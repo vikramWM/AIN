@@ -181,8 +181,30 @@
                             <label class=" fs-6 fw-bold mb-2">Amount</label>
                             <input type="text"  class="form-control form-control-solid" placeholder="" value="{{$lead->price}}" name="price">
                         </div>
+                        
+                        <div class="col-md-6 fv-row">
+                            <label class="fs-6 fw-bold mb-2">Draft Required</label>
+                            <select name="draft_required" aria-label="Select Service Type" data-control="select2" class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true" onchange="showHideDiv(this);">
+                                <?php if ($lead->draft_required === "Yes"): ?>
+                                    <option value="">No</option>
+                                    <option value="Yes" selected>Yes</option>
+                                <?php else: ?>
+                                    <option value="" selected>No</option>
+                                    <option value="Yes">Yes</option>
+                                <?php endif; ?>
+                            </select>
+                        </div>
                     </div>
-
+                    <div class="row g-9 mb-8 text-start" id="newDiv" style="<?php echo $lead->draft_required === 'Yes' ? '' : 'display:none;'; ?>">
+                        <div class="col-md-6 fv-row text-start">
+                            <label class="fs-6 fw-bold mb-2">Draft Date</label>
+                            <input type="date" class="form-control form-control-solid" placeholder="" value="{{$lead->draft_date}}" name="draft_date">
+                        </div>
+                        <div class="col-md-6 fv-row text-start">
+                            <label class="fs-6 fw-bold mb-2">Draft Time</label>
+                            <input type="time" class="form-control form-control-solid" placeholder="" value="{{$lead->draft_time}}" name="draft_time">
+                        </div>
+                    </div>
                     
 
                     <div class="row g-9 mb-8 text-center">
@@ -293,6 +315,18 @@
 
 
 <!-- Add the following script at the end of the file -->
+<script>
+    function showHideDiv(select) {
+        var selectedOption = select.value;
+        var newDiv = document.getElementById("newDiv");
+
+        if (selectedOption === "Yes") {
+            newDiv.style.display = "flex";
+        } else {
+            newDiv.style.display = "none";
+        }
+    }
+</script>
 
 
 

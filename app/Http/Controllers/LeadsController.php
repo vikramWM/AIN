@@ -145,6 +145,11 @@ if (User::where('mobile_no', $mobile_no)->where('id', '!=', $id)->exists()) {
     $leads->tech = $req->input('tech');
     $leads->module_code = $req->input('module_code');
 
+    $leads->draft_required = $req->input('draft_required');
+    $leads->draft_date = $req->input('draft_date');
+    $leads->draft_time = $req->input('draft_time');
+
+
     $leads->save();
 
     return back()->with('success', 'Lead updated successfully.');
@@ -276,6 +281,10 @@ if (User::where('mobile_no', $mobile_no)->where('id', '!=', $id)->exists()) {
     $leads->countrycode2 = $request->input('countrycode2');
     $leads->mobile2 = $request->input('mobile_no2');
 
+    $leads->draft_required = $request->input('draft_required');
+    $leads->draft_date = $request->input('draft_date');
+    $leads->draft_time = $request->input('draft_time');
+
     $leads->save();
     $leadsId = $leads->id;
 
@@ -329,6 +338,9 @@ public function convert(Request $request, $id)
         $order->order_date = now()->format('Y-m-d');
         $order->is_read = '1';
         $order->module_code = $request->input('module_code');
+        $order->draftrequired = $request->input('draft_required');
+        $order->draft_date = $request->input('draft_date');
+        $order->draft_time = $request->input('draft_time');
 
         // Save the order
         $order->save();

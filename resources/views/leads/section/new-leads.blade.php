@@ -144,9 +144,27 @@
                                 <label class=" fs-6 fw-bold mb-2">Amount</label>
                                 <input type="text"  class="form-control form-control-solid" placeholder="" value="" name="amount">
                             </div>
+
+                            <div class="col-md-6 fv-row" >
+                                <label class=" fs-6 fw-bold mb-2">Draft Required</label>
+                                <select name="draft_required" aria-label="Select Service Type" data-control="select2" class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true" onchange="showHideDiv(this);">
+                                    <option value="" data-select2-id="select2-data-18-e9lh12">No</option>
+                                    <option value="Yes" >Yes</option>
+                                </select>              
+                             </div>
                         </div>
                     </div>
-
+                    <div class="row g-9 mb-8 text-start" id="newDiv" style="display:none;">
+                        <div class="col-md-6 fv-row text-start">
+                            <label class="fs-6 fw-bold mb-2">Draft Date</label>
+                            <input type="date" class="form-control form-control-solid" placeholder="" value="" name="draft_date" onchange="showSelectedDate(this)">
+                        </div>
+                        <div class="col-md-6 fv-row text-start">
+                            <label class="fs-6 fw-bold mb-2">Draft Time</label>
+                            <input type="time" class="form-control form-control-solid" placeholder="" value="" name="draft_time" onchange="showSelectedDate(this)">
+                        </div>
+                
+                    </div>
                     
 
                         <div class="row g-9 mb-8 text-center">
@@ -265,4 +283,17 @@
             });
         });
     });
+</script>
+
+<script>
+    function showHideDiv(select) {
+        var selectedOption = select.value;
+        var newDiv = document.getElementById("newDiv");
+
+        if (selectedOption === "Yes") {
+            newDiv.style.display = "flex";
+        } else {
+            newDiv.style.display = "none";
+        }
+    }
 </script>
