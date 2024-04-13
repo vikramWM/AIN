@@ -1,0 +1,44 @@
+RewriteEngine On
+
+# Force HTTP
+RewriteCond %{HTTP} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Rewrite to the 'public' directory
+<IfModule mod_rewrite.c>
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^assignment\-help\-in\-birmingham$ "https\:\/\/www\.assignnmentinneed\.com\/uk\/birmingham\/assignment\-help" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^best\-assignment\-writing\-help\-in\-manchester$ "https\:\/\/www\.assignnmentinneed\.com\/uk\/manchester\/assignment\-help" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^assignment\-writing\-australia$ "https\:\/\/www\.assignnmentinneed\.com\/au" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^assignment\-in\-need\-sydney$ "https\:\/\/www\.assignnmentinneed\.com\/au\/sydney\/assignment\-help" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^assignment\-in\-need\-melbourne$ "https\:\/\/www\.assignnmentinneed\.com\/au\/melbourne\/assignment\-help" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^best\-assignment\-help\-spain$ "https\:\/\/www\.assignnmentinneed\.com\/es" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^assignment\-in\-need\-barcelona$ "https\:\/\/www\.assignnmentinneed\.com\/es\/barcelona\/assignment\-help" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^best\-assignment\-help\-uae$ "https\:\/\/www\.assignnmentinneed\.com\/ae" [R=301,L]
+RewriteCond %{HTTP_HOST} ^assignnmentinneed\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.assignnmentinneed\.com$
+RewriteRule ^assignment\-writing\-malaysia$ "https\:\/\/www\.assignnmentinneed\.com\/my" [R=301,L]
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php82” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
