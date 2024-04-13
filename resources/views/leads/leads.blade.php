@@ -164,49 +164,11 @@
 
                                             <form action="{{ url('convertleads/' . $lead->id) }}" method="post">
                                                 @csrf
-                                                <button type="submit" class="btn btn-icon btn-bg-secondary btn-active-color-light btn-sm me-1" id="convertLeadForm">
+                                                <button type="submit" class="btn btn-icon btn-bg-secondary btn-active-color-light btn-sm me-1">
                                                     <span class="svg-icon svg-icon-3">C</span>
                                                 </button>
                                             </form>
-                                            <script>
-    document.getElementById('convertLeadForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        // AJAX request to check if the delivery date is available
-        $.ajax({
-            url: '{{ url('check-delivery-date/' . $lead->id) }}',
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    // Delivery date is available, proceed with form submission
-                    document.getElementById('convertLeadForm').submit();
-                } else {
-                    // Check if the response message indicates a missing delivery date
-                    if (response.message == 'Delivery date not available.') {
-                        // Show SweetAlert for missing delivery date
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: response.message
-                        });
-                    } else {
-                        // Handle other error cases if needed
-                        console.error('Error:', response.message);
-                    }
-                }
-            },
-            error: function(xhr, status, error) {
-                // Show SweetAlert for AJAX error
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Something went wrong! Please try again later.'
-                });
-                console.error('AJAX Error:', error);
-            }
-        });
-    });
-</script>
+                                            
 
                                            
                                            
