@@ -581,55 +581,60 @@
 
 
 
-<script type="text/javascript">
+
+<script>
     $(document).ready(function () {
-        // Function to handle both search and filter
-        
-        // Function to populate SubWriter dropdown based on the selected Writer TL
-        function populateSubwriters() {
-            var tlId = $('#writer').val();
-            var subwriterSelect = $('#SubWriter');
+    // Function to handle both search and filter
 
-            // Store the currently selected SubWriter value
-            var selectedSubWriter = subwriterSelect.val();
+    // Function to populate SubWriter dropdown based on the selected Writer TL
+    function populateSubwriters() {
+        var tlId = $('#writer').val();
+        var subwriterSelect = $('#SubWriter');
 
-            // Clear previous options
-            subwriterSelect.empty();
+        // Store the currently selected SubWriter value
+        var selectedSubWriter = subwriterSelect.val();
 
-            // Check if a TL is selected
-            if (tlId !== '') {
-                // Fetch subwriters based on the selected TL
-                $.ajax({
-                    type: 'get',
-                    url: '/fetch-subwriters', // Use the correct URL here
-                    data: {
-                        'tlId': tlId
-                    },
-                    success: function (data) {
-                        // Populate SubWriter dropdown with fetched data
-                        $.each(data, function (key, value) {
-                            subwriterSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
-                        });
+        // Clear previous options
+        subwriterSelect.empty();
 
-                        // Set the selected option back to its original value
-                        subwriterSelect.val(selectedSubWriter);
+        // Check if a TL is selected
+        if (tlId !== '') {
+            // Fetch subwriters based on the selected TL
+            $.ajax({
+                type: 'get',
+                url: '/fetch-subwriters', // Use the correct URL here
+                data: {
+                    'tlId': tlId
+                },
+                success: function (data) {
+                    // Populate SubWriter dropdown with fetched data
+                    $.each(data, function (key, value) {
+                        subwriterSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
+                    });
 
-                        
-                    },
-                    error: function (data) {
-                        console.log('Error fetching SubWriters:', data);
-                    }
-                });
-            }
+                    // Set the selected option back to its original value
+                    subwriterSelect.val(selectedSubWriter);
+                },
+                error: function (data) {
+                    console.log('Error fetching SubWriters:', data);
+                }
+            });
+        } else {
+            // If no TL is selected, show all sub-writers
+            subwriterSelect.append('<option value=""></option>');
+            @foreach($data['SubWriter'] as $Sub)
+                subwriterSelect.append('<option value="{{ $Sub->id }}">{{ $Sub->name }}</option>');
+            @endforeach
         }
+    }
 
-        
+    // Use event delegation for dynamically populated elements
+    $(document).on('change', '#writer', populateSubwriters);
 
-        // Use event delegation for dynamically populated elements
-        $(document).on('change', '#writer', populateSubwriters);
-        
-        
-    });
+    // Populate SubWriter dropdown on page load
+    populateSubwriters();
+});
+
 </script>
 
 <script>
