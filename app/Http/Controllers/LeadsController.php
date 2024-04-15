@@ -371,7 +371,16 @@ public function convert(Request $request, $id)
                         'order_code' => $order_code,
                         'date'     => $request->input('delivery_date')
                     ];
-                    Mail::to('nadeansh@gmail.com')->send(new LeadsConvertMail($mailData));
+                    // Mail::to('vikramsuthar.wm@gmail.com')->send(new LeadsConvertMail($mailData));
+                    // Define CC recipients
+                    $ccRecipients = [
+                        'anshjangid02@gmail.com', // Add CC email addresses here
+                    ];
+
+                    // Send email with CC
+                    Mail::to('vikramsuthar.wm@gmail.com')
+                        ->cc($ccRecipients)
+                        ->send(new LeadsConvertMail($mailData));
                     } else {
                         \Log::error('User not found with ID: ' . $emp_id);
                     }
@@ -958,7 +967,17 @@ public function updateUser(Request $request, $id)
             ];
             // dd ($mailData); EXIT;
             
-            // Mail::to($mailData['email'])->send(new LeadsConvertMail($mailData));
+            // Mail::to('vikramsuthar.wm@gmail.com')->send(new LeadsConvertMail($mailData));
+
+            // Define CC recipients
+            $ccRecipients = [
+                'anshjangid02@gmail.com', // Add CC email addresses here
+            ];
+
+            // Send email with CC
+            Mail::to('vikramsuthar.wm@gmail.com')
+                ->cc($ccRecipients)
+                ->send(new LeadsConvertMail($mailData));
 
             $order->save();
 
