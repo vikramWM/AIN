@@ -348,8 +348,8 @@
                             <label class="fs-6 fw-bold mb-2">Draft Required</label>
                             <select name="daraft_status" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
 						        <option value="" data-select2-id="select2-data-18-e9lh12"></option>
-                                    <option <?php if ( $order['draftrequired'] == 'Y') {echo "selected";} ?>  value="Y">Yes</option>
-                                    <option <?php if ( $order['draftrequired'] == 'N') {echo "selected";} ?>value="N">No</option>
+                                    <option <?php if ( $order['draftrequired'] == 'Yes') {echo "selected";} ?>  value="Yes">Yes</option>
+                                    <option <?php if ( $order['draftrequired'] == 'No') {echo "selected";} ?>value="No">No</option>
                             </select>                         
                           </div>
                         <div class="col-md-4 fv-row">

@@ -929,9 +929,9 @@ public function updateUser(Request $request, $id)
                 $order->tech = '1';
             }
              // Check if the delivery date is available
-            if (!$leadData->deadline) {
-                return response()->json(['success' => false, 'message' => 'Delivery date not available.'], 400);
-            }
+            // if (!$leadData->deadline) {
+            //     return response()->json(['success' => false, 'message' => 'Delivery date not available.'], 400);
+            // }
             $order->delivery_date = $leadData->deadline;
             $order->amount = $leadData->price;
             $order->message = $leadData->messages;
@@ -941,6 +941,10 @@ public function updateUser(Request $request, $id)
             $order->order_date = now()->format('Y-m-d');
             $order->is_read = '1';
             $order->module_code =  $leadData->module_code;
+
+            $order->draftrequired = $leadData->draft_required;
+            $order->draft_date = $leadData->draft_date;
+            $order->draft_time = $leadData->draft_time;
             
             
         $user = User::where('id', $leadData->emp_id)->first();

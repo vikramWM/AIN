@@ -185,7 +185,7 @@
                         <div class="col-md-6 fv-row">
                             <label class="fs-6 fw-bold mb-2">Draft Required</label>
                             <select name="draft_required" aria-label="Select Service Type" data-control="select2" class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true" onchange="showHideDiv(this);">
-                                <?php if ($lead->draft_required === "Yes"): ?>
+                                <?php if ($lead->draft_required == "Yes"): ?>
                                     <option value="">No</option>
                                     <option value="Yes" selected>Yes</option>
                                 <?php else: ?>
