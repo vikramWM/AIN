@@ -828,7 +828,7 @@ public function handleRoleSeven(Request $request)
         if ($searchTerm != '') {
             $orders->where(function($query) use ($searchTerm) {
                 $query->where('order_id', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('title', $searchTerm);
+                      ->orWhere('title', 'like', '%' . $searchTerm . '%');
             });
         }
         if($selectedDataTextBox)
