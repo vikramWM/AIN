@@ -183,6 +183,7 @@
     				<!-- <button type='submit' class="btn btn-sm btn-primary" >Search</button> -->
                     <a  id="resetFiltersBtn" class="btn btn-sm btn-danger">Reset</a>
                     <a  onclick="applyFilters()" class="btn btn-sm btn-primary">Search</a>
+                    <a onclick="orderExport()" class="btn btn-sm btn-warning">Export</a>
                     <button type="button" id="showMoreFilters" class="btn btn-sm btn-success">Show More Filters</button>
 
     			</div>
@@ -404,6 +405,81 @@
     });
 </script>
 
+<script>
+    function orderExport() {
+        // Retrieve filter parameters
+        var search = $('#search').val();
+        var uid = $('#selectedValue').val();
+        var status = $('#status').val();
+        var writer = $('#writer').val();
+        var dateStatus = $('#date_status').val();
+        var fromDate = $('#from_date').val();
+        var toDate = $('#to_date').val();
+        var writerTL = $('#writerTL').val();
+        var subWriter = $('#SubWriter').val();
+        var college = $('#college').val();
+        var extra = $('#extra').val();
+        var secondaryMobile = $('#secondary_mobile').val();
+
+        // Store filter values in localStorage
+        localStorage.setItem('filters', JSON.stringify({
+            search: search,
+            uid: uid,
+            status: status,
+            writer: writer,
+            dateStatus: dateStatus,
+            fromDate: fromDate,
+            toDate: toDate,
+            writerTL: writerTL,
+            subWriter: subWriter,
+            college: college,
+            extra: extra,
+            secondaryMobile: secondaryMobile
+        }));
+
+        // Use CSRF token for security
+        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+        // Send AJAX request to export endpoint
+        $.ajax({
+            type: 'get',
+            url: '{{ url('export') }}',
+            data: {
+                _token: CSRF_TOKEN,
+                search: search,
+                uid: uid,
+                status: status,
+                writer: writer,
+                date_status: dateStatus,
+                from_date: fromDate,
+                to_date: toDate,
+                WriterTL: writerTL,
+                SubWriter: subWriter,
+                college: college,
+                extra: extra,
+                secondary_mobile: secondaryMobile
+            },
+            success: function (data) {
+                // On success, trigger file download
+                var blob = new Blob([data], { type: 'text/csv' });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                
+                // Generate file name with current timestamp
+                var filename = 'orders_' + new Date().toISOString().slice(0, 19).replace(/[-T:/]/g, '') + '.csv';
+                link.download = filename;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (data) {
+                console.log('Error:', data);
+            }
+
+        });
+    }
+</script>
 
 
 

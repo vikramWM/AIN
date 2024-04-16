@@ -19,6 +19,10 @@ use App\Models\Leads;
 use App\Http\Controllers\CallController;
 
 use Carbon\Carbon;
+use App\Http\Controllers\ExportController;
+
+Route::get('/export', [ExportController::class, 'export'])->name('export.orders');
+
 
 Route::get('/', function () {
     $data['title'] = 'Assignment Writing Help in London, UK @40% off';
