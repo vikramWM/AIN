@@ -106,12 +106,24 @@ class ExportController extends Controller
         $csvData = 'Order Code,User Name,User Email,Mobile,Order Date,Pages,Title,Delivery Date,Delivery Time,Amount,Writer Name,Writer Deadline,Chapter,Draft Date,Draft Time' . PHP_EOL;
         foreach ($filteredOrders as $order) {
             // Access user's name and email from the user relationship
-            $userName = $order->user->name ?? '';
-            $userEmail = $order->user->email ?? '';
-            $userMobile = $order->user->mobile_no ?? '';
-            // Enclose title in double quotes to treat commas as a single block in Excel
+            $userName = '"' . ($order->user->name ?? '') . '"';
+            $userEmail = '"' . ($order->user->email ?? '') . '"';
+            $userMobile = '"' . ($order->user->mobile_no ?? '') . '"';
+            // Enclose fields in double quotes to treat commas as a single block in Excel
+            $order_id = '"' . $order->order_id . '"';
+            $orderDate = '"' . $order->order_date . '"';
+            $pages = '"' . $order->pages . '"';
             $title = '"' . $order->title . '"';
-            $csvData .= $order->order_id . ',' . $userName . ',' . $userEmail . ',' . $userMobile . ',' . $order->order_date . ',' . $order->pages . ',' . $title . ','  . $order->delivery_date . ',' . $order->delivery_time . ',' . $order->amount . ',' . $order->writer_name . ',' . $order->writer_deadline . ',' . $order->chapter . ',' . $order->draft_date . ',' . $order->draft_time .  PHP_EOL;
+            $deliveryDate = '"' . $order->delivery_date . '"';
+            $deliveryTime = '"' . $order->delivery_time . '"';
+            $amount = '"' . $order->amount . '"';
+            $writerName = '"' . $order->writer_name . '"';
+            $writerDeadline = '"' . $order->writer_deadline . '"';
+            $chapter = '"' . $order->chapter . '"';
+            $draftDate = '"' . $order->draft_date . '"';
+            $draftTime = '"' . $order->draft_time . '"';
+        
+            $csvData .= $order_id . ',' . $userName . ',' . $userEmail . ',' . $userMobile . ',' . $orderDate . ',' . $pages . ',' . $title . ','  . $deliveryDate . ',' . $deliveryTime . ',' . $amount . ',' . $writerName . ',' . $writerDeadline . ',' . $chapter . ',' . $draftDate . ',' . $draftTime .  PHP_EOL;
         }
 
         // Generate file name with current timestamp
