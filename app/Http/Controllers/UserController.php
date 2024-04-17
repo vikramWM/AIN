@@ -11,32 +11,68 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
-    {
-        $searchUserId = $request->input('user_id');
-        $perPage = 10;
+    // public function index(Request $request)
+    // {
+    //     $searchUserId = $request->input('user_id');
+    //     $perPage = 10;
     
-        // Query for paginated users with flag and status not equal to 1
-        $data['users'] = User::where('flag', '==', 0)
+    //     // Query for paginated users with flag and status not equal to 1
+    //     $data['users'] = User::where('flag', '==', 0)
             
-            ->when($searchUserId, function ($query) use ($searchUserId) {
-                return $query->where('id', $searchUserId);
-            })
-            ->orderBy('id', 'desc')
-            ->paginate($perPage);
+    //         ->when($searchUserId, function ($query) use ($searchUserId) {
+    //             return $query->where('id', $searchUserId);
+    //         })
+    //         ->orderBy('id', 'desc')
+    //         ->paginate($perPage);
     
-        // Query for all users with flag and status not equal to 1
-        $data['all_user'] = User::where('flag', '==', 0)
+    //     // Query for all users with flag and status not equal to 1
+    //     $data['all_user'] = User::where('flag', '==', 0)
            
-            ->orderBy('id', 'desc')
-            ->get();
+    //         ->orderBy('id', 'desc')
+    //         ->get();
     
-        $data['role'] = Role::all();
-        $data['bank'] = Bank::all();
+    //     $data['role'] = Role::all();
+    //     $data['bank'] = Bank::all();
     
-        return view('user.user_view', compact('data'));
+    //     return view('user.user_view', compact('data'));
+    // }
+    public function index(Request $request)
+{
+    $searchUserId = $request->input('user_id');
+    $startDate = $request->input('start_date');
+    $endDate = $request->input('end_date');
+    $roleId = $request->input('role');
+    $perPage = 10;
+
+    // Query for paginated users with flag and status not equal to 1
+    $query = User::where('flag', 0);
+
+    if ($searchUserId) {
+        $query->where('id', $searchUserId);
     }
-    
+
+    if ($startDate && !$endDate) {
+        $query->whereDate('created_at', $startDate);
+    }
+
+    if ($startDate && $endDate) {
+        $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    if ($roleId) {
+        $query->where('role_id', $roleId);
+    }
+
+    $data['users'] = $query->orderBy('id', 'desc')->paginate($perPage);
+
+    // Query for all users with flag and status not equal to 1
+    $data['all_user'] = User::where('flag', 0)->orderBy('id', 'desc')->get();
+    $data['role'] = Role::all();
+    $data['bank'] = Bank::all();
+
+    return view('user.user_view', compact('data'));
+}
+
 
     public function EditUser(Request $request ,$id)
     {

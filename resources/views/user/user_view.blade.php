@@ -19,35 +19,45 @@
 					</div>
 					<div class="card-body py-3">
 						
-						<form action="">
-							<div class="row mb-3">
-
-								<div class="col-lg-3 fv-row fv-plugins-icon-container">
-									<select name="user_id" aria-label="Select a Timezone" data-control="select2" data-placeholder="Search By Name email" class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-7969" tabindex="-1" aria-hidden="true">
-										<option value="" data-select2-id="select2-data-18-e9lh"></option>
-										@foreach($data['all_user'] as $user)
-										<option value="{{$user->id}}" >{{$user->name}} ({{$user->email}}) {{$user->mobile_no}}</option>
-										@endforeach
-										
-									</select>
-								<div class="fv-plugins-message-container invalid-feedback"></div></div>
-								<!-- <div class="col-lg-3 fv-row fv-plugins-icon-container">
-									<select name="refer" aria-label="Select a Language" data-control="select2" data-placeholder="refer code" class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-13-mh4q" tabindex="-1" aria-hidden="true">
-										<option value="" data-select2-id="select2-data-15-jtqd"></option>
-									
-									</select>
-									<div class="fv-plugins-message-container invalid-feedback"></div>
-								</div> -->
-								</div>
-
-								<div class="col-lg-3 fv-row fv-plugins-icon-container">
-									<button type='submit' class="btn btn-sm btn-primary" >Search</button>
-									<a href="/user" class="btn btn-sm btn-danger" >reset</a>
-								</div>
-
-							
+					<form action="">
+						<div class="row mb-3">
+							<div class="col-lg-3 fv-row fv-plugins-icon-container">
+								<select name="user_id" aria-label="Select a Timezone" data-control="select2" data-placeholder="Search By Name email" class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-7969" tabindex="-1" aria-hidden="true">
+									<option value="" data-select2-id="select2-data-18-e9lh"></option>
+									@foreach($data['all_user'] as $user)
+									<option value="{{$user->id}}" {{ $user->id == request('user_id') ? 'selected' : '' }}>{{$user->name}} ({{$user->email}}) {{$user->mobile_no}}</option>
+									@endforeach
+								</select>
+								<div class="fv-plugins-message-container invalid-feedback"></div>
 							</div>
-						</form>
+							<!-- Other filters -->
+							<div class="col-lg-3 fv-row fv-plugins-icon-container">
+								<input type="date" name="start_date" placeholder="Start Date" class="form-control" value="{{ request('start_date') }}" />
+								<div class="fv-plugins-message-container invalid-feedback"></div>
+							</div>
+
+							<div class="col-lg-3 fv-row fv-plugins-icon-container">
+								<input type="date" name="end_date" placeholder="End Date" class="form-control" value="{{ request('end_date') }}" />
+								<div class="fv-plugins-message-container invalid-feedback"></div>
+							</div>
+
+							<div class="col-lg-3 fv-row fv-plugins-icon-container">
+								<select name="role" aria-label="Select a Role" data-control="select2" class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-20-7969" tabindex="-1" aria-hidden="true">
+									<option value="">Select Role</option>
+									@foreach($data['role'] as $role)
+									<option value="{{$role->id}}" {{ $role->id == request('role') ? 'selected' : '' }}>{{$role->role}}</option>
+									@endforeach
+								</select>
+
+								<div class="fv-plugins-message-container invalid-feedback"></div>
+							</div>
+							<div class="col-lg-3 fv-row fv-plugins-icon-container">
+								<button type='submit' class="btn btn-sm btn-primary">Search</button>
+								<a href="/user" class="btn btn-sm btn-danger">reset</a>
+							</div>
+						</div>
+					</form>
+
 				</div>
 			</div>
             <div class="toolbar" id="kt_toolbar">
@@ -68,6 +78,7 @@
 								<span class="card-label fw-bolder fs-3 mb-1">All User</span>
 								<span class="text-muted mt-1 fw-bold fs-7"></span>
 							</h3>
+							<a onclick="exportUsers()" style="height: fit-content;" class="btn btn-sm btn-danger">Export</a>
 						</div>
 						<div class="card-body py-3">
 							<div class="table-responsive">
@@ -131,7 +142,7 @@
 												<div class="d-flex flex-column w-100 me-2">
 													<div class="d-flex flex-stack mb-2">
 														@if($user->created_at != '')
-														<span class="text-muted me-2 fs-7 fw-bold">{{$user->created_at->format('d D Y (H:i:s)')}}</span>
+														<span class="text-muted me-2 fs-7 fw-bold">{{$user->created_at->format('d M Y D (h:i:s a)')}}</span>
 														@endif
 													</div>
 													
@@ -165,7 +176,8 @@
                                         @endforeach
 									</tbody>
 								</table>
-                                {{ $data['users']->links() }}
+                                <!-- {{ $data['users']->links() }} -->
+								{{ $data['users']->appends(request()->except('page'))->links() }}
 							</div>
 						</div>
 					</div>
@@ -173,4 +185,42 @@
 			</div>
         </div>
     </div>
+
+<script>
+    function exportUsers() {
+        // Retrieve filter parameters
+        var userId = $('select[name="user_id"]').val();
+
+        // Use CSRF token for security
+        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+        // Send AJAX request to export endpoint
+        $.ajax({
+            type: 'get',
+            url: '{{ route('export.users') }}',
+            data: {
+                _token: CSRF_TOKEN,
+                user_id: userId // Pass the selected user ID as a parameter
+            },
+            success: function (data) {
+                // On success, trigger file download
+                var blob = new Blob([data], { type: 'text/csv' });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+
+                // Generate file name with current timestamp
+                var filename = 'users_' + new Date().toISOString().slice(0, 19).replace(/[-T:/]/g, '') + '.csv';
+                link.download = filename;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (data) {
+                console.log('Error:', data);
+            }
+        });
+    }
+</script>
+
 @endsection

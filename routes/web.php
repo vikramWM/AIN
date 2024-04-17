@@ -23,6 +23,7 @@ use App\Http\Controllers\ExportController;
 
 Route::get('/export', [ExportController::class, 'export'])->name('export.orders');
 Route::get('/export-leads', [ExportController::class, 'exportLeads'])->name('export.leads');
+Route::get('/export-users', [ExportController::class, 'exportUsers'])->name('export.users');
 
 
 Route::get('/', function () {

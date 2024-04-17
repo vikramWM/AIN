@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Leads;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
@@ -241,6 +242,77 @@ class ExportController extends Controller
         ]);
     }
     
+    private function getRoleName($roleId)
+    {
+        switch ($roleId) {
+            case 1:
+                return 'Super Admin';
+            case 2:
+                return 'User';
+            case 3:
+                return 'Sub Admin';
+            case 4:
+                return 'Marketing Team';
+            case 5:
+                return 'Project Team';
+            case 6:
+                return 'WriterTL';
+            case 7:
+                return 'Sub Writer';
+            case 8:
+                return 'Writer Admin';
+            default:
+                return 'Unknown';
+        }
+    }
+
+    public function exportUsers(Request $request)
+    {
+        // Get the user_id from the request
+        $userId = $request->input('user_id');
+
+        // Filter users based on request parameters
+        $usersQuery = User::query();
+
+        // Apply filters, if provided
+        if ($userId !== null) {
+            $usersQuery->where('id', $userId);
+        } else {
+            // If user_id is not provided, get all users with flag 0
+            $usersQuery->where('flag', 0);
+        }
+
+        // Fetch filtered users data from the database
+        $users = $usersQuery->orderBy('id', 'desc')->get();
+
+        // Prepare CSV file content with headers
+        $csvData = 'User ID,Name,Email,Mobile No,Role,Join Date' . PHP_EOL;
+
+        // Generate CSV data
+        foreach ($users as $user) {
+            // Enclose fields in double quotes to treat commas as a single block in Excel
+            $userId = '"' . $user->id . '"';
+            $name = '"' . $user->name . '"';
+            $email = '"' . $user->email . '"';
+            $mobileNo = '"' . $user->mobile_no . '"';
+            $role = '"' . $this->getRoleName($user->role_id) . '"';
+            $joinDate = '"' . $user->created_at->format('d M Y D (h:i:s a)') . '"';
+
+            $csvData .= $userId . ',' . $name . ',' . $email . ',' . $mobileNo . ',' . $role . ',' . $joinDate . PHP_EOL;
+        }
+
+        // Generate file name
+        $filename = 'users_' . now()->format('YmdHis') . '.csv';
+
+        // Save CSV content to storage
+        Storage::disk('local')->put($filename, $csvData);
+
+        // Return the file path to the AJAX request
+        return response()->download(storage_path('app/' . $filename), $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 
 
 
