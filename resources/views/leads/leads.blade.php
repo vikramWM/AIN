@@ -55,6 +55,8 @@
                             </span>
                             New Leads
                         </a>
+                        <a onclick="leadsExport()" style="margin-left: 10px;" class="btn btn-sm btn-danger">Export</a>
+
                     </div>
                     @include('leads.section.new-leads')
                 </div>

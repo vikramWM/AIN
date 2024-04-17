@@ -37,7 +37,7 @@
 						<h3 class="card-title align-items-start flex-column">
 							<span class="card-label fw-bolder fs-3 mb-1">Orders</span>
 						</h3>
-						
+						<a onclick="orderExport()" style="height: fit-content;" class="btn btn-sm btn-danger">Export</a>
 					</div>
 					<div class="card-body py-3">
 						<div class="table-responsive">

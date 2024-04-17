@@ -140,6 +140,7 @@
             <div class="col-lg-3 fv-row fv-plugins-icon-container">
                 <a id="resetFiltersBtn"class="btn btn-sm btn-danger">Reset</a>
                 <a id="applyButton"  class="btn btn-sm btn-primary">search</a>
+                <!-- <a onclick="leadsExport()" class="btn btn-sm btn-warning">Export</a> -->
             </div>
         </div>
     </form>
@@ -266,4 +267,64 @@ $(document).ready(function () {
     }
 });
 
+</script>
+
+<script>
+    function leadsExport() {
+        // Retrieve filter parameters
+        var additionalFilter1 = $('#additional_filter1').val();
+        var additionalFilter2 = $('#selectedValue').val();
+        var additionalFilter3 = $('#additional_filter3').val();
+        var additionalFilter4 = $('#additional_filter4').val();
+        var additionalFilter5 = $('#additional_filter5').val();
+        var additionalFilter6 = $('#additional_filter6').val();
+        var additionalFilter7 = $('#additional_filter7').val();
+
+        // Store filter values in localStorage
+        localStorage.setItem('filters', JSON.stringify({
+            additionalFilter1: additionalFilter1,
+            additionalFilter2: additionalFilter2,
+            additionalFilter3: additionalFilter3,
+            additionalFilter4: additionalFilter4,
+            additionalFilter5: additionalFilter5,
+            additionalFilter6: additionalFilter6,
+            additionalFilter7: additionalFilter7
+        }));
+
+        // Use CSRF token for security
+        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+        // Send AJAX request to export endpoint
+        $.ajax({
+            type: 'get',
+            url: '{{ route('export.leads') }}',
+            data: {
+                _token: CSRF_TOKEN,
+                additional_filter1: additionalFilter1,
+                additional_filter2: additionalFilter2,
+                additional_filter3: additionalFilter3,
+                additional_filter4: additionalFilter4,
+                additional_filter5: additionalFilter5,
+                additional_filter6: additionalFilter6,
+                additional_filter7: additionalFilter7
+            },
+            success: function (data) {
+                // On success, trigger file download
+                var blob = new Blob([data], { type: 'text/csv' });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                
+                // Generate file name with current timestamp
+                var filename = 'leads_' + new Date().toISOString().slice(0, 19).replace(/[-T:/]/g, '') + '.csv';
+                link.download = filename;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (data) {
+                console.log('Error:', data);
+            }
+        });
+    }
 </script>

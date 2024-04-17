@@ -183,7 +183,7 @@
     				<!-- <button type='submit' class="btn btn-sm btn-primary" >Search</button> -->
                     <a  id="resetFiltersBtn" class="btn btn-sm btn-danger">Reset</a>
                     <a  onclick="applyFilters()" class="btn btn-sm btn-primary">Search</a>
-                    <a onclick="orderExport()" class="btn btn-sm btn-warning">Export</a>
+                    <!-- <a onclick="orderExport()" class="btn btn-sm btn-warning">Export</a> -->
                     <button type="button" id="showMoreFilters" class="btn btn-sm btn-success">Show More Filters</button>
 
     			</div>
