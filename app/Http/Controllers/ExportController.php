@@ -268,37 +268,52 @@ class ExportController extends Controller
 
     public function exportUsers(Request $request)
     {
-        // Get the user_id from the request
-        $userId = $request->input('user_id');
+        // Retrieve filter parameters from the request
+        $searchUserId = $request->input('user_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $roleId = $request->input('role');
 
-        // Filter users based on request parameters
-        $usersQuery = User::query();
+        // Initialize the user query
+        $usersQuery = User::query()->where('flag', 0);
 
-        // Apply filters, if provided
-        if ($userId !== null) {
-            $usersQuery->where('id', $userId);
-        } else {
-            // If user_id is not provided, get all users with flag 0
-            $usersQuery->where('flag', 0);
+        // Apply filters
+        if ($searchUserId) {
+            $usersQuery->where('id', $searchUserId);
         }
 
-        // Fetch filtered users data from the database
+        if ($startDate && !$endDate) {
+            $usersQuery->whereDate('created_at', $startDate);
+        }
+
+        if ($startDate && $endDate) {
+            $usersQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        if ($roleId) {
+            $usersQuery->where('role_id', $roleId);
+        }
+
+        // Retrieve filtered users data from the database
         $users = $usersQuery->orderBy('id', 'desc')->get();
 
         // Prepare CSV file content with headers
-        $csvData = 'User ID,Name,Email,Mobile No,Role,Join Date' . PHP_EOL;
+        $csvData = 'Name,Email,CountryCode,Mobile No,CountryCode2,Mobile No2,Role,Join Date' . PHP_EOL;
 
         // Generate CSV data
         foreach ($users as $user) {
             // Enclose fields in double quotes to treat commas as a single block in Excel
-            $userId = '"' . $user->id . '"';
+            
             $name = '"' . $user->name . '"';
             $email = '"' . $user->email . '"';
+            $countryCode = '"' . $user->countrycode . '"';
             $mobileNo = '"' . $user->mobile_no . '"';
+            $countryCode2 = '"' . $user->countrycode2 . '"';
+            $mobileNo2 = '"' . $user->mobile_no2 . '"';
             $role = '"' . $this->getRoleName($user->role_id) . '"';
             $joinDate = '"' . $user->created_at->format('d M Y D (h:i:s a)') . '"';
 
-            $csvData .= $userId . ',' . $name . ',' . $email . ',' . $mobileNo . ',' . $role . ',' . $joinDate . PHP_EOL;
+            $csvData .= $name . ',' . $email . ',' .$countryCode. ',' . $mobileNo . ',' .$countryCode2. ',' . $mobileNo2 . ',' . $role . ',' . $joinDate . PHP_EOL;
         }
 
         // Generate file name
@@ -313,6 +328,7 @@ class ExportController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
+
 
 
 

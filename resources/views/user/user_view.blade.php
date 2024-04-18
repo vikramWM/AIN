@@ -186,41 +186,48 @@
         </div>
     </div>
 
-<script>
-    function exportUsers() {
-        // Retrieve filter parameters
-        var userId = $('select[name="user_id"]').val();
+	<script>
+		function exportUsers() {
+			// Retrieve filter parameters
+			var userId = $('select[name="user_id"]').val();
+			var startDate = $('input[name="start_date"]').val();
+			var endDate = $('input[name="end_date"]').val();
+			var roleId = $('select[name="role"]').val();
 
-        // Use CSRF token for security
-        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+			// Use CSRF token for security
+			var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
-        // Send AJAX request to export endpoint
-        $.ajax({
-            type: 'get',
-            url: '{{ route('export.users') }}',
-            data: {
-                _token: CSRF_TOKEN,
-                user_id: userId // Pass the selected user ID as a parameter
-            },
-            success: function (data) {
-                // On success, trigger file download
-                var blob = new Blob([data], { type: 'text/csv' });
-                var link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
+			// Send AJAX request to export endpoint
+			$.ajax({
+				type: 'get',
+				url: '{{ route('export.users') }}',
+				data: {
+					_token: CSRF_TOKEN,
+					user_id: userId,
+					start_date: startDate,
+					end_date: endDate,
+					role: roleId
+				},
+				success: function (data) {
+					// On success, trigger file download
+					var blob = new Blob([data], { type: 'text/csv' });
+					var link = document.createElement('a');
+					link.href = window.URL.createObjectURL(blob);
 
-                // Generate file name with current timestamp
-                var filename = 'users_' + new Date().toISOString().slice(0, 19).replace(/[-T:/]/g, '') + '.csv';
-                link.download = filename;
+					// Generate file name with current timestamp
+					var filename = 'users_' + new Date().toISOString().slice(0, 19).replace(/[-T:/]/g, '') + '.csv';
+					link.download = filename;
 
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            },
-            error: function (data) {
-                console.log('Error:', data);
-            }
-        });
-    }
-</script>
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				},
+				error: function (data) {
+					console.log('Error:', data);
+				}
+			});
+		}
+	</script>
+
 
 @endsection
