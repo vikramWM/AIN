@@ -19,12 +19,12 @@
                             <option value="In Progress" >In Progress</option>
                             <option value="Draft Ready" >Draft Ready</option>
                             <option value="Draft Feedback" >Draft Feedback</option>
-                            <option value="Attached to Email (Draft) " >Attached to Email (Draft) </option>
+                            <option value="Attached to Email (Draft)" >Attached to Email (Draft) </option>
                             <option value="Draft Delivered">Draft Delivered</option>
                             <option value="Complete file Ready">Complete file Ready</option>
                             <option value="Feedback">Feedback</option>
                             <option value="Feedback Delivered">Feedback Delivered</option>
-                            <option value="Attached to Email (Complete file) ">Attached to Email (Complete file) </option>
+                            <option value="Attached to Email (Complete file)">Attached to Email (Complete file) </option>
                             <option value="Delivered" >Delivered</option>
                             <option value="Hold">Hold</option>
                     </select>

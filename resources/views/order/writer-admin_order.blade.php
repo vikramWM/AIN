@@ -75,19 +75,30 @@
 									</td>
 									<td class="min-w-170px">
 										<div class="d-flex">
-											@if($order->writer_fd != '0000-00-00')
-												{{ \Carbon\Carbon::parse($order->writer_fd)->format('d M ') }}
-												<span class="badge badge-light-danger fs-7 fw-bold"> {{$order->writer_fd_h}}</span>
+											@if($order->writer_fd != '0000-00-00' && $order->writer_fd != NULL && $order->writer_fd != '')
+												{{ $order->writer_fd}}
+												@if($order->writer_fd_h)
+													<span class="badge badge-light-danger fs-7 fw-bold"> {{$order->writer_fd_h}}</span>
+												@endif
 											@endif
 										</div>
 									<br>
 										<div class="d-flex">
-											@if($order->writer_ud != '0000-00-00')
-												{{ \Carbon\Carbon::parse($order->writer_ud)->format('d M ') }}
-												<span class="badge badge-light-danger fs-7 fw-bold"> {{$order->writer_ud_h}}</span>
+											@if($order->writer_ud != '0000-00-00' && $order->writer_ud != NULL && $order->writer_ud != '')
+												{{ $order->writer_ud}}
+												@if($order->writer_ud_h)
+													<span class="badge badge-light-danger fs-7 fw-bold"> {{$order->writer_ud_h}}</span>
+												@endif
+											
 											@endif
 										</div>
+										@if($order->writer_fd == '0000-00-00' || $order->writer_fd == NULL || $order->writer_fd == '' || $order->writer_ud == '0000-00-00' || $order->writer_ud == NULL || $order->writer_ud == '')
+											<div class="d-flex">
+												<span class="badge badge-light-danger fs-7 fw-bold">Not Assigned</span>											
+											</div>
+										@endif
 									</td>
+									
 
 
 
@@ -109,21 +120,31 @@
 										@elseif($order->writer_status == 'Completed')
 											<span class="badge badge-light-success fs-7 fw-bold m-1">Completed</span>
 										@elseif($order->writer_status == 'Delivered')
-											<span class="badge badge-light-primary fs-7 fw-bold m-1">Delivered</span>
+											<span class="badge badge-light-info fs-7 fw-bold m-1">Delivered</span>
 										@elseif($order->writer_status == 'Hold')
 											<span class="badge badge-light-danger fs-7 fw-bold m-1">Hold</span>
 										@elseif($order->writer_status == 'Feedback')
-											<span class="badge badge-info fs-7 fw-bold m-1">Feedback</span>
+											<span class="badge badge-light-warning fs-7 fw-bold m-1">Feedback</span>
 										@elseif($order->writer_status == 'Feedback Delivered')
-											<span class="badge badge-success-info fs-7 fw-bold m-1">Feedback Delivered</span>
+											<span class="badge badge-success fs-7 fw-bold m-1">Feedback Delivered</span>
 										@elseif($order->writer_status == 'Draft Delivered')
-											<span class="badge badge-light-secondary fs-7 fw-bold m-1">Draft Delivered</span>
+											<span class="badge badge-secondary fs-7 fw-bold m-1">Draft Delivered</span>
 										@elseif($order->writer_status == 'Quality Accepted')
 											<span class="badge badge-light-success fs-7 fw-bold m-1">Quality Accepted</span>
 										@elseif($order->writer_status == 'Quality Rejected')
 											<span class="badge badge-light-danger fs-7 fw-bold m-1">Quality Rejected</span>
 										@elseif($order->writer_status == '')
 											<span class="badge badge-light-danger fs-7 fw-bold m-1">Not Assign</span>
+										@elseif($order->writer_status == 'Draft Ready')
+											<span class="badge badge-light-primary fs-7 fw-bold m-1">Draft Ready</span>
+										@elseif($order->writer_status == 'Draft Feedback')
+											<span class="badge badge-success fs-7 fw-bold m-1">Draft Feedback</span>
+										@elseif($order->writer_status == 'Attached to Email (Draft)')
+											<span class="badge badge-light-warning fs-7 fw-bold m-1">Attached to Email (Draft)</span>
+										@elseif($order->writer_status == 'Complete file Ready')
+											<span class="badge badge-secondary fs-7 fw-bold m-1">Complete file Ready</span>
+										@elseif($order->writer_status == 'Attached to Email (Complete file)')
+											<span class="badge badge-light-primary fs-7 fw-bold m-1">Attached to Email (Complete file)</span>
 										@else
 											<!-- Handle other cases or provide a default badge -->
 											<span class="badge badge-light-info fs-7 fw-bold m-1">{{$order->writer_status}}</span>

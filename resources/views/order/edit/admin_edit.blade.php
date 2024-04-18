@@ -96,14 +96,14 @@
 													<select name="status" id="subwriter" class="form-select form-select-solid" placeholder="">
 													
 														
-														  <option value="Not Assigned" {{ $order->writer_status == 'In progress' ? 'selected' : '' }}}>Not Assigned</option>
+														  <option value="Not Assigned" {{ $order->writer_status == 'Not Assigned' ? 'selected' : '' }}>Not Assigned</option>
                                                             <option value="In Progress" {{ $order->writer_status == 'In progress' ? 'selected' : '' }}>In Progress</option>
                                                             <option value="Draft Ready" {{ $order->writer_status == 'Draft Ready' ? 'selected' : '' }}>Draft Ready</option>
-                                                            <option value="Draft Delivered"{{ $order->writer_status == 'Feedback Delivered' ? 'selected' : '' }}>Draft Delivered</option>
+                                                            <option value="Draft Delivered"{{ $order->writer_status == 'Draft Delivered' ? 'selected' : '' }}>Draft Delivered</option>
                                                             <option value="Complete file Ready" {{ $order->writer_status == 'Complete file Ready' ? 'selected' : '' }}>Complete file Ready</option>
                                                             <option value="Feedback"{{ $order->writer_status == 'Feedback' ? 'selected' : '' }}>Feedback</option>
                                                             <option value="Delivered" {{ $order->writer_status == 'Delivered' ? 'selected' : '' }}>Delivered</option>
-                                                            <option value="Hold" {{ $order->writer_status == 'Hold' ? 'selected' : '' }}}>Hold</option>
+                                                            <option value="Hold" {{ $order->writer_status == 'Hold' ? 'selected' : '' }}>Hold</option>
 													</select>
 												</div>
 												<div class="col-md-6 fv-row">

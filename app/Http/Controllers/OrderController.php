@@ -1665,13 +1665,18 @@ public function OrderCallInsert(Request $request, $id)
                             <td>
                             '.($order->writer_status ==  'In Progress' || $order->writer_status ==  'In progress' ? '<span class="badge badge-light-info fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
                             '.($order->writer_status ==  'Completed' ? '<span class="badge badge-light-warning fs-7 fw-bold">'.$order->writer_status .'</span>' : '') .'
-                            '.($order->writer_status ==  'Delivered' ? '<span class="badge badge-light-success fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Delivered' ? '<span class="badge badge-light-info fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
                             '.($order->writer_status ==  'Hold' ? '<span class="badge badge-light-danger fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
                             '.($order->writer_status ==  'Feedback' ? '<span class="badge badge-light-warning fs-7 fw-bold"  >'.$order->writer_status .'</span>' : '') .'
-                            '.($order->writer_status ==  'Feedback Delivered' ? '<span class="badge badge-light-success fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
-                            '.($order->writer_status ==  'Draft Delivered' ? '<span class="badge badge-light-success fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Feedback Delivered' ? '<span class="badge badge-success fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Draft Delivered' ? '<span class="badge badge-secondary fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
                             '.($order->writer_status ==  'Quality Accepted' ? '<span class="badge badge-light-info fs-7 fw-bold"  >'.$order->writer_status .'</span>' : '') .'
                             '.($order->writer_status ==  'Quality Rejected' ? '<span class="badge badge-light-danger fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Draft Ready' ? '<span class="badge badge-light-primary fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Draft Feedback' ? '<span class="badge badge-success fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Attached to Email (Draft)' ? '<span class="badge badge-light-warning fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Complete file Ready' ? '<span class="badge badge-secondary fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
+                            '.($order->writer_status ==  'Attached to Email (Complete file)' ? '<span class="badge badge-light-primary fs-7 fw-bold" >'.$order->writer_status .'</span>' : '') .'
                             '.($order->writer_status ==  '' ? '<span class="badge badge-light-danger fs-7 fw-bold" >'."Not Assign" .'</span>' : '') .'
                             
                        </td>
