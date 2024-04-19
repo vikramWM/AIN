@@ -2198,6 +2198,46 @@ public function OrderCallInsert(Request $request, $id)
                 return redirect()->back()->with('success', 'Order Updated');
              }
         }
+
+        public function orderWD (Request $request)
+        {
+            $ordersQuery = Order::with('user', 'payment', 'feedback')->where('uid', '!=', 0);
+            $tlId = $request->input('tlId');
+            if ($tlId != '') {
+                 // Fetch orders for the selected TL
+                $orders = Order::where('wid', $tlId)->get();
+
+                return response()->json(['orders' => $orders]);
+            }
+           
+      
+    
+            $data = [
+                'Team' => Writer::all(),
+                'Status' => Status::all(),
+                'formatting' => Formatting::all(),
+                'service' => Services::all(),
+                'Writting' => Writting::all(),
+                'paper' => Paper::all(),
+                'user' => User::all(),
+                'college' => College::all(),
+                'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
+                'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
+                'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
+            ];
+        
+            $data['orders'] = $ordersQuery->orderByDesc('id')->paginate(10);
+            return view('order.writer-WD', compact('data'));
+        }
+        public function orderWD2(Request $request)
+        {
+            $tlId = $request->input('tlId');
+
+            // Fetch orders for the selected TL
+            $orders = Order::where('wid', $tlId)->get();
+
+            return response()->json(['orders' => $orders]);
+        }
 }
 
     

@@ -24,7 +24,8 @@ use App\Http\Controllers\ExportController;
 Route::get('/export', [ExportController::class, 'export'])->name('export.orders');
 Route::get('/export-leads', [ExportController::class, 'exportLeads'])->name('export.leads');
 Route::get('/export-users', [ExportController::class, 'exportUsers'])->name('export.users');
-
+Route::get('/order-writer', [OrderController::class, 'orderWD'])->name('order.writer');
+Route::post('/order-writer', [OrderController::class, 'orderWD2'])->name('order.writer2');
 
 Route::get('/', function () {
     $data['title'] = 'Assignment Writing Help in London, UK @40% off';
