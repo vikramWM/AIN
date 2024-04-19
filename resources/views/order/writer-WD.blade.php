@@ -51,8 +51,9 @@
                                         <th class="min-w-15px">SR</th>
                                         <th class="min-w-50px">Order Code</th>
                                         <th class="min-w-50px">Date</th>
-                                        <th class="min-w-30px">Writer</th>
-                                        <th class="min-w-30px">SubWriter</th>
+                                        <!-- <th class="min-w-50px">DateU</th> -->
+                                        <!-- <th class="min-w-30px">Writer</th>
+                                        <th class="min-w-30px">SubWriter</th> -->
                                     </tr>
                                 </thead>
                                 <tbody id="ordersTableBody"> <!-- Add id to tbody -->
@@ -93,9 +94,10 @@
                             var row = '<tr>' +
                                 '<td>' + (index + 1) + '</td>' +
                                 '<td>' + order.order_id + '</td>' +
-                                '<td>' + order.order_date + '</td>' +
-                                '<td>' + order.writer_name + '</td>' +
-                                '<td>' + order.subWriter + '</td>' +
+                                '<td>' + order.date + '</td>' +
+                                // '<td>' + order.writer_ud + '</td>' +
+                                // '<td>' + order.wid + '</td>' +
+                                // '<td>' + order.swid + '</td>' +
                                 '</tr>';
                             tbody.append(row);
                         });

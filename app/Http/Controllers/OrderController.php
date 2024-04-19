@@ -2231,12 +2231,72 @@ public function OrderCallInsert(Request $request, $id)
         }
         public function orderWD2(Request $request)
         {
-            $tlId = $request->input('tlId');
+            // $tlId = $request->input('tlId');
 
-            // Fetch orders for the selected TL
-            $orders = Order::where('wid', $tlId)->get();
+            // // Fetch orders for the selected TL
+            // $orders = Order::where('wid', $tlId)->get();
+// --------------=========
+            // $tlId = $request->input('tlId');
 
-            return response()->json(['orders' => $orders]);
+            // // Fetch orders for the selected TL
+            // // $orders = Order::where('wid', $tlId)->get();
+            // $orders = Order::where('wid', $tlId)->orderByDesc('created_at')->get();
+// ------------------------------
+$tlId = $request->input('tlId');
+
+// Initialize the query builder
+$query = Order::query();
+
+// Check if tlId is "Not Assigned"
+if ($tlId === "Not Assigned") {
+    // Fetch orders where 'wid' is null or empty
+    $query->where(function ($query) {
+        $query->whereNull('wid')
+              ->orWhere('wid', '');
+    });
+} else {
+    // Fetch orders for the selected TL
+    $query->where('wid', $tlId);
+}
+
+// Add ordering by created_at in descending order
+$orders = $query->orderByDesc('created_at')->get();           
+// ---------------------------
+            // Initialize an empty array to store the expanded orders
+            $expandedOrders = [];
+
+            // Iterate over each order
+            foreach ($orders as $order) {
+                // Parse the start and end dates, handling null, empty, or "0000-00-00" values
+                $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
+                $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
+
+                // If start or end date is null or empty, set it to "Not Mentioned"
+                if (!$startDate || !$endDate) {
+                    $expandedOrder = [
+                        'order_id' => $order->order_id,
+                        'date' => 'Not Mentioned'
+                    ];
+
+                    $expandedOrders[] = $expandedOrder;
+                    continue; // Skip further processing for this order
+                }
+
+                // Generate records for each day within the date range
+                for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+                    // Create a new record with the same order details but different date
+                    $expandedOrder = [
+                        'order_id' => $order->order_id,
+                        'date' => $date->toDateString()
+                    ];
+                    
+                    // Add the expanded order to the array
+                    $expandedOrders[] = $expandedOrder;
+                }
+            }
+
+
+            return response()->json(['orders' => $expandedOrders]);
         }
 }
 
