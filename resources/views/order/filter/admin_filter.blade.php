@@ -33,6 +33,7 @@
                     <div class="col-md-3 fv-row">
 						<select name="writerTL" id="writerTL" class="form-select form-select-solid" placeholder="">
 							<option value="">Select Writer</option>
+							<option  value="Not Assigned">Not Assigned</option>
 							<option  value="{{Auth::user()->id}}">My Writer</option>
 							@foreach($data['writerTL'] as $tl)
 								<option  value="{{ $tl->id }}">{{ $tl->name }}</option>
@@ -44,7 +45,7 @@
 								<option value="">Subwriter</option>
 							</select>
 							</div>
-							<script>
+							<!-- <script>
 								// Function to fetch and populate subwriters based on the selected TL
 								function populateSubwriters() {
 									var tlId = document.getElementById('writerTL').value;
@@ -71,7 +72,7 @@
 								document.getElementById('writerTL').addEventListener('change', populateSubwriters);
 								// Initial population in case there's a TL selected on page load
 								populateSubwriters();
-				</script>
+				</script> -->
                 
                 <div class="col-lg-3 fv-row fv-plugins-icon-container">
                     <select name="extra" id="extra" aria-label="Select a Timezone" data-control="select2" data-placeholder="Search By Tech Resit Failed Job" class="form-select form-select-solid form-select-lg" tabindex="-1">
@@ -345,6 +346,39 @@
                 });
             }
         }
+        // function populateSubwriters() {
+        //     var tlId = $('#writerTL').val();
+        //     var subwriterSelect = $('#SubWriter');
+        //     var selectedSubWriter = subwriterSelect.val();
+        //     subwriterSelect.empty();
+
+        //     if (tlId !== '') {
+        //         // Pre-append the 'Not Assigned' option manually
+        //         subwriterSelect.append('<option value="">Select Subwriter</option>');
+        //         subwriterSelect.append('<option value="Not Assigned">Not Assigned</option>');
+
+        //         $.ajax({
+        //             type: 'get',
+        //             url: '/fetch-subwriters',
+        //             data: {
+        //                 'tlId': tlId
+        //             },
+        //             success: function (data) {
+        //                 $.each(data, function (key, value) {
+        //                     subwriterSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
+        //                 });
+
+        //                 // Set the selected value after appending all options
+        //                 subwriterSelect.val(selectedSubWriter);
+        //                 applyFilters();
+        //             },
+        //             error: function (data) {
+        //                 console.log('Error fetching SubWriters:', data);
+        //             }
+        //         });
+        //     }
+        // }
+
 
         $('#showMoreFilters').on('click', function () {
             $('.additional-filters').toggle();

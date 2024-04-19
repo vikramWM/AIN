@@ -1104,12 +1104,14 @@ public function handleRoleSeven(Request $request)
     public function fetchSubWriters(Request $request)
     {
         $tlId = $request->input('tlId');
-
+        if ($tlId != '' && $tlId != 'Not Assigned') {
+            
         // Fetch SubWriters based on TL ID
         $subWriters = User::where('tl_id', $tlId)->get();
 
         // Return the SubWriters as JSON response
         return response()->json($subWriters);
+        }
     }
 
     public function orderEditPage($id)
@@ -1574,23 +1576,37 @@ public function OrderCallInsert(Request $request, $id)
 
            
         }
-
-        if($WriterTL != '')
-        {
-            $orders->where('wid', $WriterTL);
-
-        }
+        if ($WriterTL != '') {
+            if ($WriterTL == 'Not Assigned') {
+                $orders->where(function($query) {
+                    $query->where('wid', '')
+                          ->orWhereNull('wid');
+                });
+            } else {
+                $orders->where('wid', $WriterTL);
+            }
+        }        
 
        
-      if ($SubWriter != '') {
-                  
-                $multipleWriters = multipleswiter::where('user_id', $SubWriter)->get();
+        if ($SubWriter != '') {
+            // if ($SubWriter == 'Not Assigned') {
+            //     // Retrieve all records from multipleswiter where user_id is empty or null
+            //     $multipleWriters = multipleswiter::whereNull('user_id')->orWhere('user_id', '')->get();
                 
-                $orderIds = $multipleWriters->pluck('order_id')->toArray();
+            //     // Extract order IDs from the retrieved multipleWriters
+            //     $orderIds = $multipleWriters->pluck('order_id')->toArray();
                 
-                $orders->whereIn('id', $orderIds);
+            //     // Exclude orders with the extracted order IDs
+            //     $orders->whereNotIn('id', $orderIds);
+            // }
                 
-            }
+            $multipleWriters = multipleswiter::where('user_id', $SubWriter)->get();
+            
+            $orderIds = $multipleWriters->pluck('order_id')->toArray();
+            
+            $orders->whereIn('id', $orderIds);
+            
+        }
         
 
        
