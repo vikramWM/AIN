@@ -23,6 +23,39 @@
 
 			<div class="col-xl-12">
 				<!-- include('order.section.fileter') -->
+                <div class="card card-xxl-stretch mb-5 mb-xl-8">
+                    <div class="card-header border-0 pt-5">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bolder fs-3 mb-1">Filter</span>
+                        </h3>
+                    </div>
+                    <div class="card-body py-3">
+                        <form action="">
+                            <div class="row mb-3">
+                                <div class="col-md-3 fv-row">
+                                    <input type="date" name="from_date" id="from_date" class="form-control form-control-solid" placeholder="From">
+                                </div>
+                                <div class="col-md-3 fv-row">
+                                    <input type="date" name="to_date" id="to_date" class="form-control form-control-solid" placeholder="To">
+                                </div>
+                                <div class="col-md-3 fv-row">
+                                    <select name="writerTL" id="writerTL" class="form-select form-select-solid" placeholder="">
+                                        <option value="">Select Writer</option>
+                                        <option  value="Not Assigned">Not Assigned</option>
+                                        
+                                        @foreach($data['writerTL'] as $tl)
+                                            <option  value="{{ $tl->id }}">{{ $tl->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-lg-12 fv-row fv-plugins-icon-container mt-2">
+                                    <a  id="resetFiltersBtn" class="btn btn-sm btn-danger">Reset</a>
+                                    <a  id="applySearch" class="btn btn-sm btn-primary">Search</a> 
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 			</div>
             
 			<div class="card card-xl-stretch  mb-xl-">
@@ -32,25 +65,18 @@
 						<h3 class="card-title align-items-start flex-column">
 							<span class="card-label fw-bolder fs-3 mb-1">Orders</span>
 						</h3>
-						<div class="col-md-3 fv-row">
-                            <select name="writerTL" id="writerTL" class="form-select form-select-solid" placeholder="">
-                                <option value="">Select Writer</option>
-                                <option  value="Not Assigned">Not Assigned</option>
-                                
-                                @foreach($data['writerTL'] as $tl)
-                                    <option  value="{{ $tl->id }}">{{ $tl->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        
 					</div>
 					<div class="card-body py-3">
                         <div class="table-responsive">
                             <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
                                 <thead class="p-2">
                                     <tr class="fw-bolder text-muted bg-light">
-                                        <th class="min-w-15px">SR</th>
-                                        <th class="min-w-50px">Order Code</th>
-                                        <th class="min-w-50px">Date</th>
+                                        <th class="min-w-55px text-center">SR</th>
+                                        <th class="min-w-125px">Order Code</th>
+                                        <th class="min-w-150px">Date</th>
+                                        <th class="min-w-250px">Title</th>
+                                        <th class="min-w-150px text-start">Word</th>
                                         <!-- <th class="min-w-50px">DateU</th> -->
                                         <!-- <th class="min-w-30px">Writer</th>
                                         <th class="min-w-30px">SubWriter</th> -->
@@ -70,7 +96,7 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
+    <!-- <script>
         $(document).ready(function() {
             $('#writerTL').change(function() {
                 var tlId = $(this).val();
@@ -92,9 +118,11 @@
                         // Populate table with orders
                         $.each(orders, function(index, order) {
                             var row = '<tr>' +
-                                '<td>' + (index + 1) + '</td>' +
+                                '<td class="min-w-55px text-center">' + (index + 1) + '</td>' +
                                 '<td>' + order.order_id + '</td>' +
                                 '<td>' + order.date + '</td>' +
+                                '<td>' + order.title + '</td>' +
+                                '<td>' + order.pages + '</td>' +
                                 // '<td>' + order.writer_ud + '</td>' +
                                 // '<td>' + order.wid + '</td>' +
                                 // '<td>' + order.swid + '</td>' +
@@ -108,7 +136,68 @@
                 });
             });
         });
-    </script>
+    </script> -->
+<script>
+    $(document).ready(function() {
+        // Function to fetch orders based on filter criteria
+        function fetchOrders() {
+            var from_date = $('#from_date').val();
+            var to_date = $('#to_date').val();
+            var tlId = $('#writerTL').val();
+
+            // Make AJAX request to fetch orders
+            $.ajax({
+                url: '{{ route('order.writer2') }}',
+                type: 'POST',
+                data: {
+                    from_date: from_date,
+                    to_date: to_date,
+                    tlId: tlId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    var orders = response.orders;
+                    var tbody = $('#ordersTableBody');
+                    tbody.empty();
+
+                    // Populate table with orders
+                    $.each(orders, function(index, order) {
+                        var row = '<tr>' +
+                            '<td class="min-w-55px text-center">' + (index + 1) + '</td>' +
+                            '<td>' + order.order_id + '</td>' +
+                            '<td>' + order.date + '</td>' +
+                            '<td>' + order.title + '</td>' +
+                            '<td>' + order.pages + '</td>' +
+                            '</tr>';
+                        tbody.append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                }
+            });
+        }
+
+        // Trigger fetchOrders function on search button click
+        $('#applySearch').click(function(e) {
+            e.preventDefault();
+            fetchOrders();
+        });
+
+        // Reset filter values and refresh the page on reset button click
+        $('#resetFiltersBtn').click(function(e) {
+            e.preventDefault();
+            $('#from_date').val('');
+            $('#to_date').val('');
+            $('#writerTL').val('');
+            location.reload(); // Refresh the page
+        });
+    });
+</script>
+
+
+
+
 
   @endsection
   
