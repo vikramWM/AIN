@@ -173,7 +173,8 @@
                     
                     
                     <div class="text-center pb-lg-0 pb-8">
-                        <button  type="submit" class="btn btn-lg btn-primary fw-bolder">
+                        
+                        <button id="submitBtn" type="submit" class="btn btn-lg btn-primary fw-bolder">
                             Submit
                         </button>
                     </div>
@@ -187,6 +188,13 @@
         
                 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('paymentForm').addEventListener('submit', function () {
+            document.getElementById('submitBtn').setAttribute('disabled', 'true');
+        });
+    });
+</script>
 
 
 

@@ -24,6 +24,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Mail\OrderComplete;
 use Mail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Redirect;
 
 
 
@@ -555,29 +557,73 @@ public function handleRoleSeven(Request $request)
         }
     }
 
-    public function payment(Request $req , $id)
-    {
-        $payment = new Payment;
-        $payment->order_id = $id;
-        $payment->payment_date = $req->input('payment_date');
-        $payment->paid_amount = $req->input('amount');
-        $payment->reference = $req->input('message');
-        $payment->account_status = 1;
-        $payment->save();
+//     public function payment(Request $req , $id)
+//     {
+//         $payment = new Payment;
+//         $payment->order_id = $id;
+//         $payment->payment_date = $req->input('payment_date');
+//         $payment->paid_amount = $req->input('amount');
+//         $payment->reference = $req->input('message');
+//         $payment->account_status = 1;
+//         $payment->save();
 
-        $order = Order::find($id);
+//         $order = Order::find($id);
        
-        $ra    = $order->received_amount;
+//         $ra    = $order->received_amount;
+// if ($order->amount >= $order->received_amount) {
+//     $order->received_amount = $ra + $req->input('amount');
+//     $order->save();
+// }
 
-        $order->received_amount = $ra + $req->input('amount');
-        $order->save();
-
-        return redirect()->back()->with('success', "Amount Is Updates");
+//         return redirect()->back()->with('success', "Amount Is Updates");
         
 
 
+//     }
+
+public function payment(Request $request, $id)
+{
+    // Validation rules
+    $validator = Validator::make($request->all(), [
+        'amount' => 'required|numeric|min:0.01', // Minimum amount should be 0.01
+    ]);
+
+    // If validation fails
+    if ($validator->fails()) {
+        return Redirect::back()->withErrors($validator)->withInput();
     }
 
+    // Find the order
+    $order = Order::find($id);
+
+    if (!$order) {
+        return Redirect::back()->with('error', 'Order not found.');
+    }
+
+    // Calculate the remaining amount to be paid
+    $remainingAmount = $order->amount - $order->received_amount;
+
+    // Check if the paid amount is valid
+    $paidAmount = $request->input('amount');
+    if ($paidAmount > $remainingAmount) {
+        return Redirect::back()->with('error', 'Paid amount exceeds the remaining due amount.');
+    }
+
+    // Save payment details
+    $payment = new Payment;
+    $payment->order_id = $id;
+    $payment->payment_date = $request->input('payment_date');
+    $payment->paid_amount = $paidAmount;
+    $payment->reference = $request->input('message');
+    $payment->account_status = 1; // Assuming this is the default value
+    $payment->save();
+
+    // Update the received amount in the order
+    $order->received_amount += $paidAmount;
+    $order->save();
+
+    return Redirect::back()->with('success', 'Payment details updated successfully.');
+}
     
     public function OrderEdit(Request $req, $id)
     {
