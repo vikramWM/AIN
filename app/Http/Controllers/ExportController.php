@@ -329,6 +329,171 @@ class ExportController extends Controller
         ]);
     }
 
+    public function exportWD (Request $request)
+    {
+        // Retrieve parameters from the request
+        $tlId = $request->input('writerTL');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+    
+        // Initialize the query builder
+        $query = Order::query();
+    
+        // Check if tlId is "Not Assigned"
+        if ($tlId === "Not Assigned") {
+            // Fetch orders where 'wid' is null or empty
+            $query->where(function ($query) {
+                $query->whereNull('wid')
+                      ->orWhere('wid', '');
+            });
+        } else {
+            // Fetch orders for the selected TL
+            $query->where('wid', $tlId);
+        }
+    
+        // Apply date range filter if both from_date and to_date are provided
+        if ($fromDate && $toDate) {
+            // $query->whereBetween('writer_fd', [$fromDate, $toDate]);
+            $query->where(function ($query) use ($fromDate, $toDate) {
+                $query->whereBetween('writer_fd', [$fromDate, $toDate])
+                      ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+            });
+        }
+    
+        // Fetch orders with applied filters and order by created_at in descending order
+        $orders = $query->orderByDesc('created_at')->get();           
+    
+        // // Fetch the name of the user associated with the TL ID
+        // $userName = '';
+        // if ($tlId !== "Not Assigned") {
+        //     $user = User::where('id', $tlId)->first();
+        //     if ($user) {
+        //         $userName = $user->name;
+        //     }
+        // }
+        // Initialize an empty array to store the expanded orders
+        $expandedOrders = [];
+    
+        // Iterate over each order
+        foreach ($orders as $order) {
+            // Parse the start and end dates, handling null, empty, or "0000-00-00" values
+            $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
+            $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
+    
+            // If start or end date is null or empty, set it to "Not Mentioned"
+            if (!$startDate || !$endDate) {
+                $expandedOrder = [
+                    'order_id' => $order->order_id,
+                    'date' => 'Not Mentioned',
+                    'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
+                    'pages' => $order->pages ? $order->pages : 'Not Mentioned' // Check if pages is null or empty
+                ];
+    
+                $expandedOrders[] = $expandedOrder;
+                continue; // Skip further processing for this order
+            }
+    
+            // If title is null or empty, set it to "Not Mentioned"
+            $title = $order->title ? $order->title : 'Not Mentioned';
+    
+            // If pages is null or empty, set it to "Not Mentioned"
+            $pages = $order->pages ? $order->pages : 'Not Mentioned';
+    
+            // Generate records for each day within the date range
+            for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+                // Create a new record with the same order details but different date
+                $expandedOrder = [
+                    'order_id' => $order->order_id,
+                    'date' => $date->toDateString(),
+                    'title' => $title, // Use the title value set earlier
+                    'pages' => $pages // Use the pages value set earlier
+                ];
+                
+                // Add the expanded order to the array
+                $expandedOrders[] = $expandedOrder;
+            }
+        }
+    
+        if ($fromDate && $toDate) {
+            
+            // Initialize an empty array to store filtered orders within the date range
+            $filteredOrders = [];
+        
+            // Filter expanded orders based on the date range
+            foreach ($expandedOrders as $expandedOrder) {
+                if ($expandedOrder['date'] >= $fromDate && $expandedOrder['date'] <= $toDate) {
+                    $filteredOrders[] = $expandedOrder;
+                }
+            }
+        
+           
+            // Prepare CSV file content with headers
+            $csvData = 'Order Code, Date, Title, Word' . PHP_EOL;
+
+            //  echo '<pre>'; print_r($filteredOrders) ; exit;
+            
+            // Generate CSV data
+            foreach ($filteredOrders as $order) {
+                // Enclose fields in double quotes to treat commas as a single block in Excel
+                
+                
+                $OrderCode = '"' . $order['order_id'] . '"';
+                $Date = '"' . $order['date'] . '"';
+                $Title = '"' . $order['title'] . '"';
+                $Word = '"' . $order['pages'] . '"';
+                
+
+                $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' .$Word. PHP_EOL;
+            }
+
+            // Generate file name
+            $filename = 'Writer_orders_' . now()->format('YmdHis') . '.csv';
+
+            // Save CSV content to storage
+            Storage::disk('local')->put($filename, $csvData);
+
+            // Return the file path to the AJAX request
+            return response()->download(storage_path('app/' . $filename), $filename, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        }  
+        // Check if both from_date and to_date are not available
+        if (!$fromDate && !$toDate) {
+            // Prepare CSV file content with headers
+            $csvData = 'Order Code, Date, Title, Word' . PHP_EOL;
+            
+            // // Prepare CSV file content with headers including user name
+            // $csvData = 'Writer Name: ' . $userName . PHP_EOL; // Include user name in the header
+            // $csvData .= 'Order Code, Date, Title, Word' . PHP_EOL;
+
+            // Generate CSV data
+            foreach ($expandedOrders as $order) {
+                // Enclose fields in double quotes to treat commas as a single block in Excel
+                $OrderCode = '"' . $order['order_id'] . '"';
+                $Date = '"' . $order['date'] . '"';
+                $Title = '"' . $order['title'] . '"';
+                $Word = '"' . $order['pages'] . '"';
+                
+                // Add the CSV row
+                $csvData .= $OrderCode . ',' . $Date . ',' . $Title . ',' . $Word . PHP_EOL;
+            }
+
+            // Generate file name
+            $filename = 'Writer_orders_' . now()->format('YmdHis') . '.csv';
+
+            // Save CSV content to storage
+            Storage::disk('local')->put($filename, $csvData);
+
+            // Return the file path to the AJAX request
+            return response()->download(storage_path('app/' . $filename), $filename, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        }
+
+
+    }
 
 
 

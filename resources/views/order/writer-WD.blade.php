@@ -65,7 +65,7 @@
 						<h3 class="card-title align-items-start flex-column">
 							<span class="card-label fw-bolder fs-3 mb-1">Orders</span>
 						</h3>
-                        
+                        <a onclick="orderExport()" style="height: fit-content;" class="btn btn-sm btn-danger">Export</a>
 					</div>
 					<div class="card-body py-3">
                         <div class="table-responsive">
@@ -195,7 +195,46 @@
     });
 </script>
 
+<script>
+		function orderExport() {
+			// Retrieve filter parameters
+			var writerTL = $('select[name="writerTL"]').val();
+			var from_date = $('input[name="from_date"]').val();
+			var to_date = $('input[name="to_date"]').val();
+			
+			// Use CSRF token for security
+			var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
+			// Send AJAX request to export endpoint
+			$.ajax({
+				type: 'get',
+				url: '{{ route('export.WD') }}',
+				data: {
+					_token: CSRF_TOKEN,
+					writerTL: writerTL,
+					from_date: from_date,
+					to_date: to_date
+				},
+				success: function (data) {
+					// On success, trigger file download
+					var blob = new Blob([data], { type: 'text/csv' });
+					var link = document.createElement('a');
+					link.href = window.URL.createObjectURL(blob);
+
+					// Generate file name with current timestamp
+					var filename = 'Writer_orders_' + new Date().toISOString().slice(0, 19).replace(/[-T:/]/g, '') + '.csv';
+					link.download = filename;
+
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				},
+				error: function (data) {
+					console.log('Error:', data);
+				}
+			});
+		}
+	</script>
 
 
 
