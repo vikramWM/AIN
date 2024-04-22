@@ -209,23 +209,25 @@
 											<a   target="_blank" href="/call.{{$order->id}}" class="btn btn-icon btn-bg-warning btn-active-color-light btn-sm me-1">Call</a>
 
 											
-                                            
-
                                             <!-- Include jQuery library -->
-											<a href="#" onclick="showConfirmation('{{ $order->id }}')" id="clickToCallBtn{{$order->id}}" class="btn btn-icon btn-bg-success btn-active-color-light btn-sm me-1">
+											<a href="#" onclick="showConfirmationclick('{{ $order->id }}')" id="clickToCallBtn{{$order->id}}" class="btn btn-icon btn-bg-success btn-active-color-light btn-sm me-1">
 												<span class="svg-icon svg-icon-3">
 													<i class="fa fa-phone fa-lg"></i>
 												</span>
+												<input type="hidden" id="primary" value="{{ $order->user->countrycode }}{{ $order->user->mobile_no }}">
 											</a>
 
 											<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 											<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 											<script>
-												function showConfirmation(orderId) {
-													var primarycountrycode = $("#country_primary").val(); // Assuming country_primary is an input field
+												function showConfirmationclick(orderId) {
 													var primarynumber = $("#primary").val(); // Assuming primary is an input field
-													var apiUrl = "/click2call?callerNumber={{ Auth::user()->sip }}&receiverNumber={{ $order->user->countrycode }}{{ $order->user->mobile_no }}&user=anil&key=jbti89692vc60b2o9nu%^7";
+													@if ($order->user)
+														@if ($order->user->countrycode && $order->user->mobile_no)
+													apiUrl = "/click2call?callerNumber={{ Auth::user()->sip }}&receiverNumber=" + primarynumber + "&user=anil&key=jbti89692vc60b2o9nu%^7";
+														@endif
+													@endif
 
 													$.get(apiUrl, function(data, status) {
 														// Use SweetAlert to display data and status

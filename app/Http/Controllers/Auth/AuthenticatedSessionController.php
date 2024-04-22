@@ -26,6 +26,7 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
+        $request->ip();
     
         $user = $request->user();
     
@@ -34,12 +35,13 @@ class AuthenticatedSessionController extends Controller
         } else {
             $redirectTo = RouteServiceProvider::HOME;
         }
-
+        
     
         $request->session()->regenerate();
     
         return redirect()->intended($redirectTo);
     }
+   
 
     /**
      * Destroy an authenticated session.

@@ -5,8 +5,8 @@ $curl = curl_init();
 
 $receiverNumber =  $_REQUEST['receiverNumber'];
 $callernumber =  $_REQUEST['callerNumber'];
-// echo "http://103.113.27.27/Anilmadan/click2call.php?callerNumber=$callernumber&receiverNumber=$receiverNumber&user=anil&key=jbti89692vc60b2o9nu%25%5E7";
-// die();
+echo "http://103.113.27.27/Anilmadan/click2call.php?callerNumber=$callernumber&receiverNumber=$receiverNumber&user=anil&key=jbti89692vc60b2o9nu%25%5E7";
+die();
 
 
 curl_setopt_array($curl, [

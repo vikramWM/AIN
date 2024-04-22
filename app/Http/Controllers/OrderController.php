@@ -612,7 +612,7 @@ public function handleRoleSeven(Request $request)
                     'date'     => $req->input('delivery_date'),
                     'due'     => $req->input('amount') - $req->input('r_amount'),
                 ];
-                Mail::to( $orderData['email'])->cc('order@assignnmentinneed.com')->send(new OrderComplete($orderData));
+                Mail::to( $orderData['email']) ->send(new OrderComplete($orderData));
                
             }
             else
