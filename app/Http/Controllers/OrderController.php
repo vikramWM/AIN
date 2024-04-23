@@ -997,10 +997,13 @@ public function payment(Request $request, $id)
     
         foreach ($orders as $order) {
             // Your existing code for creating the output string goes here
-            $output .= '<tr>
+            // $output .= '<tr>
+            $output .= '<tr ' . ($order->user->feedback_issue == 1 ? 'style="color: green;"' : '') . '>
+
                             <td>' .  $index++. '</td>
                             <td>
                                 ' . $order->order_id . '
+                                ' . ($order->feedback_ticket != '' ? '<span class="badge badge-light-danger fs-7 fw-bold ">' . $order->feedback_ticket . '</span>' : '') . '
                                 ' . ($order->is_fail == 1 ? '<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>' : '') . '
                                 ' . ($order->services == 'First Class Work' ? '<span class="badge badge-light-info fs-7 fw-bold">First Class Work</span>' : '') . '
                                 ' . ($order->resit == 'on' ? '<span class="badge badge-light-danger fs-7 fw-bold">Resit</span>' : '') . '
@@ -1400,6 +1403,12 @@ public function payment(Request $request, $id)
         
         $feedback->save();
 
+    // Update user feedback issue status
+    $user = User::find($order->uid);
+    if ($user) {
+        $user->feedback_issue = 1;
+        $user->save();
+    }
         
 
         return response()->json(['status' => 'success','created_at' => $feedback->created_at ,'message' => $feedback->comment]);

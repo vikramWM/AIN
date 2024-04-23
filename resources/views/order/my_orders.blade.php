@@ -66,11 +66,12 @@
 								<tbody class="allData">
 
                                     @foreach($data['orders'] as $order)
-									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')">										<td>
+									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')" @if($order->user->feedback_issue == 1) style="color: green;" @endif>										<td>
 										{{ $loop->index + 1 }}
 										</td>
 										<td class="text-center">
 											{{ $order->order_id }}
+											<span class="badge badge-light-danger fs-7 fw-bold ">{{$order->feedback_ticket}}</span>
                                             @if($order->is_fail == 1)
 												<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>
 											@endif

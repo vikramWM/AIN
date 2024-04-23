@@ -46,7 +46,7 @@
                     <div data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_content_container', 'lg': '#kt_toolbar_container'}" class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                         <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Order
                         <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
-                        <small class="text-muted fs-7 fw-bold my-1 ms-1">Assignement In Need for MarketingTeamRole</small>
+                        <small class="text-muted fs-7 fw-bold my-1 ms-1">Assignement In Need for SubAdmin</small>
                     </div>
                     
                 </div>
@@ -105,11 +105,12 @@
 								<tbody class="allData">
 
                                     @foreach($data['orders'] as $order)
-									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')">										<td>
+									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')" @if($order->user->feedback_issue == 1) style="color: green;" @endif>										<td>
 										{{ $loop->index + 1 }}
 										</td>
 										<td class="text-center">
 											{{ $order->order_id }}
+											<span class="badge badge-light-danger fs-7 fw-bold ">{{$order->feedback_ticket}}</span>
                                             @if($order->is_fail == 1)
 												<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>
 											@endif
