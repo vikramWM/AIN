@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Leads;
 use App\Models\User;
+use App\Models\multipleswiter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
@@ -333,11 +334,19 @@ class ExportController extends Controller
     {
         // Retrieve parameters from the request
         $tlId = $request->input('writerTL');
+        $swId = $request->input('SubWriter');
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
     
+        // Check if all request parameters are not available
+        if (!$tlId && !$swId && !$fromDate && !$toDate) {
+            // Return a response indicating that no parameters are available
+            return response()->json(['message' => 'No parameters provided.'], 400);
+        }
+
         // Initialize the query builder
-        $query = Order::query();
+        // $query = Order::query();
+        $query = Order::query()->with('writer','mulsubwriter')->where('admin_id', '!=', 0);
     
         // Check if tlId is "Not Assigned"
         if ($tlId === "Not Assigned") {
@@ -346,11 +355,19 @@ class ExportController extends Controller
                 $query->whereNull('wid')
                       ->orWhere('wid', '');
             });
-        } else {
+        } elseif ($tlId) {
+       
             // Fetch orders for the selected TL
             $query->where('wid', $tlId);
         }
-    
+        if ($swId) {
+            // Fetch orders for the selected SW
+            $multipleWriters = multipleswiter::where('user_id', $swId)->get();
+                    
+            $orderIds = $multipleWriters->pluck('order_id')->toArray();
+            
+            $query->whereIn('id', $orderIds); 
+        }
         // Apply date range filter if both from_date and to_date are provided
         if ($fromDate && $toDate) {
             // $query->whereBetween('writer_fd', [$fromDate, $toDate]);
@@ -363,12 +380,19 @@ class ExportController extends Controller
         // Fetch orders with applied filters and order by created_at in descending order
         $orders = $query->orderByDesc('created_at')->get();           
     
-        // // Fetch the name of the user associated with the TL ID
-        // $userName = '';
+        // // Fetch the name of the Writer associated with the TL ID
+        // $W_Name = '';
+        // $S_Name = '';
         // if ($tlId !== "Not Assigned") {
         //     $user = User::where('id', $tlId)->first();
         //     if ($user) {
-        //         $userName = $user->name;
+        //         $W_Name = $user->name;
+        //     }
+        // }
+        // if ($swId !== "Not Assigned") {
+        //     $user = User::where('id', $swId)->first();
+        //     if ($user) {
+        //         $S_Name = $user->name;
         //     }
         // }
         // Initialize an empty array to store the expanded orders
@@ -380,13 +404,25 @@ class ExportController extends Controller
             $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
             $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
     
+            // Initialize the variable to store SubWriter names
+            $subWriterNames = [];
+
+            // Retrieve SubWriter names
+            foreach ($order->mulsubwriter as $mulsubwriter) {
+                $subWriterNames[] = $mulsubwriter->user->name;
+            }
+            // Retrieve Writer name
+            $writerName = $order->writer->name;
+
             // If start or end date is null or empty, set it to "Not Mentioned"
             if (!$startDate || !$endDate) {
                 $expandedOrder = [
                     'order_id' => $order->order_id,
                     'date' => 'Not Mentioned',
                     'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
-                    'pages' => $order->pages ? $order->pages : 'Not Mentioned' // Check if pages is null or empty
+                    'pages' => $order->pages ? $order->pages : 'Not Mentioned', // Check if pages is null or empty
+                    'writer_name' => $writerName,
+                    'sub_writer_names' => implode(', ', $subWriterNames),  
                 ];
     
                 $expandedOrders[] = $expandedOrder;
@@ -406,7 +442,9 @@ class ExportController extends Controller
                     'order_id' => $order->order_id,
                     'date' => $date->toDateString(),
                     'title' => $title, // Use the title value set earlier
-                    'pages' => $pages // Use the pages value set earlier
+                    'pages' => $pages, // Use the pages value set earlier
+                    'writer_name' => $writerName,
+                    'sub_writer_names' => implode(', ', $subWriterNames),  
                 ];
                 
                 // Add the expanded order to the array
@@ -428,7 +466,7 @@ class ExportController extends Controller
         
            
             // Prepare CSV file content with headers
-            $csvData = 'Order Code, Date, Title, Word' . PHP_EOL;
+            $csvData = 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
 
             //  echo '<pre>'; print_r($filteredOrders) ; exit;
             
@@ -441,9 +479,11 @@ class ExportController extends Controller
                 $Date = '"' . $order['date'] . '"';
                 $Title = '"' . $order['title'] . '"';
                 $Word = '"' . $order['pages'] . '"';
+                $Writer = '"' . $order['writer_name'] . '"';
+                $SubWriter = '"' . $order['sub_writer_names'] . '"';
                 
 
-                $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' .$Word. PHP_EOL;
+                $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
             }
 
             // Generate file name
@@ -461,7 +501,9 @@ class ExportController extends Controller
         // Check if both from_date and to_date are not available
         if (!$fromDate && !$toDate) {
             // Prepare CSV file content with headers
-            $csvData = 'Order Code, Date, Title, Word' . PHP_EOL;
+            // $csvData = 'Order Code, Date, Title, Word' . PHP_EOL;
+            $csvData = 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
+
             
             // // Prepare CSV file content with headers including user name
             // $csvData = 'Writer Name: ' . $userName . PHP_EOL; // Include user name in the header
@@ -474,9 +516,11 @@ class ExportController extends Controller
                 $Date = '"' . $order['date'] . '"';
                 $Title = '"' . $order['title'] . '"';
                 $Word = '"' . $order['pages'] . '"';
+                $Writer = '"' . $order['writer_name'] . '"';
+                $SubWriter = '"' . $order['sub_writer_names'] . '"';
                 
-                // Add the CSV row
-                $csvData .= $OrderCode . ',' . $Date . ',' . $Title . ',' . $Word . PHP_EOL;
+
+                $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
             }
 
             // Generate file name

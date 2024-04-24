@@ -38,7 +38,7 @@
                                 <div class="col-md-3 fv-row">
                                     <input type="date" name="to_date" id="to_date" class="form-control form-control-solid" placeholder="To">
                                 </div>
-                                <div class="col-md-3 fv-row">
+                                <!-- <div class="col-md-3 fv-row">
                                     <select name="writerTL" id="writerTL" class="form-select form-select-solid" placeholder="">
                                         <option value="">Select Writer</option>
                                         <option  value="Not Assigned">Not Assigned</option>
@@ -48,6 +48,95 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-md-3 fv-row">
+                                    <select name="SubWriter" id="SubWriter" class="form-select form-select-solid" placeholder="">
+                                        <option value="">Select SubWriter</option>
+                                        <option  value="Not Assigned">Not Assigned</option>
+                                        
+                                        @foreach($data['SubWriter'] as $sw)
+                                            <option  value="{{ $sw->id }}">{{ $sw->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div> -->
+                                 <!-- -------------- -->
+                            <div class="col-lg-3 fv-row fv-plugins-icon-container">
+                                <select name="writerTL" id="writerTL" aria-label="Select a Timezone" data-control="select2" data-placeholder="Search By writer Name" class="form-select form-select-solid form-select-lg" tabindex="-1">
+                                    <option value="">Select Writer</option>
+                                    <!-- <option  value="Not Assigned">Not Assigned</option> -->
+                                    @foreach($data['writerTL'] as $tl)
+                                        <option value="{{ $tl->id }}">{{ $tl->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-lg-3 fv-row fv-plugins-icon-container">
+                                <select name="SubWriter" id="SubWriter" aria-label="Select a Timezone" data-control="select2" data-placeholder="Search By Sub Writer" class="form-select form-select-solid form-select-lg" tabindex="-1">
+                                    <option value="">Select SubWriter</option>
+                                    <!-- <option  value="Not Assigned">Not Assigned</option> -->
+                                    @foreach($data['SubWriter'] as $Sub)
+                                        <option value="{{ $Sub->id }}">{{ $Sub->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+                            <script>
+                                $(document).ready(function () {
+                                // Function to handle both search and filter
+
+                                // Function to populate SubWriter dropdown based on the selected Writer TL
+                                function populateSubwriters() {
+                                    var tlId = $('#writerTL').val();
+                                    var subwriterSelect = $('#SubWriter');
+
+                                    // Store the currently selected SubWriter value
+                                    var selectedSubWriter = subwriterSelect.val();
+
+                                    // Clear previous options
+                                    subwriterSelect.empty();
+
+                                    // Check if a TL is selected
+                                    if (tlId !== '') {
+                                        // Fetch subwriters based on the selected TL
+                                        $.ajax({
+                                            type: 'get',
+                                            url: '/fetch-subwriters', // Use the correct URL here
+                                            data: {
+                                                'tlId': tlId
+                                            },
+                                            success: function (data) {
+                                                // Populate SubWriter dropdown with fetched data
+                                                $.each(data, function (key, value) {
+                                                    subwriterSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
+                                                });
+
+                                                // Set the selected option back to its original value
+                                                subwriterSelect.val(selectedSubWriter);
+                                            },
+                                            error: function (data) {
+                                                console.log('Error fetching SubWriters:', data);
+                                            }
+                                        });
+                                    } else {
+                                        // If no TL is selected, show all sub-writers
+                                        subwriterSelect.append('<option value=""></option>');
+                                        @foreach($data['SubWriter'] as $Sub)
+                                            subwriterSelect.append('<option value="{{ $Sub->id }}">{{ $Sub->name }}</option>');
+                                        @endforeach
+                                    }
+                                }
+
+                                // Use event delegation for dynamically populated elements
+                                $(document).on('change', '#writerTL', populateSubwriters);
+
+                                // Populate SubWriter dropdown on page load
+                                populateSubwriters();
+                            });
+
+                            </script>
+
+                            
+
+                           <!-- ----------------------- -->
                                 <div class="col-lg-12 fv-row fv-plugins-icon-container mt-2">
                                     <a  id="resetFiltersBtn" class="btn btn-sm btn-danger">Reset</a>
                                     <a  id="applySearch" class="btn btn-sm btn-primary">Search</a> 
@@ -77,6 +166,8 @@
                                         <th class="min-w-150px">Date</th>
                                         <th class="min-w-250px">Title</th>
                                         <th class="min-w-150px text-start">Word</th>
+                                        <th class="min-w-150px text-start">writer name</th>
+                                        <th class="min-w-150px text-start">subwriter name</th>
                                         <!-- <th class="min-w-50px">DateU</th> -->
                                         <!-- <th class="min-w-30px">Writer</th>
                                         <th class="min-w-30px">SubWriter</th> -->
@@ -144,6 +235,7 @@
             var from_date = $('#from_date').val();
             var to_date = $('#to_date').val();
             var tlId = $('#writerTL').val();
+            var swId = $('#SubWriter').val();
 
             // Make AJAX request to fetch orders
             $.ajax({
@@ -153,6 +245,7 @@
                     from_date: from_date,
                     to_date: to_date,
                     tlId: tlId,
+                    swId: swId,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
@@ -168,6 +261,8 @@
                             '<td>' + order.date + '</td>' +
                             '<td>' + order.title + '</td>' +
                             '<td>' + order.pages + '</td>' +
+                            '<td>' + order.writer_name + '</td>' +
+                            '<td>' + order.sub_writer_names + '</td>' +
                             '</tr>';
                         tbody.append(row);
                     });
@@ -199,6 +294,7 @@
 		function orderExport() {
 			// Retrieve filter parameters
 			var writerTL = $('select[name="writerTL"]').val();
+			var SubWriter = $('select[name="SubWriter"]').val();
 			var from_date = $('input[name="from_date"]').val();
 			var to_date = $('input[name="to_date"]').val();
 			
@@ -212,6 +308,7 @@
 				data: {
 					_token: CSRF_TOKEN,
 					writerTL: writerTL,
+                    SubWriter: SubWriter,
 					from_date: from_date,
 					to_date: to_date
 				},
