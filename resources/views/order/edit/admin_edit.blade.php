@@ -118,13 +118,14 @@
 													@endif
 												</div>
 												<div class="col-md-6 fv-row">
-													<select name="writer_fd_half" id=""
+													<!-- <select name="writer_fd_half" id=""
 														class="form-select form-select-solid"
 														placeholder="">
 														<option {{ $order->writer_fd_h == '' ? 'selected' : '' }} value="">Select Status</option>
 														<option {{ $order->writer_fd_h == 'First Half' ? 'selected' : '' }} value="First Half">First Half</option>
 														<option {{ $order->writer_fd_h == 'Second Half' ? 'selected' : '' }} value="Second Half">Second Half</option>
-													</select>
+													</select> -->
+													<input type="time" name="writer_fd_half" id="" value="{{ $order->writer_fd_h }}" class="form-control form-control-solid">
 												</div>
 												<div class="col-md-6 fv-row">
 												@if($order->writer_ud != 0000-00-00)
@@ -138,13 +139,14 @@
 												@endif
 													</div>
 												<div class="col-md-6 fv-row">
-													<select name="writer_ud_half" id="writer_status"
+													<!-- <select name="writer_ud_half" id="writer_status"
 														class="form-select form-select-solid"
 														placeholder="">
 														<option {{ $order->writer_ud_h == '' ? 'selected' : '' }} value="">Select Status</option>
 														<option {{ $order->writer_ud_h == 'First Half' ? 'selected' : '' }} value="First Half">First Half</option>
 														<option {{ $order->writer_ud_h == 'Second Half' ? 'selected' : '' }} value="Second Half">Second Half</option>
-													</select>
+													</select> -->
+													<input type="time" name="writer_ud_half" id="" value="{{ $order->writer_ud_h }}" class="form-control form-control-solid">
 												</div>
 											</div>
 										<div class="card-footer">

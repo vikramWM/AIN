@@ -78,7 +78,7 @@
 											@if($order->writer_fd != '0000-00-00' && $order->writer_fd != NULL && $order->writer_fd != '')
 												{{ $order->writer_fd}}
 												@if($order->writer_fd_h)
-													<span class="badge badge-light-danger fs-7 fw-bold"> {{$order->writer_fd_h}}</span>
+													<span class="badge badge-light-danger fs-7 fw-bold"> {{date('h:i A', strtotime($order->writer_fd_h))}}</span>
 												@endif
 											@endif
 										</div>
@@ -87,7 +87,7 @@
 											@if($order->writer_ud != '0000-00-00' && $order->writer_ud != NULL && $order->writer_ud != '')
 												{{ $order->writer_ud}}
 												@if($order->writer_ud_h)
-													<span class="badge badge-light-danger fs-7 fw-bold"> {{$order->writer_ud_h}}</span>
+													<span class="badge badge-light-danger fs-7 fw-bold"> {{date('h:i A', strtotime($order->writer_ud_h))}}</span>
 												@endif
 											
 											@endif
