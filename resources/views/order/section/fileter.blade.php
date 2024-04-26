@@ -4,32 +4,6 @@
     		<span class="card-label fw-bolder fs-3 mb-1">Filter</span>
     	</h3>
     </div>
-    <!-- HTML for preloader -->
-<div id="preloader" style="display: none; background-color: #09090987;">
-<div class="spinner"></div>
-</div>
-<style>
-    .spinner {
-  width: 50px;
-  height: 50px;
-  position: relative;
-  margin: 100px auto;
-  border-radius: 50%;
-  border: 5px solid transparent;
-  border-top-color: #333;
-  border-bottom-color: #333;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
-</style>
-<!-- HTML for preloader -->
     <div class="card-body py-3">
     	<form action="">
     		<div class="row mb-3">
@@ -434,8 +408,6 @@
 
 <script>
     function orderExport() {
-         // Show preloader
-         $('#preloader').show();
         // Retrieve filter parameters
         var search = $('#search').val();
         var uid = $('#selectedValue').val();
@@ -489,8 +461,6 @@
                 secondary_mobile: secondaryMobile
             },
             success: function (data) {
-                // Hide preloader
-                $('#preloader').hide();
                 // On success, trigger file download
                 var blob = new Blob([data], { type: 'text/csv' });
                 var link = document.createElement('a');
@@ -505,8 +475,6 @@
                 document.body.removeChild(link);
             },
             error: function (data) {
-                // Hide preloader on error
-                $('#preloader').hide();
                 console.log('Error:', data);
             }
 

@@ -83,12 +83,7 @@ class ExportController extends Controller
         }
 
         if ($SubWriter) {
-            // $orders->where('swid', $SubWriter);
-            $multipleWriters = multipleswiter::where('user_id', $SubWriter)->get();
-                    
-            $orderIds = $multipleWriters->pluck('order_id')->toArray();
-            
-            $orders->whereIn('id', $orderIds);
+            $orders->where('swid', $SubWriter);
         }
 
         if ($college) {
@@ -111,24 +106,8 @@ class ExportController extends Controller
         $filteredOrders = $orders->orderBy('id', 'desc')->get();
 
         // Prepare CSV file content
-        $csvData = 'Order Code,User Name,User Email,Mobile,Order Date,Pages,Title,Delivery Date,Delivery Time,Amount,Team,Writer Name,SubWriter,Writer Deadline,Chapter,Draft Date,Draft Time' . PHP_EOL;
+        $csvData = 'Order Code,User Name,User Email,Mobile,Order Date,Pages,Title,Delivery Date,Delivery Time,Amount,Writer Name,Writer Deadline,Chapter,Draft Date,Draft Time' . PHP_EOL;
         foreach ($filteredOrders as $order) {
-             // Initialize the variable to store SubWriter names
-             $subWriterNames = [];
-
-             // Retrieve SubWriter names
-             foreach ($order->mulsubwriter as $mulsubwriter) {
-                 $subWriterNames[] = $mulsubwriter->user->name;
-             }
-             // Retrieve Writer name
-             if ($order->writer !== null) {
-                $writerName2 = $order->writer->name;
-            } else {
-                // Handle the case when $order->writer is null
-                // For example, you could set a default value for $writerName2
-                $writerName2 = "";
-            }
-            
             // Access user's name and email from the user relationship
             $userName = '"' . ($order->user->name ?? '') . '"';
             $userEmail = '"' . ($order->user->email ?? '') . '"';
@@ -142,14 +121,12 @@ class ExportController extends Controller
             $deliveryTime = '"' . $order->delivery_time . '"';
             $amount = '"' . $order->amount . '"';
             $writerName = '"' . $order->writer_name . '"';
-                    $writer_name = '"' . $writerName2 . '"';
-                    $sub_writer_names = '"' . implode(', ', $subWriterNames) . '"';
             $writerDeadline = '"' . $order->writer_deadline . '"';
             $chapter = '"' . $order->chapter . '"';
             $draftDate = '"' . $order->draft_date . '"';
             $draftTime = '"' . $order->draft_time . '"';
         
-            $csvData .= $order_id . ',' . $userName . ',' . $userEmail . ',' . $userMobile . ',' . $orderDate . ',' . $pages . ',' . $title . ','  . $deliveryDate . ',' . $deliveryTime . ',' . $amount . ',' . $writerName . ',' . $writer_name . ',' . $sub_writer_names. ',' . $writerDeadline . ',' . $chapter . ',' . $draftDate . ',' . $draftTime .  PHP_EOL;
+            $csvData .= $order_id . ',' . $userName . ',' . $userEmail . ',' . $userMobile . ',' . $orderDate . ',' . $pages . ',' . $title . ','  . $deliveryDate . ',' . $deliveryTime . ',' . $amount . ',' . $writerName . ',' . $writerDeadline . ',' . $chapter . ',' . $draftDate . ',' . $draftTime .  PHP_EOL;
         }
 
         // Generate file name with current timestamp
