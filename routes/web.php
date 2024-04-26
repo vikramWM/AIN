@@ -696,6 +696,7 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
     Route::get('/HangUp', [CallController::class, 'HangUp'])->name('HangUp');
     Route::get('/HoldCall', [CallController::class, 'HoldCall'])->name('HoldCall');
     Route::get('/unhold', [CallController::class, 'UnHoldCall'])->name('unhold');
+    Route::get('/api', [CallController::class, 'api'])->name('api');
 
 
     

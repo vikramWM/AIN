@@ -157,6 +157,28 @@ public function UnHoldCall(Request $request)
     }
 }
 
+public function api()
+{
+    try {
+        $response = Http::post('https://roubot.rmlconnect.net/live-agent/#/main/user-requests', [
+            'username' => 'WarrgyizVendor',
+            'password' => '6eeL20sTvmg0',
+        ]);
+
+        if ($response->successful()) {
+            // Handle successful response here
+            $data = $response->json(); 
+            dd($data);
+        } else {
+            // Handle unsuccessful response here
+            echo 'Request failed with status: ' . $response->status();
+            echo 'Response Body: ' . $response->body();
+        }
+    } catch (\Exception $e) {
+        // If an exception occurred during the request, handle it here
+        echo 'An error occurred: ' . $e->getMessage();
+    }
+}
 
 
 }
