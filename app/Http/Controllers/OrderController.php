@@ -911,10 +911,6 @@ public function payment(Request $request, $id)
             {
                 $orders->where('admin_id',  8392 );
             }
-            elseif($writer == 'N/A')
-            {
-                $orders->whereNotNull("writer_name")->where('writer_name', '!=', '');
-            }
             else
             {
 
@@ -957,7 +953,12 @@ public function payment(Request $request, $id)
 
         if($SubWriter != '')
         {
-            $orders->where('swid', $SubWriter );
+            // $orders->where('swid', $SubWriter );
+            $multipleWriters = multipleswiter::where('user_id', $SubWriter)->get();
+                    
+            $orderIds = $multipleWriters->pluck('order_id')->toArray();
+            
+            $orders->whereIn('id', $orderIds); 
 
         }
 
@@ -1078,7 +1079,23 @@ public function payment(Request $request, $id)
                             </td> '
                             
                             : '') .'
+                            <td>';
 
+                            if ($order['writer'] && !$order['writer']['name'] == "") {
+                                if ($order->mulsubwriter) {
+                                    // Output email addresses
+                                    foreach ($order->mulsubwriter as $writer) {
+                                        $output .= $writer->user->name . '<br>';
+                                    }
+                                } else {
+                                    $output .= 'No writers found for this order.<br>';
+                                }
+                                $output .= '<span class="badge badge-light-info fs-7 fw-bold">(' . $order['writer']['name'] . ')</span>';
+                            } else {
+                                $output .= 'Not Assign';
+                            }
+            
+                            $output .= '</td>
                             
 
                             
@@ -2359,98 +2376,98 @@ public function OrderCallInsert(Request $request, $id)
 //             return response()->json(['orders' => $expandedOrders]);
 //         }
 
-    public function orderWD2(Request $request)
-    {
-        $tlId = $request->input('tlId');
-        $swId = $request->input('swId');
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
-        
-        if (!$tlId && !$swId && !$fromDate && !$toDate) {
-            return response()->json(['message' => 'No parameters provided.'], 400);
-        }
-        $query = Order::query()->with('writer','mulsubwriter')->where('admin_id', '!=', 0);
-        if ($tlId === "Not Assigned") {
-            $query->where(function ($query) {
-                $query->whereNull('wid')
-                    ->orWhere('wid', '');
-            });
-        } elseif ($tlId) {
-            $query->where('wid', $tlId);
-        }
-        if ($swId) {
-            $multipleWriters = multipleswiter::where('user_id', $swId)->get();
-            $orderIds = $multipleWriters->pluck('order_id')->toArray();
-            $query->whereIn('id', $orderIds);      
-        }
-
-        if ($fromDate && $toDate) {
-            $query->where(function ($query) use ($fromDate, $toDate) {
-                $query->whereBetween('writer_fd', [$fromDate, $toDate])
-                    ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
-            });
-        }
-
-        $orders = $query->orderByDesc('created_at')->get();           
-        $expandedOrders = [];
-
-        foreach ($orders as $order) {
-            $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
-            $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
-            $subWriterNames = [];
-            foreach ($order->mulsubwriter as $mulsubwriter) {
-                if ($mulsubwriter->user !== null) {
-                    $subWriterNames[] = $mulsubwriter->user->name;
-                }
-            }
-            if ($order->writer !== null) {
-                $writerName2 = $order->writer->name;
-            } else {
-                $writerName2 = "";
-            }
-            if (!$startDate || !$endDate) {
-                $expandedOrder = [
-                    'order_id' => $order->order_id,
-                    'date' => 'Not Mentioned',
-                    'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
-                    'pages' => $order->pages ? $order->pages : 'Not Mentioned', // Check if pages is null or empty
-                    'writer_name' => $writerName2,
-                    'sub_writer_names' => implode(', ', $subWriterNames), 
-                ];
-
-                $expandedOrders[] = $expandedOrder;
-                continue; 
-            }
-            $title = $order->title ? $order->title : 'Not Mentioned';
-            $pages = $order->pages ? $order->pages : 'Not Mentioned';
-            for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
-                $expandedOrder = [
-                    'order_id' => $order->order_id,
-                    'date' => $date->toDateString(),
-                    'title' => $title, // Use the title value set earlier
-                    'pages' => $pages, // Use the pages value set earlier
-                    'writer_name' => $writerName2,
-                    'sub_writer_names' => implode(', ', $subWriterNames), 
-                    
-                ];
-                $expandedOrders[] = $expandedOrder;
-            }
-        }
-        // Sort expanded orders by date in ascending order
-        usort($expandedOrders, function($a, $b) {
-            return strtotime($a['date']) - strtotime($b['date']);
-        });
-        if ($fromDate && $toDate) {
-            $filteredOrders = [];
-            foreach ($expandedOrders as $expandedOrder) {
-                if ($expandedOrder['date'] >= $fromDate && $expandedOrder['date'] <= $toDate) {
-                    $filteredOrders[] = $expandedOrder;
-                }
-            }
-            return response()->json(['orders' => $filteredOrders]);
-        }
-        return response()->json(['orders' => $expandedOrders]);
+public function orderWD2(Request $request)
+{
+    $tlId = $request->input('tlId');
+    $swId = $request->input('swId');
+    $fromDate = $request->input('from_date');
+    $toDate = $request->input('to_date');
+    
+    if (!$tlId && !$swId && !$fromDate && !$toDate) {
+        return response()->json(['message' => 'No parameters provided.'], 400);
     }
+    $query = Order::query()->with('writer','mulsubwriter')->where('admin_id', '!=', 0);
+    if ($tlId === "Not Assigned") {
+        $query->where(function ($query) {
+            $query->whereNull('wid')
+                ->orWhere('wid', '');
+        });
+    } elseif ($tlId) {
+        $query->where('wid', $tlId);
+    }
+    if ($swId) {
+        $multipleWriters = multipleswiter::where('user_id', $swId)->get();
+        $orderIds = $multipleWriters->pluck('order_id')->toArray();
+        $query->whereIn('id', $orderIds);      
+    }
+
+    if ($fromDate && $toDate) {
+        $query->where(function ($query) use ($fromDate, $toDate) {
+            $query->whereBetween('writer_fd', [$fromDate, $toDate])
+                ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+        });
+    }
+
+    $orders = $query->orderByDesc('created_at')->get();           
+    $expandedOrders = [];
+
+    foreach ($orders as $order) {
+        $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
+        $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
+        $subWriterNames = [];
+        foreach ($order->mulsubwriter as $mulsubwriter) {
+            if ($mulsubwriter->user !== null) {
+                $subWriterNames[] = $mulsubwriter->user->name;
+            }
+        }
+        if ($order->writer !== null) {
+            $writerName2 = $order->writer->name;
+        } else {
+            $writerName2 = "";
+        }
+        if (!$startDate || !$endDate) {
+            $expandedOrder = [
+                'order_id' => $order->order_id,
+                'date' => 'Not Mentioned',
+                'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
+                'pages' => $order->pages ? $order->pages : 'Not Mentioned', // Check if pages is null or empty
+                'writer_name' => $writerName2,
+                'sub_writer_names' => implode(', ', $subWriterNames), 
+            ];
+
+            $expandedOrders[] = $expandedOrder;
+            continue; 
+        }
+        $title = $order->title ? $order->title : 'Not Mentioned';
+        $pages = $order->pages ? $order->pages : 'Not Mentioned';
+        for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+            $expandedOrder = [
+                'order_id' => $order->order_id,
+                'date' => $date->toDateString(),
+                'title' => $title, // Use the title value set earlier
+                'pages' => $pages, // Use the pages value set earlier
+                'writer_name' => $writerName2,
+                'sub_writer_names' => implode(', ', $subWriterNames), 
+                
+            ];
+            $expandedOrders[] = $expandedOrder;
+        }
+    }
+    // Sort expanded orders by date in ascending order
+    usort($expandedOrders, function($a, $b) {
+        return strtotime($a['date']) - strtotime($b['date']);
+    });
+    if ($fromDate && $toDate) {
+        $filteredOrders = [];
+        foreach ($expandedOrders as $expandedOrder) {
+            if ($expandedOrder['date'] >= $fromDate && $expandedOrder['date'] <= $toDate) {
+                $filteredOrders[] = $expandedOrder;
+            }
+        }
+        return response()->json(['orders' => $filteredOrders]);
+    }
+    return response()->json(['orders' => $expandedOrders]);
+}
 }
 
     
