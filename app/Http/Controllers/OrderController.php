@@ -2397,30 +2397,12 @@ public function OrderCallInsert(Request $request, $id)
         foreach ($orders as $order) {
             $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
             $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
-<<<<<<< Updated upstream
             $subWriterNames = [];
-=======
-            
-            $subWriterNames = [];
-
->>>>>>> Stashed changes
             foreach ($order->mulsubwriter as $mulsubwriter) {
                 if ($mulsubwriter->user !== null) {
                     $subWriterNames[] = $mulsubwriter->user->name;
                 }
             }
-<<<<<<< Updated upstream
-=======
-            
-            if ($order->writer !== null) {
-                $writerName2 = $order->writer->name;
-            } else {
-                $writerName2 = "";
-            }
-
-
-            // If start or end date is null or empty, set it to "Not Mentioned"
->>>>>>> Stashed changes
             if (!$startDate || !$endDate) {
                 $expandedOrder = [
                     'order_id' => $order->order_id,
