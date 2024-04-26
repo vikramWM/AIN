@@ -953,7 +953,12 @@ public function payment(Request $request, $id)
 
         if($SubWriter != '')
         {
-            $orders->where('swid', $SubWriter );
+            // $orders->where('swid', $SubWriter );
+            $multipleWriters = multipleswiter::where('user_id', $SubWriter)->get();
+                    
+            $orderIds = $multipleWriters->pluck('order_id')->toArray();
+            
+            $orders->whereIn('id', $orderIds); 
 
         }
 
@@ -1074,7 +1079,23 @@ public function payment(Request $request, $id)
                             </td> '
                             
                             : '') .'
+                            <td>';
 
+                            if ($order['writer'] && !$order['writer']['name'] == "") {
+                                if ($order->mulsubwriter) {
+                                    // Output email addresses
+                                    foreach ($order->mulsubwriter as $writer) {
+                                        $output .= $writer->user->name . '<br>';
+                                    }
+                                } else {
+                                    $output .= 'No writers found for this order.<br>';
+                                }
+                                $output .= '<span class="badge badge-light-info fs-7 fw-bold">(' . $order['writer']['name'] . ')</span>';
+                            } else {
+                                $output .= 'Not Assign';
+                            }
+            
+                            $output .= '</td>
                             
 
                             
