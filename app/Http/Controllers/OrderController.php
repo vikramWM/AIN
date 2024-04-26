@@ -2442,6 +2442,13 @@ public function OrderCallInsert(Request $request, $id)
             foreach ($order->mulsubwriter as $mulsubwriter) {
                 $subWriterNames[] = $mulsubwriter->user->name;
             }
+            if ($order->writer !== null) {
+                $writerName2 = $order->writer->name;
+            } else {
+                // Handle the case when $order->writer is null
+                // For example, you could set a default value for $writerName2
+                $writerName2 = "";
+            }
 
             // If start or end date is null or empty, set it to "Not Mentioned"
             if (!$startDate || !$endDate) {
@@ -2450,7 +2457,7 @@ public function OrderCallInsert(Request $request, $id)
                     'date' => 'Not Mentioned',
                     'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
                     'pages' => $order->pages ? $order->pages : 'Not Mentioned', // Check if pages is null or empty
-                    'writer_name' => $order->writer->name,
+                    'writer_name' => $writerName2,
                     'sub_writer_names' => implode(', ', $subWriterNames), 
                 ];
 
@@ -2472,7 +2479,7 @@ public function OrderCallInsert(Request $request, $id)
                     'date' => $date->toDateString(),
                     'title' => $title, // Use the title value set earlier
                     'pages' => $pages, // Use the pages value set earlier
-                    'writer_name' => $order->writer->name,
+                    'writer_name' => $writerName2,
                     'sub_writer_names' => implode(', ', $subWriterNames), 
                     
                 ];
@@ -2481,6 +2488,11 @@ public function OrderCallInsert(Request $request, $id)
                 $expandedOrders[] = $expandedOrder;
             }
         }
+            // Sort expanded orders by date in ascending order
+        usort($expandedOrders, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+
 
         if ($fromDate && $toDate) {
             
