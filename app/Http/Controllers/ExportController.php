@@ -380,23 +380,7 @@ class ExportController extends Controller
         // Fetch orders with applied filters and order by created_at in descending order
         $orders = $query->orderByDesc('created_at')->get();           
     
-        // // Fetch the name of the Writer associated with the TL ID
-        // $W_Name = '';
-        // $S_Name = '';
-        // if ($tlId !== "Not Assigned") {
-        //     $user = User::where('id', $tlId)->first();
-        //     if ($user) {
-        //         $W_Name = $user->name;
-        //     }
-        // }
-        // if ($swId !== "Not Assigned") {
-        //     $user = User::where('id', $swId)->first();
-        //     if ($user) {
-        //         $S_Name = $user->name;
-        //     }
-        // }
-        // Initialize an empty array to store the expanded orders
-        $expandedOrders = [];
+       $expandedOrders = [];
     
         // Iterate over each order
         foreach ($orders as $order) {
@@ -409,10 +393,16 @@ class ExportController extends Controller
 
             // Retrieve SubWriter names
             foreach ($order->mulsubwriter as $mulsubwriter) {
-                $subWriterNames[] = $mulsubwriter->user->name;
+                if ($mulsubwriter->user !== null) {
+                    $subWriterNames[] = $mulsubwriter->user->name;
+                }
             }
             // Retrieve Writer name
-            $writerName = $order->writer->name;
+            if ($order->writer->name) {
+                $writerName = $order->writer->name;
+            } else {
+                $writerName = "";
+            }
 
             // If start or end date is null or empty, set it to "Not Mentioned"
             if (!$startDate || !$endDate) {
@@ -451,7 +441,10 @@ class ExportController extends Controller
                 $expandedOrders[] = $expandedOrder;
             }
         }
-    
+        // Sort expanded orders by date in ascending order
+        usort($expandedOrders, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
         if ($fromDate && $toDate) {
             
             // Initialize an empty array to store filtered orders within the date range
