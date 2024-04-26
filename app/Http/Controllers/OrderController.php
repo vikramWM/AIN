@@ -2403,13 +2403,18 @@ public function OrderCallInsert(Request $request, $id)
                     $subWriterNames[] = $mulsubwriter->user->name;
                 }
             }
+            if ($order->writer !== null) {
+                $writerName2 = $order->writer->name;
+            } else {
+                $writerName2 = "";
+            }
             if (!$startDate || !$endDate) {
                 $expandedOrder = [
                     'order_id' => $order->order_id,
                     'date' => 'Not Mentioned',
                     'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
                     'pages' => $order->pages ? $order->pages : 'Not Mentioned', // Check if pages is null or empty
-                    'writer_name' => $order->writer->name,
+                    'writer_name' => $writerName2,
                     'sub_writer_names' => implode(', ', $subWriterNames), 
                 ];
 
@@ -2424,14 +2429,17 @@ public function OrderCallInsert(Request $request, $id)
                     'date' => $date->toDateString(),
                     'title' => $title, // Use the title value set earlier
                     'pages' => $pages, // Use the pages value set earlier
-                    'writer_name' => $order->writer->name,
+                    'writer_name' => $writerName2,
                     'sub_writer_names' => implode(', ', $subWriterNames), 
                     
                 ];
                 $expandedOrders[] = $expandedOrder;
             }
         }
-
+        // Sort expanded orders by date in ascending order
+        usort($expandedOrders, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
         if ($fromDate && $toDate) {
             $filteredOrders = [];
             foreach ($expandedOrders as $expandedOrder) {
