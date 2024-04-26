@@ -2399,7 +2399,9 @@ public function OrderCallInsert(Request $request, $id)
             $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
             $subWriterNames = [];
             foreach ($order->mulsubwriter as $mulsubwriter) {
-                $subWriterNames[] = $mulsubwriter->user->name;
+                if ($mulsubwriter->user !== null) {
+                    $subWriterNames[] = $mulsubwriter->user->name;
+                }
             }
             if (!$startDate || !$endDate) {
                 $expandedOrder = [
