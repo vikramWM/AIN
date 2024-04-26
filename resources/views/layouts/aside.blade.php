@@ -70,7 +70,7 @@
 													
 													@if(in_array($submenu->id, $submenuIds))
 														<div class="menu-item">
-															<a class="menu-link" href="{{ route( $submenu->routes ) }}">
+															<a class="menu-link" href="{{$submenu->routes}}">
 																<span class="menu-bullet">
 																	<span class="bullet bullet-dot"></span>
 																</span>
@@ -84,7 +84,7 @@
 									@else
 										<!-- Display as a regular menu item -->
 										<div class="menu-item">
-											<a class="menu-link active" href="{{ route($menu['routes']) }}">
+											<a class="menu-link active" href="{{$menu['routes']}}">
 												<span class="menu-icon">
 													<!--begin::Svg Icon | path: icons/duotune/general/gen025.svg-->
 													<li class="{{ $menu['icon_class'] }}"></li>

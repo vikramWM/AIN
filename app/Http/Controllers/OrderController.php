@@ -911,6 +911,10 @@ public function payment(Request $request, $id)
             {
                 $orders->where('admin_id',  8392 );
             }
+            elseif($writer == 'N/A')
+            {
+                $orders->whereNotNull("writer_name")->where('writer_name', '!=', '');
+            }
             else
             {
 
@@ -2357,72 +2361,46 @@ public function OrderCallInsert(Request $request, $id)
 
     public function orderWD2(Request $request)
     {
-        // Retrieve parameters from the request
         $tlId = $request->input('tlId');
         $swId = $request->input('swId');
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
         
-        // Check if all request parameters are not available
         if (!$tlId && !$swId && !$fromDate && !$toDate) {
-            // Return a response indicating that no parameters are available
             return response()->json(['message' => 'No parameters provided.'], 400);
         }
-        // Initialize the query builder
-        // $query = Order::query();
         $query = Order::query()->with('writer','mulsubwriter')->where('admin_id', '!=', 0);
-
-        // Check if tlId is "Not Assigned"
         if ($tlId === "Not Assigned") {
-            // Fetch orders where 'wid' is null or empty
             $query->where(function ($query) {
                 $query->whereNull('wid')
                     ->orWhere('wid', '');
             });
         } elseif ($tlId) {
-        
-            // Fetch orders for the selected TL
             $query->where('wid', $tlId);
         }
         if ($swId) {
-            // Fetch orders for the selected SW
             $multipleWriters = multipleswiter::where('user_id', $swId)->get();
-                    
             $orderIds = $multipleWriters->pluck('order_id')->toArray();
-            
             $query->whereIn('id', $orderIds);      
         }
 
-        // Apply date range filter if both from_date and to_date are provided
         if ($fromDate && $toDate) {
-            // $query->whereBetween('writer_fd', [$fromDate, $toDate]);
             $query->where(function ($query) use ($fromDate, $toDate) {
                 $query->whereBetween('writer_fd', [$fromDate, $toDate])
                     ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
             });
         }
 
-        // Fetch orders with applied filters and order by created_at in descending order
         $orders = $query->orderByDesc('created_at')->get();           
-
-        // Initialize an empty array to store the expanded orders
         $expandedOrders = [];
 
-        // Iterate over each order
         foreach ($orders as $order) {
-            // Parse the start and end dates, handling null, empty, or "0000-00-00" values
             $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
             $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
-            
-            // Initialize the variable to store SubWriter names
             $subWriterNames = [];
-
-            // Retrieve SubWriter names
             foreach ($order->mulsubwriter as $mulsubwriter) {
                 $subWriterNames[] = $mulsubwriter->user->name;
             }
-
-            // If start or end date is null or empty, set it to "Not Mentioned"
             if (!$startDate || !$endDate) {
                 $expandedOrder = [
                     'order_id' => $order->order_id,
@@ -2434,18 +2412,11 @@ public function OrderCallInsert(Request $request, $id)
                 ];
 
                 $expandedOrders[] = $expandedOrder;
-                continue; // Skip further processing for this order
+                continue; 
             }
-
-            // If title is null or empty, set it to "Not Mentioned"
             $title = $order->title ? $order->title : 'Not Mentioned';
-
-            // If pages is null or empty, set it to "Not Mentioned"
             $pages = $order->pages ? $order->pages : 'Not Mentioned';
-
-            // Generate records for each day within the date range
             for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
-                // Create a new record with the same order details but different date
                 $expandedOrder = [
                     'order_id' => $order->order_id,
                     'date' => $date->toDateString(),
@@ -2455,25 +2426,17 @@ public function OrderCallInsert(Request $request, $id)
                     'sub_writer_names' => implode(', ', $subWriterNames), 
                     
                 ];
-                
-                // Add the expanded order to the array
                 $expandedOrders[] = $expandedOrder;
             }
         }
 
         if ($fromDate && $toDate) {
-            
-            // Initialize an empty array to store filtered orders within the date range
             $filteredOrders = [];
-        
-            // Filter expanded orders based on the date range
             foreach ($expandedOrders as $expandedOrder) {
                 if ($expandedOrder['date'] >= $fromDate && $expandedOrder['date'] <= $toDate) {
                     $filteredOrders[] = $expandedOrder;
                 }
             }
-        
-            // Return the filtered orders as JSON response
             return response()->json(['orders' => $filteredOrders]);
         }
         return response()->json(['orders' => $expandedOrders]);

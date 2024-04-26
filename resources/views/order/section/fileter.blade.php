@@ -107,6 +107,7 @@
                 <div class="col-lg-3 fv-row fv-plugins-icon-container">
                     <select name="writer" id="writer" aria-label="Select a Timezone" data-control="select2" data-placeholder="Search By writer Name " class="form-select form-select-solid form-select-lg " data-select2-id="select2-data-16-79699" tabindex="-1" >
     					<option value="" data-select2-id="select2-data-18-e9lhs"></option>
+                        <option value="N/A">◘Not Assign</option>
                         @foreach($data['Team'] as $writer)
                         <option value="{{$writer->writer_name}}">{{$writer->writer_name}}</option>
                         @endforeach

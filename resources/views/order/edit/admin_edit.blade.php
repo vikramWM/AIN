@@ -13,10 +13,7 @@
 				</div>
 			</div>
 		</div>
-
-		
-
-		<div class="card card-xl-stretch  mb-xl-">
+			<div class="card card-xl-stretch  mb-xl-">
 			
 			<div class="card-body py-3">
 
@@ -47,7 +44,6 @@
 														<!-- Options will be dynamically populated using JavaScript -->
 													</select>
 												</div>
-
 													@foreach($data['ordersub'] as $subswriter)
 														<input type="hidden" value="{{$subswriter->user_id}}" class="swid">
 													@endforeach
@@ -90,12 +86,8 @@
 														// Initial population in case there's a TL selected on page load
 														populateSubwriters();
 													</script>
-
-
 												<div class="col-md-12 fv-row">
 													<select name="status" id="subwriter" class="form-select form-select-solid" placeholder="">
-													
-														
 														  <option value="Not Assigned" {{ $order->writer_status == 'Not Assigned' ? 'selected' : '' }}>Not Assigned</option>
                                                             <option value="In Progress" {{ $order->writer_status == 'In progress' ? 'selected' : '' }}>In Progress</option>
                                                             <option value="Draft Ready" {{ $order->writer_status == 'Draft Ready' ? 'selected' : '' }}>Draft Ready</option>
