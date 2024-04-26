@@ -55,7 +55,6 @@
 										<th class="min-w-40px">Amount</th>
 										<th class="min-w-40px">Received</th>
 										<th class="min-w-40px" >Due</th>
-										<th class="min-w-40px">Team</th>
 										<th class="min-w-40px">Writer_name</th>
 										<th class="min-w-150px text-center" >Actions</th>
 									</tr>
@@ -174,24 +173,6 @@
 												<span style="background-color: #f8f5ff;" class="badge badge-light-info fs-7 fw-bold">{{ \Carbon\Carbon::parse($order->writer_deadline)->format('d M Y') }}</span>	
 											@else
 												N/A
-											@endif
-										</td>
-										<td>
-											@if( $order['writer'] && !$order['writer']['name'] == "")
-												@if ($order->mulsubwriter)
-													{{-- Output email addresses --}}
-													@foreach ($order->mulsubwriter as $writer)
-														{{ $writer->user->name }} <br>
-													@endforeach
-												@else
-													No writers found for this order.
-												@endif
-												<br>
-													<span class="badge badge-light-info fs-7 fw-bold">({{
-												$order['writer']['name'] }})</span>
-
-											@else
-											Not Assign
 											@endif
 										</td>
 
