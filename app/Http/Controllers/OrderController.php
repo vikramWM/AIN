@@ -2135,6 +2135,7 @@ public function OrderCallInsert(Request $request, $id)
             $selectedDataTextBox = $request->input('selectedDataTextBox');
             $edited_on = $request->input('edited_on');
             $OldSubWriter = $request->input('OldSubWriter');
+            $QcExecutive = $request->input('QcExecutive');
 
             if ($fromDate != '' && $toDate != '') {
                 if ($edited_on == 'Order-date') {
@@ -2186,6 +2187,9 @@ public function OrderCallInsert(Request $request, $id)
              
             if ($OldSubWriter != '') {
                 $ordersQuery->where('swid',$OldSubWriter);
+            }
+            if ($QcExecutive != '') {
+                $ordersQuery->where('uid',$QcExecutive);
             }
             
             if ($admin != '') {

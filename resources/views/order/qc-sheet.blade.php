@@ -120,7 +120,14 @@
                                 </select>
                             </div>
                             @endif
-                            
+                            <div class="col-lg-3 fv-row fv-plugins-icon-container">
+                                <select name="QcExecutive"  aria-label="Qc Executive" data-control="select2" data-placeholder="Search By Qc Executive" class="form-select form-select-solid form-select-lg" tabindex="-1">
+                                    <option value=""></option>
+                                    @foreach($data['executive'] as $exec)
+                                        <option value="{{ $exec->id }}">{{ $exec->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                                
 
                             
