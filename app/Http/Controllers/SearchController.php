@@ -487,6 +487,17 @@ class SearchController extends Controller
     
         return response()->json(['success' => true]);
     }
+    public function updatePlag(Request $request ,$orderId)
+    {
+        $newScore = $request->input('newScore');
+
+        // Update the AI score in the database
+        $order = Order::find($orderId);
+        $order->plag_score = $newScore;
+        $order->save();
+    
+        return response()->json(['success' => true]);
+    }
     
     public function qcchecked($leadId)
     {

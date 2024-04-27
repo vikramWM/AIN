@@ -163,6 +163,7 @@
 										<th class="min-w-40px">Status</th>
 										<th class="min-w-40px">Quality standard</th>
 										<th class="min-w-40px" >Ai Score</th>
+										<th class="min-w-40px" >Plag Score</th>
 										<th class="min-w-40px">Writer </th>
 										<th class="min-w-150px text-center" >Comment</th>
 										<th class="min-w-150px text-center" >Action</th>
@@ -278,6 +279,11 @@
                                             <td id="ai-score" class="editable " data-order-id="{{ $order->id }}">
                                                 @if($order->ai_score != null)
                                                     {{ $order->ai_score }} %
+                                                @endif
+                                            </td>
+                                            <td id="plag-score" class="editable2 " data-order-id="{{ $order->id }}">
+                                                @if($order->plag_score != null)
+                                                    {{ $order->plag_score }} %
                                                 @endif
                                             </td>
 
@@ -679,6 +685,55 @@
                         },
                         error: function(xhr, status, error) {
                             Swal.fire('Error!', 'Failed to update AI Score.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('.editable2').click(function() {
+            var orderId = $(this).data('order-id');
+
+            Swal.fire({
+                title: 'Enter new Plag Score',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Ok',
+                showLoaderOnConfirm: true,
+                preConfirm: (value) => {
+                    if (!value) {
+                        Swal.showValidationMessage('Please enter a value');
+                    }
+                    return value;
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var newScore = result.value;
+                    var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+                    $.ajax({
+                        type: 'POST',
+                        url: '/update-plag-score/' + orderId,
+                        headers: {
+                            'X-CSRF-TOKEN': CSRF_TOKEN
+                        },
+                        data: {
+                            _token: CSRF_TOKEN,
+                            newScore: newScore
+                        },
+                        success: function(response) {
+                            // Update the value in the <td> element
+                            $('#plag-score[data-order-id="' + orderId + '"]').text(newScore + ' %');
+                            Swal.fire('Updated!', 'Plag Score has been updated.', 'success');
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire('Error!', 'Failed to update Plag Score.', 'error');
                         }
                     });
                 }

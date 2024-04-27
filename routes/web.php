@@ -689,6 +689,7 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
 
     
     Route::post('/update-ai-score/{orderId}', [SearchController::class, 'updateAi']);
+    Route::post('/update-plag-score/{orderId}', [SearchController::class, 'updatePlag']);
         Route::post('/qcchecked/{orderId}', [SearchController::class, 'qcchecked']);
 
 
