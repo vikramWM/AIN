@@ -353,7 +353,208 @@ class ExportController extends Controller
         ]);
     }
 
-    public function exportWD (Request $request)
+    // public function exportWD (Request $request)
+    // {
+    //     // Retrieve parameters from the request
+    //     $tlId = $request->input('writerTL');
+    //     $swId = $request->input('SubWriter');
+    //     $fromDate = $request->input('from_date');
+    //     $toDate = $request->input('to_date');
+    
+    //     // Check if all request parameters are not available
+    //     if (!$tlId && !$swId && !$fromDate && !$toDate) {
+    //         // Return a response indicating that no parameters are available
+    //         return response()->json(['message' => 'No parameters provided.'], 400);
+    //     }
+
+    //     // Initialize the query builder
+    //     // $query = Order::query();
+    //     $query = Order::query()->with('writer','mulsubwriter')->where('admin_id', '!=', 0);
+    
+    //     // Check if tlId is "Not Assigned"
+    //     if ($tlId === "Not Assigned") {
+    //         // Fetch orders where 'wid' is null or empty
+    //         $query->where(function ($query) {
+    //             $query->whereNull('wid')
+    //                   ->orWhere('wid', '');
+    //         });
+    //     } elseif ($tlId) {
+       
+    //         // Fetch orders for the selected TL
+    //         $query->where('wid', $tlId);
+    //     }
+    //     if ($swId) {
+    //         // Fetch orders for the selected SW
+    //         $multipleWriters = multipleswiter::where('user_id', $swId)->get();
+                    
+    //         $orderIds = $multipleWriters->pluck('order_id')->toArray();
+            
+    //         $query->whereIn('id', $orderIds); 
+    //     }
+    //     // Apply date range filter if both from_date and to_date are provided
+    //     if ($fromDate && $toDate) {
+    //         // $query->whereBetween('writer_fd', [$fromDate, $toDate]);
+    //         $query->where(function ($query) use ($fromDate, $toDate) {
+    //             $query->whereBetween('writer_fd', [$fromDate, $toDate])
+    //                   ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+    //         });
+    //     }
+    
+    //     // Fetch orders with applied filters and order by created_at in descending order
+    //     $orders = $query->orderByDesc('created_at')->get();           
+    
+    //    $expandedOrders = [];
+    
+    //     // Iterate over each order
+    //     foreach ($orders as $order) {
+    //         // Parse the start and end dates, handling null, empty, or "0000-00-00" values
+    //         $startDate = $order->writer_fd && $order->writer_fd !== '0000-00-00' ? Carbon::parse($order->writer_fd) : null;
+    //         $endDate = $order->writer_ud && $order->writer_ud !== '0000-00-00' ? Carbon::parse($order->writer_ud) : null;
+    
+    //         // Initialize the variable to store SubWriter names
+    //         $subWriterNames = [];
+
+    //         // Retrieve SubWriter names
+    //         foreach ($order->mulsubwriter as $mulsubwriter) {
+    //             if ($mulsubwriter->user !== null) {
+    //                 $subWriterNames[] = $mulsubwriter->user->name;
+    //             }
+    //         }
+    //         // Retrieve Writer name
+    //         if ($order->writer->name) {
+    //             $writerName = $order->writer->name;
+    //         } else {
+    //             $writerName = "";
+    //         }
+
+    //         // If start or end date is null or empty, set it to "Not Mentioned"
+    //         if (!$startDate || !$endDate) {
+    //             $expandedOrder = [
+    //                 'order_id' => $order->order_id,
+    //                 'date' => 'Not Mentioned',
+    //                 'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
+    //                 'pages' => $order->pages ? $order->pages : 'Not Mentioned', // Check if pages is null or empty
+    //                 'writer_name' => $writerName,
+    //                 'sub_writer_names' => implode(', ', $subWriterNames),  
+    //             ];
+    
+    //             $expandedOrders[] = $expandedOrder;
+    //             continue; // Skip further processing for this order
+    //         }
+    
+    //         // If title is null or empty, set it to "Not Mentioned"
+    //         $title = $order->title ? $order->title : 'Not Mentioned';
+    
+    //         // If pages is null or empty, set it to "Not Mentioned"
+    //         $pages = $order->pages ? $order->pages : 'Not Mentioned';
+    
+    //         // Generate records for each day within the date range
+    //         for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+    //             // Create a new record with the same order details but different date
+    //             $expandedOrder = [
+    //                 'order_id' => $order->order_id,
+    //                 'date' => $date->toDateString(),
+    //                 'title' => $title, // Use the title value set earlier
+    //                 'pages' => $pages, // Use the pages value set earlier
+    //                 'writer_name' => $writerName,
+    //                 'sub_writer_names' => implode(', ', $subWriterNames),  
+    //             ];
+                
+    //             // Add the expanded order to the array
+    //             $expandedOrders[] = $expandedOrder;
+    //         }
+    //     }
+    //     // Sort expanded orders by date in ascending order
+    //     usort($expandedOrders, function($a, $b) {
+    //         return strtotime($a['date']) - strtotime($b['date']);
+    //     });
+    //     if ($fromDate && $toDate) {
+            
+    //         // Initialize an empty array to store filtered orders within the date range
+    //         $filteredOrders = [];
+        
+    //         // Filter expanded orders based on the date range
+    //         foreach ($expandedOrders as $expandedOrder) {
+    //             if ($expandedOrder['date'] >= $fromDate && $expandedOrder['date'] <= $toDate) {
+    //                 $filteredOrders[] = $expandedOrder;
+    //             }
+    //         }
+        
+           
+    //         // Prepare CSV file content with headers
+    //         $csvData = 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
+
+    //         //  echo '<pre>'; print_r($filteredOrders) ; exit;
+            
+    //         // Generate CSV data
+    //         foreach ($filteredOrders as $order) {
+    //             // Enclose fields in double quotes to treat commas as a single block in Excel
+                
+                
+    //             $OrderCode = '"' . $order['order_id'] . '"';
+    //             $Date = '"' . $order['date'] . '"';
+    //             $Title = '"' . $order['title'] . '"';
+    //             $Word = '"' . $order['pages'] . '"';
+    //             $Writer = '"' . $order['writer_name'] . '"';
+    //             $SubWriter = '"' . $order['sub_writer_names'] . '"';
+                
+
+    //             $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
+    //         }
+
+    //         // Generate file name
+    //         $filename = 'Writer_orders_' . now()->format('YmdHis') . '.csv';
+
+    //         // Save CSV content to storage
+    //         Storage::disk('local')->put($filename, $csvData);
+
+    //         // Return the file path to the AJAX request
+    //         return response()->download(storage_path('app/' . $filename), $filename, [
+    //             'Content-Type' => 'text/csv',
+    //             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+    //         ]);
+    //     }  
+    //     // Check if both from_date and to_date are not available
+    //     if (!$fromDate && !$toDate) {
+    //         // Prepare CSV file content with headers
+    //         // $csvData = 'Order Code, Date, Title, Word' . PHP_EOL;
+    //         $csvData = 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
+
+            
+    //         // // Prepare CSV file content with headers including user name
+    //         // $csvData = 'Writer Name: ' . $userName . PHP_EOL; // Include user name in the header
+    //         // $csvData .= 'Order Code, Date, Title, Word' . PHP_EOL;
+
+    //         // Generate CSV data
+    //         foreach ($expandedOrders as $order) {
+    //             // Enclose fields in double quotes to treat commas as a single block in Excel
+    //             $OrderCode = '"' . $order['order_id'] . '"';
+    //             $Date = '"' . $order['date'] . '"';
+    //             $Title = '"' . $order['title'] . '"';
+    //             $Word = '"' . $order['pages'] . '"';
+    //             $Writer = '"' . $order['writer_name'] . '"';
+    //             $SubWriter = '"' . $order['sub_writer_names'] . '"';
+                
+
+    //             $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
+    //         }
+
+    //         // Generate file name
+    //         $filename = 'Writer_orders_' . now()->format('YmdHis') . '.csv';
+
+    //         // Save CSV content to storage
+    //         Storage::disk('local')->put($filename, $csvData);
+
+    //         // Return the file path to the AJAX request
+    //         return response()->download(storage_path('app/' . $filename), $filename, [
+    //             'Content-Type' => 'text/csv',
+    //             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+    //         ]);
+    //     }
+
+
+    // }
+    public function exportWD(Request $request)
     {
         // Retrieve parameters from the request
         $tlId = $request->input('writerTL');
@@ -366,44 +567,41 @@ class ExportController extends Controller
             // Return a response indicating that no parameters are available
             return response()->json(['message' => 'No parameters provided.'], 400);
         }
-
+    
         // Initialize the query builder
-        // $query = Order::query();
-        $query = Order::query()->with('writer','mulsubwriter')->where('admin_id', '!=', 0);
+        $query = Order::query()->with('writer', 'mulsubwriter')->where('admin_id', '!=', 0);
     
         // Check if tlId is "Not Assigned"
         if ($tlId === "Not Assigned") {
             // Fetch orders where 'wid' is null or empty
             $query->where(function ($query) {
                 $query->whereNull('wid')
-                      ->orWhere('wid', '');
+                    ->orWhere('wid', '');
             });
         } elseif ($tlId) {
-       
             // Fetch orders for the selected TL
             $query->where('wid', $tlId);
         }
         if ($swId) {
             // Fetch orders for the selected SW
             $multipleWriters = multipleswiter::where('user_id', $swId)->get();
-                    
             $orderIds = $multipleWriters->pluck('order_id')->toArray();
-            
-            $query->whereIn('id', $orderIds); 
+            $query->whereIn('id', $orderIds);
         }
         // Apply date range filter if both from_date and to_date are provided
         if ($fromDate && $toDate) {
-            // $query->whereBetween('writer_fd', [$fromDate, $toDate]);
             $query->where(function ($query) use ($fromDate, $toDate) {
                 $query->whereBetween('writer_fd', [$fromDate, $toDate])
-                      ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+                    ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
             });
         }
     
         // Fetch orders with applied filters and order by created_at in descending order
-        $orders = $query->orderByDesc('created_at')->get();           
+        $orders = $query->orderByDesc('created_at')->get();
     
-       $expandedOrders = [];
+        $expandedOrders = [];
+        $totalWordCount = 0; // Initialize total word count
+        $totalOrders = $orders->count(); // Count total number of orders
     
         // Iterate over each order
         foreach ($orders as $order) {
@@ -413,7 +611,7 @@ class ExportController extends Controller
     
             // Initialize the variable to store SubWriter names
             $subWriterNames = [];
-
+    
             // Retrieve SubWriter names
             foreach ($order->mulsubwriter as $mulsubwriter) {
                 if ($mulsubwriter->user !== null) {
@@ -421,12 +619,12 @@ class ExportController extends Controller
                 }
             }
             // Retrieve Writer name
-            if ($order->writer->name) {
+            if ($order->writer !== null) {
                 $writerName = $order->writer->name;
             } else {
                 $writerName = "";
             }
-
+    
             // If start or end date is null or empty, set it to "Not Mentioned"
             if (!$startDate || !$endDate) {
                 $expandedOrder = [
@@ -435,7 +633,7 @@ class ExportController extends Controller
                     'title' => $order->title ? $order->title : 'Not Mentioned', // Check if title is null or empty
                     'pages' => $order->pages ? $order->pages : 'Not Mentioned', // Check if pages is null or empty
                     'writer_name' => $writerName,
-                    'sub_writer_names' => implode(', ', $subWriterNames),  
+                    'sub_writer_names' => implode(', ', $subWriterNames),
                 ];
     
                 $expandedOrders[] = $expandedOrder;
@@ -448,6 +646,8 @@ class ExportController extends Controller
             // If pages is null or empty, set it to "Not Mentioned"
             $pages = $order->pages ? $order->pages : 'Not Mentioned';
     
+            $totalWordCount += is_numeric($pages) ? $pages : 0;
+    
             // Generate records for each day within the date range
             for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
                 // Create a new record with the same order details but different date
@@ -457,75 +657,66 @@ class ExportController extends Controller
                     'title' => $title, // Use the title value set earlier
                     'pages' => $pages, // Use the pages value set earlier
                     'writer_name' => $writerName,
-                    'sub_writer_names' => implode(', ', $subWriterNames),  
+                    'sub_writer_names' => implode(', ', $subWriterNames),
                 ];
-                
+    
                 // Add the expanded order to the array
                 $expandedOrders[] = $expandedOrder;
             }
         }
+    
         // Sort expanded orders by date in ascending order
-        usort($expandedOrders, function($a, $b) {
+        usort($expandedOrders, function ($a, $b) {
             return strtotime($a['date']) - strtotime($b['date']);
         });
+    
         if ($fromDate && $toDate) {
-            
             // Initialize an empty array to store filtered orders within the date range
             $filteredOrders = [];
-        
+    
             // Filter expanded orders based on the date range
             foreach ($expandedOrders as $expandedOrder) {
                 if ($expandedOrder['date'] >= $fromDate && $expandedOrder['date'] <= $toDate) {
                     $filteredOrders[] = $expandedOrder;
                 }
             }
-        
-           
+    
             // Prepare CSV file content with headers
-            $csvData = 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
-
-            //  echo '<pre>'; print_r($filteredOrders) ; exit;
-            
-            // Generate CSV data
+            $csvData = 'Total Orders,Total Word Count' . PHP_EOL;
+    
+            // Add the total orders and total word count in the first row
+            $csvData .= $totalOrders . ',' . $totalWordCount . PHP_EOL;
+    
+            // Add headers for order details
+            $csvData .= 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
+    
+            // Generate CSV data for each order
             foreach ($filteredOrders as $order) {
                 // Enclose fields in double quotes to treat commas as a single block in Excel
-                
-                
                 $OrderCode = '"' . $order['order_id'] . '"';
                 $Date = '"' . $order['date'] . '"';
                 $Title = '"' . $order['title'] . '"';
                 $Word = '"' . $order['pages'] . '"';
                 $Writer = '"' . $order['writer_name'] . '"';
                 $SubWriter = '"' . $order['sub_writer_names'] . '"';
-                
-
-                $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
+    
+                // Concatenate order details
+                $csvData .= $OrderCode . ',' . $Date . ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
             }
-
-            // Generate file name
-            $filename = 'Writer_orders_' . now()->format('YmdHis') . '.csv';
-
-            // Save CSV content to storage
-            Storage::disk('local')->put($filename, $csvData);
-
-            // Return the file path to the AJAX request
-            return response()->download(storage_path('app/' . $filename), $filename, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            ]);
-        }  
-        // Check if both from_date and to_date are not available
+        }
+    
+        // Prepare CSV file content with headers if both from_date and to_date are not available
         if (!$fromDate && !$toDate) {
             // Prepare CSV file content with headers
-            // $csvData = 'Order Code, Date, Title, Word' . PHP_EOL;
-            $csvData = 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
-
-            
-            // // Prepare CSV file content with headers including user name
-            // $csvData = 'Writer Name: ' . $userName . PHP_EOL; // Include user name in the header
-            // $csvData .= 'Order Code, Date, Title, Word' . PHP_EOL;
-
-            // Generate CSV data
+            $csvData = 'Total Orders,Total Word Count' . PHP_EOL;
+    
+            // Add the total orders and total word count in the first row
+            $csvData .= $totalOrders . ',' . $totalWordCount . PHP_EOL;
+    
+            // Add headers for order details
+            $csvData .= 'Order Code, Date, Title, Word, Writer, SubWriter' . PHP_EOL;
+    
+            // Generate CSV data for each order
             foreach ($expandedOrders as $order) {
                 // Enclose fields in double quotes to treat commas as a single block in Excel
                 $OrderCode = '"' . $order['order_id'] . '"';
@@ -534,27 +725,25 @@ class ExportController extends Controller
                 $Word = '"' . $order['pages'] . '"';
                 $Writer = '"' . $order['writer_name'] . '"';
                 $SubWriter = '"' . $order['sub_writer_names'] . '"';
-                
-
-                $csvData .= $OrderCode . ',' .$Date. ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
+    
+                // Concatenate order details
+                $csvData .= $OrderCode . ',' . $Date . ',' . $Title . ',' . $Word . ',' . $Writer . ',' . $SubWriter . PHP_EOL;
             }
-
-            // Generate file name
-            $filename = 'Writer_orders_' . now()->format('YmdHis') . '.csv';
-
-            // Save CSV content to storage
-            Storage::disk('local')->put($filename, $csvData);
-
-            // Return the file path to the AJAX request
-            return response()->download(storage_path('app/' . $filename), $filename, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            ]);
         }
-
-
+    
+        // Generate file name
+        $filename = 'Writer_orders_' . now()->format('YmdHis') . '.csv';
+    
+        // Save CSV content to storage
+        Storage::disk('local')->put($filename, $csvData);
+    
+        // Return the file path to the AJAX request
+        return response()->download(storage_path('app/' . $filename), $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
-
+    
 
 
 

@@ -152,7 +152,10 @@
 				<div class="card-body py-3">
 					<div class="card-header border-0 pt-5">
 						<h3 class="card-title align-items-start flex-column">
-							<span class="card-label fw-bolder fs-3 mb-1">Orders</span>
+							<span class="card-label fw-bolder fs-3 mb-1">Orders
+                                <span id="totalOrders" class="text-muted fs-4 fw-bold my-1 ms-1"></span>
+                                <span id="totalWords" class="text-muted fs-4 fw-bold my-1 ms-1"></span>
+                            </span>
 						</h3>
                         <a onclick="orderExport()" style="height: fit-content;" class="btn btn-sm btn-danger">Export</a>
 					</div>
@@ -251,6 +254,15 @@
                 success: function(response) {
                     var orders = response.orders;
                     var tbody = $('#ordersTableBody');
+                    var totalWords = response.total_word_count; // Total number of orders
+                    var totalOrders = response.total_orders; // Total number of orders
+                    
+                    var totalWordsSpan = $('#totalWords'); // Span element for total order count
+                    var totalOrdersSpan = $('#totalOrders'); // Span element for total order count
+
+                    // Update total order count in the header
+                    totalWordsSpan.text('Total Words: ' + totalWords);
+                    totalOrdersSpan.text('Total Orders: ' + totalOrders);
                     tbody.empty();
 
                     // Populate table with orders
