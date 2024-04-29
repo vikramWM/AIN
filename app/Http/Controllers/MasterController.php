@@ -191,13 +191,38 @@ class MasterController extends Controller
         return redirect()->back()->with('success', 'Paper Type deleted successfully'); 
     }
 
-    public function payments()
 
+    public function payments(Request $request)
     {
+        $OrderCode = $request->input('search');
+        $Paymentdate = $request->input('date');
+        $Uid = $request->input('uid');
+        
+        $query = Payment::with('order.user')->orderByDesc('id')->where('account_status', 1);
+
+        if ($OrderCode != '') {
+            $query->whereHas('order', function($subQuery) use ($OrderCode) {
+                $subQuery->where('order_id', $OrderCode);
+            });
+        }
+
+        if ($Paymentdate != '') {
+            // Format the payment date to match the stored format in the database
+            $formattedDate = date('l j F Y', strtotime($Paymentdate));
+            
+            // Use LIKE to match the formatted date
+            $query->where('payment_date', 'LIKE', '%' . $formattedDate . '%');
+        }
+
+        if ($Uid != '') {
+            $query->whereHas('order.user', function($subQuery) use ($Uid) {
+                $subQuery->where('id', $Uid);
+            });
+        }
+
         $data['order_code'] = Order::all();
         $data['payments_user'] = User::all();
-        $data['payments'] = Payment::with('order.user')->orderByDesc('id')->where('account_status', 1)->paginate(20);
-
+        $data['payments'] = $query->paginate(20);
         return view('master.payments', compact('data'));
     }
     public function updateStatus($paymentId, $isChecked)
