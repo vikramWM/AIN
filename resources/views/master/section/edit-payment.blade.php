@@ -14,7 +14,10 @@
             <div class="modal-body scroll-y px-10 px-lg-15 pt-0 pb-15">
                 <form id="kt_modal_new_target_form" class="form" method="POST" action="#">
                 @csrf
-                @method('PUT')
+                @method('POST')
+                    <input type="hidden" name="order_id" value="{{ $payment->order_id }}">
+                    <input type="hidden" name="payment_id" value="{{ $payment->id }}">
+
                     <div class="mb-13 text-center">
                         <h1 class="mb-3">Edit-Payment</h1>
                         <div class="text-muted fw-bold fs-5">{{ $payment->order->order_id }}</div>
@@ -23,19 +26,19 @@
                     <div class="row g-9 mb-8 text-start">
                         <div class="col-md-6 fv-row">
                             <label class=" fs-6 fw-bold mb-2">User Name</label>
-                        <input type="text" readonly  class="form-control form-control-solid" placeholder="" value="{{ $payment->order->user->name }}" name="user_name">
+                        <input type="text" readonly  class="form-control form-control-solid" placeholder="" value="{{ $payment->order->user->name }}">
                            
                         </div>
                         <div class="col-md-6 fv-row text-start">
                             <label class=" fs-6 fw-bold mb-2">mobile_no</label>
-                            <input type="text" readonly  class="form-control form-control-solid" placeholder="" value="" name="{{ $payment->order->user->mobile_no }}">
+                            <input type="text" readonly  class="form-control form-control-solid" placeholder="" value="{{ $payment->order->user->mobile_no }}">
                         </div>
                     </div>
                     <div class="row g-9 mb-8 text-start">
                         
                         <div class="col-md-12 fv-row text-start">
                             <label class=" fs-6 fw-bold mb-2">email</label>
-                            <input type="text" readonly  class=" text-center form-control form-control-solid" placeholder="" value="{{ $payment->order->user->email }}" name="mobile">
+                            <input type="text" readonly  class=" text-center form-control form-control-solid" placeholder="" value="{{ $payment->order->user->email }}">
                        
                         </div>
                     </div>
@@ -44,7 +47,7 @@
                     <div class="row g-9 mb-8 text-start">
                         <div class="col-md-6 fv-row text-start">
                             <label class="fs-6 fw-bold mb-2">Payment Date</label>
-                            <input type="date" class="form-control form-control-solid" placeholder="" value="{{$payment->payment_date  }}" name="date" onchange="showSelectedDate(this)">
+                            <input type="date" class="form-control form-control-solid" placeholder="" value="{{$payment->payment_date  }}" name="date" onchange="showSelectedDate(this)" readonly>
                         </div>
                         <div class="col-md-6 fv-row">
                             <label class=" fs-6 fw-bold mb-2">Amount</label>
@@ -61,7 +64,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" onclick="submitForm()" class="btn btn-primary">Submit</button>
                         
                     </div>
                 </form>
@@ -72,3 +75,29 @@
 </div>
 
 <!-- Add the following script at the end of the file -->
+<script>
+    // Function to handle form submission via AJAX
+    function submitForm() {
+        // Get the form data
+        var formData = new FormData(document.getElementById('kt_modal_new_target_form'));
+
+        // Send AJAX request
+        $.ajax({
+            url: "{{ route('update_payments') }}", // URL for the AJAX request
+            type: "POST", // HTTP method
+            data: formData, // Form data
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Handle success response
+                console.log(response);
+                // You can perform actions based on the response, such as showing a success message or redirecting the user
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error(xhr.responseText);
+                // You can display an error message or perform other actions based on the error
+            }
+        });
+    }
+</script>

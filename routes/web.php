@@ -614,6 +614,8 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
     Route::get('/status', [MasterController::class, 'status'])->name('status');
     Route::get('/Payments', [MasterController::class, 'Payments'])->name('Payments');
     Route::post('/update-payment-status/{paymentId}/{isChecked}', [MasterController::class, 'updateStatus']);
+    Route::post('/Payments', [MasterController::class, 'update_payments'])->name('update_payments');
+    Route::delete('/Payments/{id}', [MasterController::class, 'delete_payments'])->name('delete_payments');
 
 
     Route::get('/failedJobs', [MasterController::class, 'failedJobs'])->name('failedJobs');

@@ -195,7 +195,8 @@ class MasterController extends Controller
     public function payments(Request $request)
     {
         $OrderCode = $request->input('search');
-        $Paymentdate = $request->input('date');
+        $fromDate = $request->input('dateFrom');
+        $toDate = $request->input('dateTo');
         $Uid = $request->input('uid');
         
         $query = Payment::with('order.user')->orderByDesc('id')->where('account_status', 1);
@@ -205,13 +206,10 @@ class MasterController extends Controller
                 $subQuery->where('order_id', $OrderCode);
             });
         }
-
-        if ($Paymentdate != '') {
-            // Format the payment date to match the stored format in the database
-            $formattedDate = date('l j F Y', strtotime($Paymentdate));
-            
-            // Use LIKE to match the formatted date
-            $query->where('payment_date', 'LIKE', '%' . $formattedDate . '%');
+        if ($fromDate != '' && $toDate != '') {
+            $query->whereBetween('payment_date', [$fromDate, $toDate]);
+        } elseif ($fromDate != '') {
+            $query->whereDate('payment_date', $fromDate);
         }
 
         if ($Uid != '') {
@@ -223,7 +221,74 @@ class MasterController extends Controller
         $data['order_code'] = Order::all();
         $data['payments_user'] = User::all();
         $data['payments'] = $query->paginate(20);
+        // $data['payments'] = $query->orderBy('id', 'desc')->paginate(20);
+
         return view('master.payments', compact('data'));
+    }
+    public function update_payments(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            
+            'price' => 'required|numeric',
+            'message' => 'required|string',
+        ]);
+
+        // Retrieve the payment by its ID
+        $payment = Payment::find($request->payment_id);
+        //receive ammount
+        $payments = Payment::where('order_id', $request->order_id)->get();
+        $totalPaidAmount = $payments->sum('paid_amount');
+        $order = Order::find($request->order_id);
+        if (!$payment) {
+            return back()->with('error', 'Payment not found.');
+        }
+        if (!$order) {
+            return back()->with('error', 'Order not found.');
+        }
+
+        // Update the payment details
+        // $payment->payment_date = $request->date;
+        $payment->payment_date = date('Y-m-d H:i:s');
+
+        $payment->paid_amount = $request->price;
+        $payment->reference = $request->message;
+        
+        // Save the updated payment
+        $payment->save();
+        $order->received_amount = $totalPaidAmount;
+        $order->save();
+        // Redirect back with success message
+        return back()->with('success', 'Payment updated successfully.');
+    }
+    public function delete_payments(Request $request, $id)
+    {
+        try {
+            // Find the payment by ID
+            $payment = Payment::findOrFail($id);
+
+            // Get the order ID of the payment
+            $orderId = $payment->order_id;
+
+            // Delete the payment
+            $payment->delete();
+
+            // Get all payments related to the order
+            $payments = Payment::where('order_id', $orderId)->get();
+            
+            // Calculate the total paid amount for the order
+            $totalPaidAmount = $payments->sum('paid_amount');
+
+            // Find the order by ID
+            $order = Order::find($orderId);
+
+            // Update the received amount for the order
+            $order->received_amount = $totalPaidAmount;
+            $order->save();
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json(['message' => 'Failed to delete payment'], 500);
+        }
     }
     public function updateStatus($paymentId, $isChecked)
     {

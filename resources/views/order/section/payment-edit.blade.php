@@ -124,7 +124,7 @@
                             <div class="row">
                             <div class="mb-10 fv-plugins-icon-container col-6 text-start">
                                 <label class="form-label fw-bolder text-dark fs-6">Payment Date and Time</label>
-                                <input class="form-control form-control-solid" type="text" placeholder="" name="payment_date" autocomplete="off" value="{{ now()->format('l d F Y h:i A') }}" readonly>
+                                <input class="form-control form-control-solid" type="text" placeholder="" name="payment_date" autocomplete="off" value="{{ now()->format('Y-m-d') }}" readonly>
                                 <div class="fv-plugins-message-container invalid-feedback"></div>
                             </div>
 

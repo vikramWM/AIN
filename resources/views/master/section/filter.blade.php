@@ -91,7 +91,10 @@
                     });
                 </script>
 				<div class="col-md-3 fv-row">
-                    <input type="date" name="date" id="date" class="form-control form-control-solid" placeholder="Search By Date">
+                    <input type="date" name="dateFrom" id="" class="form-control form-control-solid" placeholder="Search By Date">
+                </div>
+				<div class="col-md-3 fv-row">
+                    <input type="date" name="dateTo" id="" class="form-control form-control-solid" placeholder="Search By Date">
                 </div>
     			
 				<div class="row">

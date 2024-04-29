@@ -65,7 +65,7 @@
                                         </td>
                                         <td  style="justify-content:center" class=" text-center icon-container my-auto d-flex">
                                             
-                                            <a href="#" id="" style="color:white" class="btn btn-icon btn-bg-danger btn-active-color-light btn-sm me-1 delete-link">
+                                            <a href="#" style="color:white" class="btn btn-icon btn-bg-danger btn-active-color-light btn-sm me-1 delete-link" id="delete-payment-{{$payment->id}}" onclick="deletePayment({{$payment->id}})">
                                                 <span class="svg-icon svg-icon-3">
                                                     <li class="fa fa-trash fa-lg"></li>
                                                 </span>
@@ -139,6 +139,53 @@
             
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Include SweetAlert library -->
+
+    <script>
+        function deletePayment(paymentId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will not be able to recover this payment!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // User confirmed deletion, send AJAX request
+                    $.ajax({
+                        url: '/Payments/' + paymentId,
+                        type: 'DELETE',
+                        headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                        success: function(response) {
+                            // Handle success
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: response.message,
+                                icon: 'success'
+                            });
+                            // Remove the deleted payment from the UI
+                            $('#delete-payment-' + paymentId).remove();
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle errors
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Failed to delete payment',
+                                icon: 'error'
+                            });
+                            console.error(xhr.responseText);
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+
 
 
 @endsection
