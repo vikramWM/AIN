@@ -601,6 +601,9 @@ class ExportController extends Controller
     
         $expandedOrders = [];
         $totalWordCount = 0; // Initialize total word count
+        $totalWordCount = $orders->reduce(function ($carry, $order) {
+            return $carry + (is_numeric($order->pages) ? $order->pages : 0);
+        }, 0); // Initialize total word count
         $totalOrders = $orders->count(); // Count total number of orders
     
         // Iterate over each order
@@ -646,7 +649,7 @@ class ExportController extends Controller
             // If pages is null or empty, set it to "Not Mentioned"
             $pages = $order->pages ? $order->pages : 'Not Mentioned';
     
-            $totalWordCount += is_numeric($pages) ? $pages : 0;
+            // $totalWordCount += is_numeric($pages) ? $pages : 0;
     
             // Generate records for each day within the date range
             for ($date = $startDate; $date->lte($endDate); $date->addDay()) {

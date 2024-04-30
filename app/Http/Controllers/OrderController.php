@@ -1717,7 +1717,15 @@ public function OrderCallInsert(Request $request, $id)
         if ($orders->isEmpty()) {
             return response()->json(['message' => 'No data found']);
         }
-    
+    // Calculate total order count
+    $totalOrderCount = $orders->count();
+
+    // Calculate total word count
+    // $totalWordCount = $orders->sum('pages');
+    $totalWordCount = $orders->reduce(function ($carry, $order) {
+        return $carry + (is_numeric($order->pages) ? $order->pages : 0);
+    }, 0);
+    // dd($totalOrderCount,$totalWordCount);
         $output = '';
         $index = 1;
     
@@ -1815,7 +1823,12 @@ public function OrderCallInsert(Request $request, $id)
                         </tr>';
         }
     
-        return response()->json($output);
+        // return response()->json($output);
+        return response()->json([
+            'output' => $output,
+            'totalWordCount' => $totalWordCount,
+            'totalOrderCount' => $totalOrderCount,
+        ]);
         }
     
 
@@ -2508,7 +2521,10 @@ public function orderWD2(Request $request)
 
     $orders = $query->orderByDesc('created_at')->get();           
     $expandedOrders = [];
-    $totalWordCount = 0; // Initialize total word count
+    $totalWordCount = 0;
+    $totalWordCount = $orders->reduce(function ($carry, $order) {
+        return $carry + (is_numeric($order->pages) ? $order->pages : 0);
+    }, 0); // Initialize total word count
     $totalOrders = $orders->count(); // Count total number of orders
 
     foreach ($orders as $order) {
@@ -2540,7 +2556,7 @@ public function orderWD2(Request $request)
         }
         $title = $order->title ? $order->title : 'Not Mentioned';
         $pages = $order->pages ? $order->pages : 'Not Mentioned';
-        $totalWordCount += is_numeric($pages) ? $pages : 0; // Add word count to total word count
+        
         for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
             $expandedOrder = [
                 'order_id' => $order->order_id,
