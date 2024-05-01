@@ -1788,10 +1788,13 @@ public function OrderCallInsert(Request $request, $id)
                        $subWriterNames = [];
 
                        foreach ($order->mulsubwriter as $writer) {
-                           if ($writer != '') {
-                               $subWriterNames[] = $writer->user->name;
-                           }
-                       }
+                        if ($writer !== null && $writer->user !== null) {
+                            if ($writer->user->name !== null) {
+                                    $subWriterNames[] = $writer->user->name;
+                                }
+                            }
+                        }
+
                        
                        if (empty($subWriterNames) && $order->subwriter != null && $order->subwriter->name != null) {
                            $output .= $order->subwriter->name; // Display if no sub-writer names are found and $order->subwriter->name is not null
