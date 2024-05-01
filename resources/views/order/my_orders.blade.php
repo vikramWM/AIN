@@ -72,7 +72,7 @@
 										</td>
 										<td class="text-center">
 											{{ $order->order_id }}
-											<span class="badge badge-light-danger fs-7 fw-bold ">{{$order->feedback_ticket}}</span>
+											
                                             @if($order->is_fail == 1)
 												<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>
 											@endif
@@ -144,6 +144,7 @@
                                             @elseif($order->projectstatus == 'Initiated')
 											<span class="badge badge-light-primary fs-7 fw-bold" style="background:pink; color:white">{{$order->projectstatus}}</span>
                                             @endif
+											<span class="badge badge-light-danger fs-7 fw-bold mt-1">{{$order->feedback_ticket}}</span>
 										</td>
 										<td style="width:50px">
 										@if($order->pages != '')

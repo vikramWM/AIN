@@ -1003,12 +1003,12 @@ public function payment(Request $request, $id)
         foreach ($orders as $order) {
             // Your existing code for creating the output string goes here
             // $output .= '<tr>
-            $output .= '<tr ' . ($order->user->feedback_issue == 1 ? 'style="color: green;"' : '') . '>
+            $output .= '<tr ' . (!is_null($order->user) && $order->user->feedback_issue == 1 ? 'style="color: green;"' : '') . '>
 
                             <td>' .  $index++. '</td>
                             <td>
                                 ' . $order->order_id . '
-                                ' . ($order->feedback_ticket != '' ? '<span class="badge badge-light-danger fs-7 fw-bold ">' . $order->feedback_ticket . '</span>' : '') . '
+                                
                                 ' . ($order->is_fail == 1 ? '<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>' : '') . '
                                 ' . ($order->services == 'First Class Work' ? '<span class="badge badge-light-info fs-7 fw-bold">First Class Work</span>' : '') . '
                                 ' . ($order->resit == 'on' ? '<span class="badge badge-light-danger fs-7 fw-bold">Resit</span>' : '') . '
@@ -1056,6 +1056,8 @@ public function payment(Request $request, $id)
                             '.($order->projectstatus ==  'Draft Ready' ? '<span class="badge badge-light-danger fs-7 fw-bold" style="background:#eaea00; color:black" >'.$order->projectstatus .'</span>' : '') .'
                             '.($order->projectstatus ==  'Draft Delivered' ? '<span class="badge badge-light-danger fs-7 fw-bold"  style="background:green; color:white" >'.$order->projectstatus .'</span>' : '') .'
                             '.($order->projectstatus ==  'Initiated' ? '<span class="badge badge-light-danger fs-7 fw-bold"  style="background:pink; color:white">'.$order->projectstatus .'</span>' : '') .'
+                            
+                            ' . ($order->feedback_ticket != '' ? '<span class="badge badge-light-danger fs-7 fw-bold mt-1">' . $order->feedback_ticket . '</span>' : '') . '
                             
                        </td>
 

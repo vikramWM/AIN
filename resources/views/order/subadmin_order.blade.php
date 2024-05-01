@@ -95,8 +95,9 @@
 										<th class="min-w-40px">Amount</th>
 										<th class="min-w-40px">Received</th>
 										<th class="min-w-40px" >Due</th>
-										<th class="min-w-40px" >writer </th>
-										<th class="min-w-100px text-center" >Action</th>
+										<th class="min-w-40px">Team</th>
+										<th class="min-w-40px">Writer_name</th>
+										<th class="min-w-150px text-center" >Action</th>
 									</tr>
 								</thead>
 								<tbody style="display:none" id="content" class="searchData">
@@ -110,7 +111,7 @@
 										</td>
 										<td class="text-center">
 											{{ $order->order_id }}
-											<span class="badge badge-light-danger fs-7 fw-bold ">{{$order->feedback_ticket}}</span>
+											
                                             @if($order->is_fail == 1)
 												<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>
 											@endif
@@ -180,6 +181,7 @@
                                             @elseif($order->projectstatus == 'Initiated')
 											<span class="badge badge-light-primary fs-7 fw-bold" style="background:pink; color:white">{{$order->projectstatus}}</span>
                                             @endif
+											<span class="badge badge-light-danger fs-7 fw-bold mt-1">{{$order->feedback_ticket}}</span>
 										</td>
 										<td style="width:50px">
 										@if($order->pages != '')
@@ -198,14 +200,38 @@
 											@if(is_numeric($order->amount) && is_numeric($order->received_amount))
 												{{ $order->amount - $order->received_amount }} £
 											@else
-												<!-- Handle the case where one or both values are non-numeric -->
+												
 												N/A
 											@endif
 										</td>
+										
 										<td style="width:50px">
-                                           {{$order->writer_name }} 
-                                        </td>
+											@if($order->writer_name != null)
+												{{ $order->writer_name }}
+												<br>
+												<span style="background-color: #f8f5ff;" class="badge badge-light-info fs-7 fw-bold">{{ \Carbon\Carbon::parse($order->writer_deadline)->format('d M Y') }}</span>	
+											@else
+												N/A
+											@endif
+										</td>
+										<td>
+											@if( $order['writer'] && !$order['writer']['name'] == "")
+												@if ($order->mulsubwriter)
+													{{-- Output email addresses --}}
+													@foreach ($order->mulsubwriter as $writer)
+														{{ $writer->user->name }} <br>
+													@endforeach
+												@else
+													No writers found for this order.
+												@endif
+												<br>
+													<span class="badge badge-light-info fs-7 fw-bold">({{
+												$order['writer']['name'] }})</span>
 
+											@else
+											Not Assign
+											@endif
+										</td>
 										
 
 
