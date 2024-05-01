@@ -180,6 +180,8 @@
 											<span class="badge badge-light-primary fs-7 fw-bold" style="background:green; color:white">{{$order->projectstatus}}</span>
                                             @elseif($order->projectstatus == 'Initiated')
 											<span class="badge badge-light-primary fs-7 fw-bold" style="background:pink; color:white">{{$order->projectstatus}}</span>
+											@elseif($order->projectstatus == 'Advance Assignment')
+											<span class="badge badge-light-danger fs-7 fw-bold" style="background:#44f2e4; color:black">{{$order->projectstatus}}</span>
                                             @endif
 											<span class="badge badge-light-danger fs-7 fw-bold mt-1">{{$order->feedback_ticket}}</span>
 										</td>
