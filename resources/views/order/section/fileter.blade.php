@@ -198,6 +198,7 @@
                         <option value=""></option>
                         <option value="writer_deadline">Writer Deadline</option>
                         <option value="delivery_date">Delivery Date</option>
+                        <option value="draft_date">Draft Date</option>
                     </select>
                 </div>
                 <div class="col-md-3 fv-row">
