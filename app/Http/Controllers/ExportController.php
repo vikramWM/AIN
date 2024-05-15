@@ -109,9 +109,20 @@ class ExportController extends Controller
 
         // Get filtered orders
         $filteredOrders = $orders->orderBy('id', 'desc')->get();
+        $totalWordCount = 0; // Initialize total word count
+        $totalWordCount = $filteredOrders->reduce(function ($carry, $order) {
+            return $carry + (is_numeric($order->pages) ? $order->pages : 0);
+        }, 0); // Initialize total word count
+        $totalOrders = $filteredOrders->count(); // Count total number of orders
 
+        
+        // Prepare CSV file content with headers
+        $csvData = 'Total Orders,Total Word Count' . PHP_EOL;
+    
+        // Add the total orders and total word count in the first row
+        $csvData .= $totalOrders . ',' . $totalWordCount . PHP_EOL;
         // Prepare CSV file content
-        $csvData = 'Order Code,User Name,User Email,Mobile,Order Date,Pages,Title,Delivery Date,Delivery Time,Amount,Team,Writer Name,SubWriter,Writer Deadline,Chapter,Draft Date,Draft Time' . PHP_EOL;
+        $csvData .= 'Order Code,User Name,User Email,Mobile,Order Date,Pages,Title,Delivery Date,Delivery Time,Amount,Team,Writer Name,SubWriter,Writer Deadline,Chapter,Draft Date,Draft Time' . PHP_EOL;
         foreach ($filteredOrders as $order) {
              // Initialize the variable to store SubWriter names
              $subWriterNames = [];

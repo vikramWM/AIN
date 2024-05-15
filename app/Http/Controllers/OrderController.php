@@ -167,7 +167,14 @@ class OrderController extends Controller
             'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
             'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
         ];
-    
+        $totalOrders = $ordersQuery->count();
+        $totalWordCount = 0;
+
+        foreach ($ordersQuery->get() as $order) {
+            if (is_numeric($order->pages)) {
+                $totalWordCount += $order->pages;
+            }
+        }
         if ($request->input('search') || $request->input('status') || $request->input('writer') || $request->input('writerTL') || $request->input('uid') || $request->input('date_status') || $request->input('from_date') || $request->input('to_date') || $request->input('SubWriter') || $request->input('college') || $request->input('extra') || $request->input('secondary_mobile')) {
             $data['orders'] = $ordersQuery->orderByDesc('id')->get();
         } else {
@@ -175,11 +182,11 @@ class OrderController extends Controller
             $page = $request->input('page') ?? 1;
             $ordersQuery->offset(($page - 1) * $perPage)->limit($perPage);
     
-            $totalOrders = $ordersQuery->count();
             $totalPages = ceil($totalOrders / $perPage);
     
             $data['orders'] = $ordersQuery->orderByDesc('id')->get();
             $data['totalOrders'] = $totalOrders;
+            $data['totalWordCount'] = $totalWordCount;
             $data['totalPages'] = $totalPages;
         }
         
@@ -996,7 +1003,15 @@ public function payment(Request $request, $id)
         if ($orders->isEmpty()) {
             return response()->json(['message' => 'No data found']);
         }
-    
+    // Calculate total order count
+    $totalOrderCount = $orders->count();
+
+    // Calculate total word count
+    // $totalWordCount = $orders->sum('pages');
+    $totalWordCount = $orders->reduce(function ($carry, $order) {
+        return $carry + (is_numeric($order->pages) ? $order->pages : 0);
+    }, 0);
+    // dd($totalOrderCount,$totalWordCount);
         $output = '';
         $index = 1;
     
@@ -1170,7 +1185,13 @@ public function payment(Request $request, $id)
                         </tr>';
         }
     
-        return response()->json($output);
+        // return response()->json($output);
+        // return response()->json($output);
+        return response()->json([
+            'output' => $output,
+            'totalWordCount' => $totalWordCount,
+            'totalOrderCount' => $totalOrderCount,
+        ]);
     }
     
     public function fetchSubWriters(Request $request)

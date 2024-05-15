@@ -319,8 +319,17 @@
                     'secondary_mobile': $secondaryMobile
                 },
                 success: function (data) {
-                    console.log(data);
-                    $('#content').html(data);
+                    // console.log(data);
+                    // $('#content').html(data);
+                    $('#content').html(data.output);
+
+                    // Access the totalWordCount and totalOrderCount from the data object
+                    var totalWordCount = data.totalWordCount != undefined ? data.totalWordCount : 0;
+                    var totalOrderCount = data.totalOrderCount != undefined ? data.totalOrderCount : 0;
+
+                    // Update the text content of elements with the counts
+                    $('#orderCount').text('Orders: ' + totalOrderCount);
+                    $('#wordCount').text('Words: ' + totalWordCount);
                 },
                 error: function (data) {
                     console.log('Error:', data);
