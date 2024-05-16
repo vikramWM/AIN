@@ -177,7 +177,7 @@
                 },
                 success: function (data) {
                     console.log(data);
-                    $('#content').html(data);
+                    $('#content').html(data.output);
                 },
                 error: function (data) {
                     console.log('Error:', data);
