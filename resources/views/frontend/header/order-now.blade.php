@@ -278,6 +278,7 @@
 							<div class="policy_agree">
 								<input type="checkbox" required="">&nbsp;I agree with Privacy Policy and Terms &amp; Conditions (Recommended) 
 							</div>
+							<div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
 							<div class="form-group col-md-12">
 								<button class="theme-btn btn-style-five" type="submit" >Let's Start</button>
 							</div>
@@ -289,6 +290,24 @@
 			
 			
 		</div>
+		<script>
+			document.getElementById('orderForm').addEventListener('submit', function(event) {
+				event.preventDefault(); // Prevent the form from submitting
+
+				var recaptchaResponse = grecaptcha.getResponse();
+				if (!recaptchaResponse) {
+					Swal.fire({
+						icon: 'error',
+						title: 'Oops...',
+						text: 'Please complete the reCAPTCHA.',
+					});
+					return false; // Prevent form submission
+				}
+
+				// If reCAPTCHA is completed, allow form submission
+				this.submit();
+			});
+		</script>
 	</section>
 	<section class="courses-section-three">
 		<div class="auto-container">
