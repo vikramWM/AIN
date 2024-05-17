@@ -48,6 +48,17 @@
 		margin-right: 5px;
 	}
 </style>
+<style>
+	.testimonial-block-four .video {
+		margin-top: 15px;
+	}
+
+	.testimonial-block-four .video video {
+		width: 80%;
+		height: 250px;
+		border-radius: 15px;
+	}
+</style>
 <section class="banner-section-four">
 	<div class="icon-layer-one" style="background-image:url(images2/icons/icon-11.png)"></div>
 	<div class="icon-layer-two" style="background-image:url(images2/icons/icon-3.png)"></div>
@@ -474,6 +485,97 @@
 		</div>
 	</div>
 </section>
+
+<!-- Testimonial Section Four -->
+<section class="testimonial-section-four">
+	<div class="top-pattern-layer" style="background-image:url(images2/background/pattern-20.png)"></div>
+	<div class="bottom-pattern-layer" style="background-image:url(images2/background/pattern-20.png)"></div>
+	<div class="icon-layer-one" style="background-image:url(images2/icons/icon-22.png)"></div>
+	<div class="icon-layer-two" style="background-image:url(images2/icons/icon-22.png)"></div>
+	<div class="auto-container">
+		<div class="sec-title-two centered">
+			<div class="title">Testimonial</div>
+			<h2>See what our customers say</h2>
+		</div>
+		<div class="inner-container">
+			<div class="circle-pattern-layer-one" style="background-image:url(images2/background/pattern-22.png)"></div>
+			<div class="circle-pattern-layer-two" style="background-image:url(images2/background/pattern-22.png)"></div>
+			<div class="hm4-testimonial-carousel owl-carousel owl-theme">
+
+				<!-- Testimonial Block Four with Video -->
+				<div class="testimonial-block-four">
+					<div class="video">
+						<video controls>
+							<source src="{{ asset('videos/video1.mp4') }}" type="video/mp4">
+							Your browser does not support the video tag.
+						</video>
+					</div>
+
+				</div>
+
+				<!-- Additional testimonial block with video -->
+				<div class="testimonial-block-four">
+					<div class="video">
+						<video controls>
+							<source src="{{ asset('videos/video2.mp4') }}" type="video/mp4">
+							Your browser does not support the video tag.
+						</video>
+					</div>
+
+				</div>
+
+				<!-- Third testimonial block with video -->
+				<div class="testimonial-block-four">
+					<div class="video">
+						<video controls>
+							<source src="{{ asset('videos/video3.mp4') }}" type="video/mp4">
+							Your browser does not support the video tag.
+						</video>
+					</div>
+
+				</div>
+
+				<!-- Fourth testimonial block with video -->
+				<div class="testimonial-block-four">
+					<div class="video">
+						<video controls>
+							<source src="{{ asset('videos/video4.mp4') }}" type="video/mp4">
+							Your browser does not support the video tag.
+						</video>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</section>
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const owlCarousel = $('.hm4-testimonial-carousel').owlCarousel({
+			// Your owlCarousel settings here
+			items: 1,
+			loop: true,
+			autoplay: true,
+			autoplayTimeout: 5000,
+			autoplayHoverPause: true
+		});
+
+		const videos = document.querySelectorAll('.testimonial-block-four video');
+
+		videos.forEach(video => {
+			video.addEventListener('play', () => {
+				owlCarousel.trigger('stop.owl.autoplay');
+			});
+			video.addEventListener('pause', () => {
+				owlCarousel.trigger('play.owl.autoplay');
+			});
+			video.addEventListener('ended', () => {
+				owlCarousel.trigger('play.owl.autoplay');
+			});
+		});
+	});
+</script>
+<!-- End Testimonial Section Four -->
 
 <section class="news-section-two">
 	<div class="icon-layer-one" style="background-image:url(images2/icons/icon-8.png)"></div>
