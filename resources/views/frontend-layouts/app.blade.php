@@ -195,5 +195,24 @@
         });
     </script>
     <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('orderForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please complete the reCAPTCHA.',
+                });
+                return false;
+            }
+
+            // If reCAPTCHA is completed, allow form submission
+            this.submit();
+        });
+    </script>
 </body>
 </html>

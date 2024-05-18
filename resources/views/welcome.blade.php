@@ -166,24 +166,7 @@
 			</div>
 		</div>
 	</div>
-	<script>
-		document.getElementById('orderForm').addEventListener('submit', function(event) {
-			event.preventDefault(); // Prevent the form from submitting
 
-			var recaptchaResponse = grecaptcha.getResponse();
-			if (!recaptchaResponse) {
-				Swal.fire({
-					icon: 'error',
-					title: 'Oops...',
-					text: 'Please complete the reCAPTCHA.',
-				});
-				return false; // Prevent form submission
-			}
-
-			// If reCAPTCHA is completed, allow form submission
-			this.submit();
-		});
-	</script>
 </section>
 
 <style>

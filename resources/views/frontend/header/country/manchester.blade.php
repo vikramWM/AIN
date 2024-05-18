@@ -130,7 +130,7 @@
 								<div class="policy_agree">
 									<input type="checkbox" required="">&nbsp;I agree with Privacy Policy and Terms &amp; Conditions (Recommended) 
 								</div>
-
+								<div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>						
 								<div class="form-group col-md-12">
 									<button class="theme-btn btn-style-five" type="submit">Place Order</button>
 								</div>
