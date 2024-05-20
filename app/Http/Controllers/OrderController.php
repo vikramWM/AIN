@@ -2622,6 +2622,77 @@ public function orderWD2(Request $request)
 
 //-----------------------------------------------------------------
 
+    public function writerAvailable()
+    {
+        $data = [
+            'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
+            'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
+            'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
+            
+        ];
+
+        return view('order.writerAvailable', compact('data'));
+    }
+    public function writerAvailable2(Request $request)
+    {
+        // Get the start and end date of the current month
+        $fromDate = Carbon::now()->startOfMonth()->toDateString();
+        $toDate = Carbon::now()->endOfMonth()->endOfDay()->toDateString();
+
+        // Override if the dates are provided in the request
+        if ($request->has('from_date') && $request->has('to_date')) {
+            $fromDate = $request->from_date;
+            $toDate = $request->to_date;
+        }
+
+        // Check if the start and end dates are the same
+        if ($fromDate === $toDate) {
+            $toDate = Carbon::parse($toDate)->addDay()->toDateString(); // Add one day to the end date
+        }
+
+        // Default data
+        $data = [
+            'availableDates' => [],
+        ];
+
+        // Check if tlId is provided in the request
+        if ($request->has('tlId')) {
+            $tlId = $request->tlId;
+
+            // Get orders for the specified writer within the date range
+            $orders = Order::where('wid', $tlId)
+                ->where(function ($query) use ($fromDate, $toDate) {
+                    $query->whereBetween('writer_fd', [$fromDate, $toDate])
+                        ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+                })
+                ->get();
+
+            // Collect all occupied dates from the orders
+            $occupiedDates = collect();
+            foreach ($orders as $order) {
+                $occupiedDates = $occupiedDates->merge(Carbon::parse($order->writer_fd)->range($order->writer_ud)->days()->toArray());
+            }
+
+            // Generate available dates within the specified date range
+            $availableDates = collect(Carbon::parse($fromDate)->range($toDate)->days()->toArray())
+                ->diff($occupiedDates)
+                ->values()
+                ->all();
+
+            // Convert Carbon objects to date strings
+            $availableDates = array_map(function ($date) {
+                return $date->toDateString();
+            }, $availableDates);
+
+            // Assign available dates to data array
+            $data['availableDates'] = $availableDates;
+        }
+
+        return response()->json(['data' => $data]);
+        
+    }
+
+
 }
 
     

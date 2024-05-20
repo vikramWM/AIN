@@ -21,6 +21,9 @@ use App\Http\Controllers\CallController;
 use Carbon\Carbon;
 use App\Http\Controllers\ExportController;
 
+Route::get('/writer-available', [OrderController::class, 'writerAvailable'])->name('writer.available');
+Route::post('/writer-available', [OrderController::class, 'writerAvailable2'])->name('writer.available2');
+
 Route::get('/export', [ExportController::class, 'export'])->name('export.orders');
 Route::get('/export-leads', [ExportController::class, 'exportLeads'])->name('export.leads');
 Route::get('/export-users', [ExportController::class, 'exportUsers'])->name('export.users');
