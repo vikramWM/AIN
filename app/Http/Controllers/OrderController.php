@@ -652,6 +652,7 @@ public function payment(Request $request, $id)
             $order->received_amount = $req->input('r_amount');
             $order->delivery_time = $req->input('delivery_time');
             $order->pages = $req->input('word');
+            $order->writer_deadline_time = $req->input('writer_deadline_time');
 
             if( $req->input('status') == 'Completed')
             {
@@ -813,6 +814,7 @@ public function payment(Request $request, $id)
             $order->title = $req->input('title');
             $order->order_date = $req->input('order_date');
             $order->writer_deadline = $req->input('writer_deadline');
+            $order->writer_deadline_time = $req->input('writer_deadline_time');
             $order->delivery_date = $req->input('delivery_date');
             
             $order->delivery_time = $req->input('delivery_time');
@@ -2621,6 +2623,60 @@ public function orderWD2(Request $request)
 }
 
 //-----------------------------------------------------------------
+// public function writerAvailable()
+// {
+//     $today = Carbon::today()->toDateString();
+    
+//     $admins = User::where('role_id', 8)->where('flag', 0)->get();
+//     $writerTLs = User::where('role_id', 6)->where('flag', 0)->get();
+//     $subWriters = User::where('role_id', 7)->where('flag', 0)->get();
+
+   
+
+//     foreach ($writerTLs as $writerTL) {
+//         $writerTL->isAvailableToday = $this->isUserAvailableToday($writerTL->id, $today);
+//     }
+
+//     foreach ($subWriters as $subWriter) {
+//         $subWriter->isAvailableToday = $this->isUserAvailableToday($subWriter->id, $today);
+//     }
+
+//     $data = [
+//         'admin2' => $admins,
+//         'writerTL2' => $writerTLs,
+//         'subWriter2' => $subWriters,
+//         'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
+//         'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
+//         'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
+//     ];
+
+//     return view('order.writerAvailable', compact('data'));
+// }
+
+// private function isUserAvailableToday($userId, $today)
+// {
+//     // Check if user is assigned to any order today
+//     $orderCount = Order::where('admin_id', '!=', 0)
+//         ->where(function($query) use ($userId, $today) {
+//             $query->where('wid', $userId)
+//                   ->where(function($query) use ($today) {
+//                       $query->where('writer_fd', '<=', $today)
+//                             ->where('writer_ud', '>=', $today);
+//                   });
+//         })
+//         ->orWhere(function($query) use ($userId, $today) {
+//             $query->whereHas('mulsubwriter', function($subQuery) use ($userId, $today) {
+//                 $subQuery->where('user_id', $userId);
+//             })
+//             ->where(function($query) use ($today) {
+//                 $query->where('writer_fd', '<=', $today)
+//                       ->where('writer_ud', '>=', $today);
+//             });
+//         })
+//         ->count();
+
+//     return $orderCount === 0; // If no orders are found, the user is available today
+// }
 
     public function writerAvailable()
     {
@@ -2635,6 +2691,8 @@ public function orderWD2(Request $request)
     }
     public function writerAvailable2(Request $request)
     {
+        $tlId = $request->tlId;
+        $swId = $request->swId;
         // Get the start and end date of the current month
         $fromDate = Carbon::now()->startOfMonth()->toDateString();
         $toDate = Carbon::now()->endOfMonth()->endOfDay()->toDateString();
@@ -2655,12 +2713,13 @@ public function orderWD2(Request $request)
             'availableDates' => [],
         ];
 
-        // Check if tlId is provided in the request
-        if ($request->has('tlId')) {
-            $tlId = $request->tlId;
+        $query = Order::query()->with('writer','mulsubwriter')->where('admin_id', '!=', 0);
 
+        // Check if tlId is provided 
+        if ($tlId && !$swId ) {
+            
             // Get orders for the specified writer within the date range
-            $orders = Order::where('wid', $tlId)
+            $orders = $query->where('wid', $tlId)
                 ->where(function ($query) use ($fromDate, $toDate) {
                     $query->whereBetween('writer_fd', [$fromDate, $toDate])
                         ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
@@ -2686,9 +2745,113 @@ public function orderWD2(Request $request)
 
             // Assign available dates to data array
             $data['availableDates'] = $availableDates;
+            return response()->json(['data' => $data]);
         }
 
-        return response()->json(['data' => $data]);
+        
+        // Check if swId is provided 
+        if ($swId) {            
+            $multipleWriters = multipleswiter::where('user_id', $swId)->get();
+            $orderIds = $multipleWriters->pluck('order_id')->toArray();
+                          
+            // Get orders for the specified writer within the date range
+            $orders = $query->whereIn('id', $orderIds)
+                ->where(function ($query) use ($fromDate, $toDate) {
+                    $query->whereBetween('writer_fd', [$fromDate, $toDate])
+                        ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+                })
+                ->get();
+
+            // Collect all occupied dates from the orders
+            $occupiedDates = collect();
+            foreach ($orders as $order) {
+                $occupiedDates = $occupiedDates->merge(Carbon::parse($order->writer_fd)->range($order->writer_ud)->days()->toArray());
+            }
+
+            // Generate available dates within the specified date range
+            $availableDates = collect(Carbon::parse($fromDate)->range($toDate)->days()->toArray())
+                ->diff($occupiedDates)
+                ->values()
+                ->all();
+
+            // Convert Carbon objects to date strings
+            $availableDates = array_map(function ($date) {
+                return $date->toDateString();
+            }, $availableDates);
+
+            // Assign available dates to data array
+            $data['availableDates'] = $availableDates;
+            return response()->json(['data' => $data]);
+        }
+
+        //  // If no tlId and swId are provided, get available dates for all writers and subwriters
+        // if (!$tlId && !$swId) {
+        //     $writers = User::where('role_id', 6)->where('flag', 0)->get();
+        //     $subWriters = User::where('role_id', 7)->where('flag', 0)->get();
+
+        //     $availableData = collect();
+
+        //     foreach ($writers as $writer) {
+        //         $orders = $query->where('wid', $writer->id)
+        //             ->where(function ($query) use ($fromDate, $toDate) {
+        //                 $query->whereBetween('writer_fd', [$fromDate, $toDate])
+        //                     ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+        //             })
+        //             ->get();
+
+        //         $occupiedDates = collect();
+        //         foreach ($orders as $order) {
+        //             $occupiedDates = $occupiedDates->merge(Carbon::parse($order->writer_fd)->daysUntil($order->writer_ud)->toArray());
+        //         }
+
+        //         $availableDates = collect(Carbon::parse($fromDate)->daysUntil($toDate)->toArray())
+        //             ->diff($occupiedDates)
+        //             ->values()
+        //             ->all();
+
+        //         foreach ($availableDates as $date) {
+        //             $availableData->push([
+        //                 'date' => $date->toDateString(),
+        //                 'writer_name' => $writer->name,
+        //                 'subwriter_name' => null,
+        //             ]);
+        //         }
+        //     }
+
+        //     foreach ($subWriters as $subWriter) {
+        //         $multipleWriters = multipleswiter::where('user_id', $subWriter->id)->get();
+        //         $orderIds = $multipleWriters->pluck('order_id')->toArray();
+
+        //         $orders = $query->whereIn('id', $orderIds)
+        //             ->where(function ($query) use ($fromDate, $toDate) {
+        //                 $query->whereBetween('writer_fd', [$fromDate, $toDate])
+        //                     ->orWhereBetween('writer_ud', [$fromDate, $toDate]);
+        //             })
+        //             ->get();
+
+        //         $occupiedDates = collect();
+        //         foreach ($orders as $order) {
+        //             $occupiedDates = $occupiedDates->merge(Carbon::parse($order->writer_fd)->daysUntil($order->writer_ud)->toArray());
+        //         }
+
+        //         $availableDates = collect(Carbon::parse($fromDate)->daysUntil($toDate)->toArray())
+        //             ->diff($occupiedDates)
+        //             ->values()
+        //             ->all();
+
+        //         foreach ($availableDates as $date) {
+        //             $availableData->push([
+        //                 'date' => $date->toDateString(),
+        //                 'writer_name' => null,
+        //                 'subwriter_name' => $subWriter->name,
+        //             ]);
+        //         }
+        //     }
+
+        //     $data['availableDates'] = $availableData;
+
+        //     return response()->json(['data' => $data]);
+        // }
         
     }
 
