@@ -207,9 +207,9 @@ class MasterController extends Controller
             });
         }
         if ($fromDate != '' && $toDate != '') {
-            $query->whereBetween('payment_date', [$fromDate, $toDate]);
+            $query->whereBetween('created_at', [$fromDate, $toDate]);
         } elseif ($fromDate != '') {
-            $query->whereDate('payment_date', $fromDate);
+            $query->whereDate('created_at', $fromDate);
         }
 
         if ($Uid != '') {
