@@ -249,7 +249,7 @@ class MasterController extends Controller
 
         // Update the payment details
         // $payment->payment_date = $request->date;
-        $payment->payment_date = date('Y-m-d H:i:s');
+        // $payment->payment_date = date('Y-m-d H:i:s');
 
         $payment->paid_amount = $request->price;
         $payment->reference = $request->message;
@@ -290,22 +290,40 @@ class MasterController extends Controller
             return response()->json(['message' => 'Failed to delete payment'], 500);
         }
     }
-    public function updateStatus($paymentId, $isChecked)
+    // public function updateStatus($paymentId, $isChecked)
+    // {
+    //     // Find the payment by ID
+    //     $payment = Payment::find($paymentId);
+
+    //     if ($payment) {
+    //         // Update the account_status based on the checkbox state
+    //         $payment->account_status = $isChecked ? 0 : 1;
+
+    //         // Save the changes
+    //         $payment->save();
+
+    //         return response()->json(['message' => 'Payment status updated successfully']);
+    //     } else {
+    //         return response()->json(['message' => 'Payment not found'], 404);
+    //     }
+    // }
+    public function bulkUpdateStatus(Request $request)
     {
-        // Find the payment by ID
-        $payment = Payment::find($paymentId);
+        $payments = $request->input('payments');
 
-        if ($payment) {
-            // Update the account_status based on the checkbox state
-            $payment->account_status = $isChecked ? 0 : 1;
+        foreach ($payments as $paymentData) {
+            $paymentId = $paymentData['payment_id'];
+            $status = $paymentData['status'];
 
-            // Save the changes
-            $payment->save();
+            $payment = Payment::find($paymentId);
 
-            return response()->json(['message' => 'Payment status updated successfully']);
-        } else {
-            return response()->json(['message' => 'Payment not found'], 404);
+            if ($payment) {
+                $payment->account_status = $status ? 0 : 1;
+                $payment->save();
+            }
         }
+
+        return response()->json(['message' => 'Payment statuses updated successfully']);
     }
 
 
