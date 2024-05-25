@@ -593,6 +593,7 @@ public function payment(Request $request, $id)
     // Validation rules
     $validator = Validator::make($request->all(), [
         'amount' => 'required|numeric|min:0.01', // Minimum amount should be 0.01
+        'payee_name' => 'required|string',        
     ]);
 
     // If validation fails
@@ -622,6 +623,8 @@ public function payment(Request $request, $id)
     $payment->payment_date = $request->input('payment_date');
     $payment->paid_amount = $paidAmount;
     $payment->reference = $request->input('message');
+    $payment->payee_name = $request->input('payee_name');
+    $payment->payment_update_by = auth()->user()->name;
     $payment->account_status = 1; // Assuming this is the default value
     $payment->save();
 

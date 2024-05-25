@@ -46,6 +46,8 @@
                                         <th>Order Code</th>
                                         <th>Client</th>
                                         <th>Amount</th>
+                                        <th>Update By</th>
+                                        <th>Payee Name</th>
                                         <th class='text-center'>Action</th>
                                     </tr>
                                 </thead>
@@ -66,6 +68,8 @@
                                         <td>
                                         {{$payment->paid_amount  }}
                                         </td>
+                                        <td>{{ $payment->payment_update_by }}</td>
+                                        <td>{{ $payment->payee_name }}</td>
                                         <td  style="justify-content:center" class=" text-center icon-container my-auto d-flex">
                                             
                                             <a href="#" style="color:white" class="btn btn-icon btn-bg-danger btn-active-color-light btn-sm me-1 delete-link" id="delete-payment-{{$payment->id}}" onclick="deletePayment({{$payment->id}})">

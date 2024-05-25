@@ -161,7 +161,13 @@
                             <div class="fv-plugins-message-container invalid-feedback"></div>
                         </div>
                     </div>
-
+                    <div class="row">
+                        <div class="mb-10 fv-plugins-icon-container col-6 text-start">
+                            <label class="form-label fw-bolder text-dark fs-6">Payee Name</label>
+                            <input required class="form-control form-control-solid" type="text" placeholder="" name="payee_name" autocomplete="off" value="">
+                            <div class="fv-plugins-message-container invalid-feedback"></div>
+                        </div>                        
+                    </div>
                     <div class="row">
                         <div class=" mb-10 fv-plugins-icon-container col-12 text-center">
                             <label class="form-label fw-bolder  text-dark fs-6">Messages</label>
