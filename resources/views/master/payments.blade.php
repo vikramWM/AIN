@@ -93,8 +93,8 @@
                                     </tr>
                                 @endforeach
                                 </tbody>
-                            </table>
-                        {{ $data['payments']->links() }}
+                            </table>                        
+							{{ $data['payments']->appends(request()->except('page'))->links() }}
                     </div>
                 </div>
 
