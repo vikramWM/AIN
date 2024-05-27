@@ -8,37 +8,6 @@
     margin-top: revert;
 }
 </style>
-<style>
-    .container {
-        text-align: center;
-        margin-top: 50px;
-        position: absolute;
-        background-color: #f0f0f0;
-        border: 1px solid #ccc;
-        padding: 10px;
-        cursor: move; /* Cursor set to move when hovering over the container */
-        display: none; /* Initially hidden */
-		width: 340px;
-   		height: 181px;
-    	border-radius: 26px;	
-    }
-    .button {
-        padding: 10px 20px;
-        
-        color: white;
-        border: none;
-        border-radius: 5px;
-        margin: 10px;
-        cursor: pointer;
-    }
-    #duration {
-        font-size: 24px;
-        margin-top: 20px;
-    }
-</style>
-	<div>
-		
-	</div>
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
         <div id="kt_content_container" class="">
             <div class="toolbar" id="kt_toolbar">
@@ -70,15 +39,6 @@
 						</h3>
 						
 					</div>
-					<!-- <button id="initialCallButton">Initial Call</button> -->
-						<div class="container" id="container">
-							<div id="duration">00:00:00</div>
-							<button style="background:#000000" id="muteButton" class="button"><i class="fa fa-microphone" style="font-size:24px"></i></button>
-    						<button style="background:#000000;  display:none" id="UnmuteButton" class="button"><i class="fa fa-microphone-slash" style="font-size:24px"></i></button>
-							<button style="background:red; " id="hangupButton" class="button">Hang Up</button>
-							<button style="background:#000000;" id="holdButton" class="button"><i class="fa fa-pause" style="font-size:24px"></i></button>
-							<button style="background:#000000;display:none" id="UnholdButton" class="button"><i class="fa fa-play" style="font-size:24px"></i></button>
-						</div>
 					<div class="card-body py-3">
 						<div class="table-responsive">
 							<table  class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
@@ -95,7 +55,6 @@
 										<th class="min-w-40px">Amount</th>
 										<th class="min-w-40px">Received</th>
 										<th class="min-w-40px" >Due</th>
-										<th class="min-w-40px" >writer </th>
 										<th class="min-w-100px text-center" >Action</th>
 									</tr>
 								</thead>
@@ -105,11 +64,12 @@
 								<tbody class="allData">
 
                                     @foreach($data['orders'] as $order)
-									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')">										<td>
+									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')" @if($order->user->feedback_issue == 1) style="color: green;" @endif>										<td>
 										{{ $loop->index + 1 }}
 										</td>
 										<td class="text-center">
 											{{ $order->order_id }}
+											<span class="badge badge-light-danger fs-7 fw-bold ">{{$order->feedback_ticket}}</span>
                                             @if($order->is_fail == 1)
 												<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>
 											@endif
@@ -134,7 +94,7 @@
 											{{ \Carbon\Carbon::parse($order->order_date)->format('d M Y') }}
 											
 										</td>
-										<td onclick="updateDeliveryDate({{$order->id }})" >
+										<td>
 										{{ \Carbon\Carbon::parse($order->delivery_date)->format('d M Y') }}
 										@if( $order->draftrequired == 'Y')
                                             <span class="badge badge-light-success  fs-7 fw-bold">{{ \Carbon\Carbon::parse($order->draft_date)->format('d M Y') }} ({{ \Carbon\Carbon::parse($order->draft_time)->format('H:i') }})</span>	
@@ -153,7 +113,7 @@
                                                 <span class="badge badge-light-danger fs-7 fw-bold">{{$order->module_code}}</span>
                                             @endif
                                         </td>
-										<td  onclick="status('{{$order->id }}')" >
+										<td>
                                             @if($order->projectstatus == 'Other')
 											<span class="badge badge-light-primary fs-7 fw-bold " style="background:#44f2e4; color:black">{{$order->projectstatus}}</span>
                                             @elseif($order->projectstatus == 'Pending')
@@ -178,7 +138,7 @@
 											<span class="badge badge-light-primary fs-7 fw-bold" style="background:green; color:white">{{$order->projectstatus}}</span>
                                             @elseif($order->projectstatus == 'Initiated')
 											<span class="badge badge-light-primary fs-7 fw-bold" style="background:pink; color:white">{{$order->projectstatus}}</span>
-											@elseif($order->projectstatus == 'Advance Assignment')
+                                            @elseif($order->projectstatus == 'Advance Assignment')
 											<span class="badge badge-light-danger fs-7 fw-bold" style="background:#44f2e4; color:black">{{$order->projectstatus}}</span>
                                             @endif
 										</td>
@@ -203,9 +163,6 @@
 												N/A
 											@endif
 										</td>
-										<td style="width:50px">
-                                           {{$order->writer_name }} 
-                                        </td>
 
 										
 
@@ -240,6 +197,7 @@
 												</span>
 											</a>
 											@include('order.section.comment-order')
+												<a   target="_blank" href="/call.{{$order->id}}" class="btn btn-icon btn-bg-warning btn-active-color-light btn-sm me-1">Call</a>
 
 											<a href="#" onclick="showConfirmationclick('{{ $order->id }}')" id="clickToCallBtn{{$order->id}}" class="btn btn-icon btn-bg-success btn-active-color-light btn-sm me-1">
 												<span class="svg-icon svg-icon-3">
@@ -271,15 +229,61 @@
 												};
 											</script>
 												<a href="#" id="clickToDownload{{$order->order_id}}" class="btn btn-icon btn-bg-danger btn-active-color-dark btn-sm me-1 download-btn{{$order->id}}" onclick="downloadFiles(this)">
-													<span class="svg-icon svg-icon-3">
-														<i class="fa fa-download fa-lg"></i>
-													</span>
-												</a>
-												<a onclick="CallToWriter('{{ $order->id }}')"  class="btn btn-icon btn-bg-warning btn-active-color-dark btn-sm me-1 download-btn" >
-													<span class="svg-icon svg-icon-3">
-														<i class="fa fa-phone fa-lg"></i>
-													</span>											
-												</a>
+											<span class="svg-icon svg-icon-3">
+												<i class="fa fa-download fa-lg"></i>
+											</span>
+										</a>
+
+										<script>
+											function downloadFiles(element) {
+												// Prevent the default anchor behavior
+												event.preventDefault();
+
+												// Get the order ID from the id attribute of the clicked <a> tag
+												var orderId = element.id.replace('clickToDownload', '');
+
+												// Send AJAX request to get file URLs for the order
+												$.ajax({
+													url: '/get-files-by-order', // Update the URL to your route endpoint
+													method: 'GET',
+													data: {order_id: orderId},
+													success: function(response) {
+														// Check if response is empty
+														if (response.length === 0) {
+															// Show SweetAlert popup for no files to download
+															Swal.fire({
+																icon: 'warning',
+																title: 'No Files Found',
+																text: 'There are no files to download for this order.',
+																confirmButtonColor: '#3085d6',
+																confirmButtonText: 'OK'
+															});
+														} else {
+															// Loop through each file URL and trigger download
+															response.forEach(function(fileUrl) {
+																// Create an anchor element for the file
+																var link = document.createElement('a');
+																link.href = fileUrl;
+																link.download = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
+																document.body.appendChild(link);
+
+																// Simulate a click event to trigger the download
+																link.click();
+
+																// Clean up
+																document.body.removeChild(link);
+															});
+														}
+													},
+													error: function(xhr, status, error) {
+														// Handle error
+														console.error(xhr.responseText);
+													}
+												});
+											}
+										</script>
+
+
 										</td>
 									</tr>
                                     @endforeach
@@ -294,53 +298,10 @@
 
         </div>
     </div>
-
-<script>
-	function downloadFiles(element) {
-		// Prevent the default anchor behavior
-		event.preventDefault();
-		// Get the order ID from the id attribute of the clicked <a> tag
-		var orderId = element.id.replace('clickToDownload', '');
-		// Send AJAX request to get file URLs for the order
-		$.ajax({
-			url: '/get-files-by-order', // Update the URL to your route endpoint
-			method: 'GET',
-			data: {order_id: orderId},
-			success: function(response) {
-			// Check if response is empty
-			if (response.length === 0) {
-					// Show SweetAlert popup for no files to download
-					Swal.fire({
-						icon: 'warning',
-						title: 'No Files Found',
-						text: 'There are no files to download for this order.',
-						confirmButtonColor: '#3085d6',
-						confirmButtonText: 'OK'
-					});
-				} else {
-					// Loop through each file URL and trigger download
-					response.forEach(function(fileUrl) {
-						// Create an anchor element for the file
-						var link = document.createElement('a');
-						link.href = fileUrl;
-						link.download = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
-						document.body.appendChi
-						// Simulate a click event to trigger the download
-						link
-						// Clean up
-						document.body.removeChild(link);
-					});
-				}
-			},
-			error: function(xhr, status, error) {
-				// Handle error
-				console.error(xhr.responseText);
-			}
-		});
-	}
-</script>
-
-<script src="https://cdn.socket.io/3.0.3/socket.io.min.js"></script>
+<style>
+	
+</style>
+	<script src="https://cdn.socket.io/3.0.3/socket.io.min.js"></script>
 <!-- Your table structure -->
 <script>
     function markAsRead(orderId) {
@@ -381,267 +342,6 @@
 		font-weight: bold !important;
 	}
 </style>
-<script>
-    function CallToWriter(orderId) {
-        // Assuming you're using jQuery
-        $.ajax({
-            type: 'POST',
-            url: '/appdialnumber',
-            data: {
-                order_id: orderId,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                container.style.display = "block";
-        		startTime = new Date().getTime();
-            },
-            error: function(xhr, status, error) {
-                // Display error message with SweetAlert
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to communicate with the server. Please try again later.',
-                });
-            }
-        });
-    }
-</script>
-<script>
-    let isMuted = false;
-    let isOnHold = false;
-    let startTime = 0; // Start time initially set to 0
-    let container = document.getElementById("container");
-
-    // Function to handle mouse down event on container (for dragging)
-    container.addEventListener("mousedown", function(e) {
-        let offsetX = e.clientX - container.offsetLeft;
-        let offsetY = e.clientY - container.offsetTop;
-        let isDragging = true;
-
-        // Function to handle mouse move event while dragging
-        document.addEventListener("mousemove", dragHandler);
-
-        // Function to handle mouse up event
-        document.addEventListener("mouseup", function() {
-            isDragging = false;
-            document.removeEventListener("mousemove", dragHandler);
-        });
-
-        function dragHandler(e) {
-            if (isDragging) {
-                container.style.left = (e.clientX - offsetX) + "px";
-                container.style.top = (e.clientY - offsetY) + "px";
-            }
-        }
-    });
-
-   
-		document.getElementById("hangupButton").addEventListener("click", function() {
-		// Show pop-up message
-		alert("Call hung up");
-
-		// Hide the call interface and reset duration timer
-		hideCallInterfaceAndResetTimer();
-	});
-
-			function hideCallInterfaceAndResetTimer() {
-				// Assuming you're using jQuery
-				$.ajax({
-					type: 'GET',
-					url: '/HangUp', // Corrected typo in URL
-
-					success: function(response) {
-						// Hide the call interface
-						var container = document.getElementById("container");
-						container.style.display = "none";
-
-						// Reset duration timer
-						startTime = 0;
-						document.getElementById("duration").innerText = "00:00:00";
-					},
-					error: function(xhr, status, error) {
-						// Display error message with SweetAlert
-						Swal.fire({
-							icon: 'error',
-							title: 'Error',
-							text: 'Failed to communicate with the server. Please try again later.',
-						});
-					}
-				});
-			}
-
-	
-			document.getElementById("holdButton").addEventListener("click", HoldCall);
-			function HoldCall() {
-				$.ajax({
-					type: 'GET',
-					url: '/HoldCall', // Corrected typo in URL
-
-					success: function(response) {
-						// Display the Unhold button and hide the Hold button
-						document.getElementById("UnholdButton").style.display = "inline";
-						document.getElementById("holdButton").style.display = "none";
-					},
-					error: function(xhr, status, error) {
-						// Display error message with SweetAlert
-						Swal.fire({
-							icon: 'error',
-							title: 'Error',
-							text: 'Failed to communicate with the server. Please try again later.',
-						});
-					}
-				});
-			}
-
-
-			document.getElementById("UnholdButton").addEventListener("click", UnholdCall);
-
-			function UnholdCall() {
-				// Assuming you're using jQuery
-				$.ajax({
-					type: 'GET',
-					url: '/unhold', // Corrected typo in URL
-
-					success: function(response) {
-						// Display the Hold button and hide the Unhold button
-						document.getElementById("holdButton").style.display = "inline";
-						document.getElementById("UnholdButton").style.display = "none";
-					},
-					error: function(xhr, status, error) {
-						// Display error message with SweetAlert
-						Swal.fire({
-							icon: 'error',
-							title: 'Error',
-							text: 'Failed to communicate with the server. Please try again later.',
-						});
-					}
-				});
-			}
-
-
-
-	document.getElementById("muteButton").addEventListener("click", function() {
-        document.getElementById("UnmuteButton").style.display = "inline";
-        document.getElementById("muteButton").style.display = "none";
-    });
-
-	document.getElementById("UnmuteButton").addEventListener("click", function() {
-        document.getElementById("muteButton").style.display = "inline";
-        document.getElementById("UnmuteButton").style.display = "none";
-    });
-
-    // Function to update duration every second
-    setInterval(function() {
-        if (startTime !== 0) {
-            let currentTime = new Date().getTime();
-            let duration = currentTime - startTime;
-            let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-            let minutes = Math.floor((duration / (1000 * 60)) % 60);
-            let seconds = Math.floor((duration / 1000) % 60);
-
-            document.getElementById("duration").innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-    }, 1000);
-</script>
-<script>
-	function status(orderId) {
-		let data = <?php echo json_encode($data['Status']); ?>;
-		let statusValues = Object.values(data).map(item => item.status);
-		Swal.fire({
-			title: 'Change Status',
-			text: 'Select Status',
-			icon: 'info',
-			input: 'select',
-			inputOptions: statusValues,
-			inputPlaceholder: 'Select status',
-			showCancelButton: true,
-			confirmButtonText: 'OK',
-			cancelButtonText: 'Cancel',
-			preConfirm: (selectedStatus) => {
-				if (!selectedStatus) {
-					Swal.fire({
-						title: 'Error!',
-						text: 'Status cannot be empty!',
-						icon: 'error'
-					});
-					return false; // Prevent further execution
-				}
-				
-				let updateData = {
-					orderId: orderId,
-					status: selectedStatus,
-					_token: '{{ csrf_token() }}'
-				};
-				$.ajax({
-					type: 'POST',
-					url: 'update_status',
-					data: updateData,
-					success: function(response) {
-						location.reload(); // Reload the page
-					},
-					error: function(xhr, status, error) {
-						console.log(updateData);
-					}
-				});
-			}
-		});
-	}
-</script>
-<script>
-    function updateDeliveryDate(orderId) {
-        // Show date picker
-        Swal.fire({
-            title: 'Select Delivery Date',
-            html: '<input type="date" id="deliveryDate" class="swal2-input">',
-            confirmButtonText: 'Confirm',
-            preConfirm: () => {
-                const selectedDate = document.getElementById('deliveryDate').value;
-                if (!selectedDate) {
-                    Swal.showValidationMessage('Please select a delivery date');
-                }
-                return selectedDate;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Retrieve selected date
-                const selectedDate = result.value;
-                // Perform actions with the selected date (e.g., update status)
-                console.log('Order ID:', orderId);
-                console.log('Selected Delivery Date:', selectedDate);
-
-                // Assuming you have the CSRF token available in a variable named csrfToken
-                const csrfToken = '{{ csrf_token() }}';
-
-                // Send AJAX request to update delivery date
-                $.ajax({
-                    url: 'update_date',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    data: {
-                        orderId: orderId,
-                        selectedDate: selectedDate
-                    },
-                    success: function(response) {
-						if (response.Error) {
-							// Show SweetAlert error message if there is an error in the response
-							Swal.fire('Error!', response.Error, 'error');
-						} else {
-							// Reload the page if date updated successfully
-							location.reload();
-						}
-					},
-					error: function(xhr, status, error) {
-						console.error(xhr.responseText);
-						Swal.fire('Error!', 'An unexpected error occurred.', 'error');
-					}
-                });
-            }
-        });
-    }
-</script>
-
 
   @endsection
   

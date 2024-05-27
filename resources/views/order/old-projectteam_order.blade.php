@@ -60,7 +60,7 @@
 								<tbody class="allData">
 
                                     @foreach($data['orders'] as $order)
-									<tr @if( $order->user->is_fail == 1) style="color:blue"  @endif  id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')">										<td>
+									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')">										<td>
 										{{ $loop->index + 1 }}
 										</td>
 										<td class="text-center">
@@ -81,7 +81,7 @@
 											{{ \Carbon\Carbon::parse($order->order_date)->format('d M Y') }}
 											
 										</td>
-										<td onclick="updateDeliveryDate({{$order->id }})" >
+										<td>
 										{{ \Carbon\Carbon::parse($order->delivery_date)->format('d M Y') }}
 										@if( $order->draftrequired == 'Y')
                                             <span class="badge badge-light-success  fs-7 fw-bold">{{ \Carbon\Carbon::parse($order->draft_date)->format('d M Y') }} ({{ \Carbon\Carbon::parse($order->draft_time)->format('H:i') }})</span>	
@@ -100,7 +100,7 @@
                                                 <span class="badge badge-light-danger fs-7 fw-bold">{{$order->module_code}}</span>
                                             @endif
                                         </td>
-										<td onclick="status('{{$order->id }}')" >
+										<td>
                                             @if($order->projectstatus == 'Other')
 											<span class="badge badge-light-primary fs-7 fw-bold " style="background:#44f2e4; color:black">{{$order->projectstatus}}</span>
                                             @elseif($order->projectstatus == 'Pending')
@@ -214,105 +214,6 @@
 		font-weight: bold !important;
 	}
 </style>
-
-<script>
-	function status(orderId) {
-		let data = <?php echo json_encode($data['Status']); ?>;
-		let statusValues = Object.values(data).map(item => item.status);
-		Swal.fire({
-			title: 'Change Status',
-			text: 'Select Status',
-			icon: 'info',
-			input: 'select',
-			inputOptions: statusValues,
-			inputPlaceholder: 'Select status',
-			showCancelButton: true,
-			confirmButtonText: 'OK',
-			cancelButtonText: 'Cancel',
-			preConfirm: (selectedStatus) => {
-				if (!selectedStatus) {
-					Swal.fire({
-						title: 'Error!',
-						text: 'Status cannot be empty!',
-						icon: 'error'
-					});
-					return false; // Prevent further execution
-				}
-				
-				let updateData = {
-					orderId: orderId,
-					status: selectedStatus,
-					_token: '{{ csrf_token() }}'
-				};
-				$.ajax({
-					type: 'POST',
-					url: 'update_status',
-					data: updateData,
-					success: function(response) {
-						location.reload(); // Reload the page
-					},
-					error: function(xhr, status, error) {
-						console.log(updateData);
-					}
-				});
-			}
-		});
-	}
-</script>
-<!-- <script>
-    function updateDeliveryDate(orderId) {
-        // Show date picker
-        Swal.fire({
-            title: 'Select Delivery Date',
-            html: '<input type="date" id="deliveryDate" class="swal2-input">',
-            confirmButtonText: 'Confirm',
-            preConfirm: () => {
-                const selectedDate = document.getElementById('deliveryDate').value;
-                if (!selectedDate) {
-                    Swal.showValidationMessage('Please select a delivery date');
-                }
-                return selectedDate;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Retrieve selected date
-                const selectedDate = result.value;
-                // Perform actions with the selected date (e.g., update status)
-                console.log('Order ID:', orderId);
-                console.log('Selected Delivery Date:', selectedDate);
-
-                // Assuming you have the CSRF token available in a variable named csrfToken
-                const csrfToken = '{{ csrf_token() }}';
-
-                // Send AJAX request to update delivery date
-                $.ajax({
-                    url: 'update_date',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    data: {
-                        orderId: orderId,
-                        selectedDate: selectedDate
-                    },
-                    success: function(response) {
-						if (response.Error) {
-							// Show SweetAlert error message if there is an error in the response
-							Swal.fire('Error!', response.Error, 'error');
-						} else {
-							// Reload the page if date updated successfully
-							location.reload();
-						}
-					},
-					error: function(xhr, status, error) {
-						console.error(xhr.responseText);
-						Swal.fire('Error!', 'An unexpected error occurred.', 'error');
-					}
-                });
-            }
-        });
-    }
-</script> -->
 
   @endsection
   

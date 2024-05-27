@@ -151,10 +151,44 @@
                                 <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->order_date)->format('Y-m-d') }}" name="order_date" onchange="showSelectedDate(this)">
                             </div>
                             
-                            <div class="col-md-4 fv-row text-start">
+                            <!-- <div class="col-md-4 fv-row text-start">
                                 <label class="fs-6 fw-bold mb-2">Delivery Date</label>
                                 <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}" name="delivery_date" onchange="showSelectedDate(this)">
+                            </div> -->
+                            <div class="col-md-4 fv-row text-start">
+                                <label class="fs-6 fw-bold mb-2">Delivery Date</label>
+                                <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}" name="delivery_date">
                             </div>
+
+                            <script>
+                                // Function to handle delivery date change event
+                                function validateDeliveryDate() {
+                                    // Get the value of the order date from PHP variable
+                                    const orderDate = new Date('{{ $order->order_date }}');
+                                    
+                                    // Get the delivery date input element
+                                    const deliveryDateInput = document.getElementsByName('delivery_date')[0];
+                                    
+                                    // Parse the selected delivery date
+                                    const selectedDeliveryDate = new Date(deliveryDateInput.value);
+
+                                    // Compare selected delivery date with order date
+                                    if (selectedDeliveryDate < orderDate) {
+                                        // Display SweetAlert if selected delivery date is before order date
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Invalid Delivery Date',
+                                            text: 'Delivery date cannot be before the order date.',
+                                        });
+
+                                        // Clear the value of the delivery date input
+                                        deliveryDateInput.value = '{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}';
+                                    }
+                                }
+
+                                // Add event listener to delivery date input
+                                document.getElementsByName('delivery_date')[0].addEventListener('change', validateDeliveryDate);
+                            </script>
                             <div class="col-md-4 fv-row text-start">
                                 <label class=" fs-6 fw-bold mb-2">Delivery Time</label>
                                 @if($order->delivery_time != '')

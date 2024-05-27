@@ -650,7 +650,10 @@ public function payment(Request $request, $id)
             $order->title = $req->input('title');
             $order->order_date = $req->input('order_date');
             $order->writer_deadline = $req->input('writer_deadline');
-            $order->delivery_date = $req->input('delivery_date');
+            if ($order->order_date <= $req->input('delivery_date')) {
+                // Delivery Date must be on or after the Order Date               
+                $order->delivery_date = $req->input('delivery_date');
+            }
             $order->amount = $req->input('amount');
             $order->received_amount = $req->input('r_amount');
             $order->delivery_time = $req->input('delivery_time');
@@ -666,7 +669,7 @@ public function payment(Request $request, $id)
                     'email' => $req->input('email'),
                     'title' => $req->input('title'),
                     'order_code' => $order->order_id,
-                    'date'     => $req->input('delivery_date'),
+                    'date'     => $order->delivery_date,
                     'due'     => $req->input('amount') - $req->input('r_amount'),
                 ];
                 Mail::to( $orderData['email']) ->send(new OrderComplete($orderData));
@@ -748,7 +751,11 @@ public function payment(Request $request, $id)
             $order->order_date = $req->input('order_date');
             
             
-            $order->delivery_date = $req->input('delivery_date');
+            // $order->delivery_date = $req->input('delivery_date');
+            if ($order->order_date <= $req->input('delivery_date')) {
+                // Delivery Date must be on or after the Order Date               
+                $order->delivery_date = $req->input('delivery_date');
+            }
             $order->amount = $req->input('amount');
             $order->received_amount = $req->input('r_amount');
             $order->delivery_time = $req->input('delivery_time');
@@ -762,7 +769,7 @@ public function payment(Request $request, $id)
                     'email' => $req->input('email'),
                     'title' => $req->input('title'),
                     'order_code' => $order->order_id,
-                    'date'     => $req->input('delivery_date'),
+                    'date'     => $order->delivery_date,
                     'due'     => $req->input('amount') - $req->input('r_amount'),
                 ];
                 Mail::to($orderData['email'])->cc('order@assignnmentinneed.com')->send(new OrderComplete($orderData));
@@ -818,7 +825,11 @@ public function payment(Request $request, $id)
             $order->order_date = $req->input('order_date');
             $order->writer_deadline = $req->input('writer_deadline');
             $order->writer_deadline_time = $req->input('writer_deadline_time');
-            $order->delivery_date = $req->input('delivery_date');
+            // $order->delivery_date = $req->input('delivery_date');
+            // if ($order->order_date <= $req->input('delivery_date')) {
+            //     // Delivery Date must be on or after the Order Date               
+            //     $order->delivery_date = $req->input('delivery_date');
+            // }
             
             $order->delivery_time = $req->input('delivery_time');
             $order->pages = $req->input('word');
@@ -2858,6 +2869,113 @@ public function orderWD2(Request $request)
         
     }
 
+    //27-may-update
+    public function updateDate(Request $request)
+    {
+        // Check if a date has been selected
+        if ($request->input('selectedDate') != '') {
+            $orderId = $request->input('orderId');
+            $date = $request->input('selectedDate');
+
+            // Find the order by its ID, or fail if not found
+            $order = Order::findOrFail($orderId);
+
+            // Check if the selected date is on or after the order date
+            if ($order->order_date <= $date) {
+                // Update the delivery date and save the order
+                $order->delivery_date = $date;
+                $order->save();
+
+                // Return a success response
+                return response()->json(['message' => 'Date updated successfully', 'order' => $order]);
+            } else {
+                // Return an error response if the delivery date is before the order date
+                return response()->json(['Error' => 'Delivery date cannot be before the order date.']);           
+            }
+        } else {
+            // Return an error response if no date is selected
+            return response()->json(['Error' => 'Date not selected']);
+        }
+    }
+
+    // public function updateDate (Request $request)
+    // {
+    //     if(  $request->input('selectedDate') != '')
+    //     {
+    //         $orderId = $request->input('orderId');
+    //         $date = $request->input('selectedDate');
+
+        
+
+    //         $order = Order::findOrFail($orderId);
+    //         $order->delivery_date = $date;
+        
+            
+    //         $order->save();
+    //         return response()->json(['message' => 'date updated successfully', 'order' => $order]);
+
+    //     }
+    //     else
+    //     {
+    //         return response()->json(['message' => 'date Not Selected']);
+
+    //     }
+    // }
+    public function updateStatus(Request $request)
+    {
+        if(  $request->input('status') != '')
+        {
+            $orderId = $request->input('orderId');
+            $index = $request->input('status');
+
+            $id = $index + 1 ;
+            // dd($id);
+
+            $statusName = Status::find( $id);
+
+
+            $order = Order::findOrFail($orderId);
+            $order->projectstatus = $statusName->status;
+            $order->status_date = Carbon::now('Asia/Kolkata');
+            $order->status_by   = auth()->user()->name;
+            
+            $order->save();
+            return response()->json(['message' => 'Status updated successfully', 'order' => $order]);
+
+        }
+        else
+        {
+            return response()->json(['message' => 'Status Not Selected']);
+
+        }
+        
+
+        // Return response
+    }
+
+    public function statusDetails(Request $request)
+    {
+        $from_date = $request->input('from_date');
+        $to_date = $request->input('to_date');
+        
+        $query = Order::with('user')->where('uid', '!=', 0)
+        ->where('status_date', '!=', '0000-00-00 00:00:00');
+
+        if ($from_date && $to_date) {
+            $query->whereDate('status_date', '>=', $from_date)->whereDate('status_date', '<=', $to_date);
+        }
+
+        if ($from_date && $to_date) {
+        $data['order'] = $query->get();
+        }
+        else
+        {
+            $data['order'] = $query->paginate(10);
+
+        }
+
+        return view('order.order-status-details', compact('data'));
+    }
 
 }
 

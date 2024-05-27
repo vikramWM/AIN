@@ -31,6 +31,11 @@ Route::get('/export-WD', [ExportController::class, 'exportWD'])->name('export.WD
 Route::get('/order-writer', [OrderController::class, 'orderWD'])->name('order.writer');
 Route::post('/order-writer', [OrderController::class, 'orderWD2'])->name('order.writer2');
 
+Route::POST('/update_status', [OrderController::class, 'updateStatus'])->name('update_status');
+Route::POST('/update_date', [OrderController::class, 'updateDate'])->name('update_date');
+
+route::get('/status-details', [OrderController::class, 'statusDetails'])->name('status-details');
+
 Route::get('/', function () {
     $data['title'] = 'Assignment Writing Help in London, UK @40% off';
     $data['description'] = 'Assignment Writing Help in London, UK offers The technical assignments as well Mathematics, Physics, C++, Java, LabVIEW, MATLAB Assignments order @40% off.';
