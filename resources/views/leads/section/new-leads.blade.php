@@ -133,8 +133,25 @@
                             
                             <div class="col-md-6 fv-row text-start">
                                 <label class="fs-6 fw-bold mb-2">Delivery Date</label>
-                                <input type="date"  class="form-control form-control-solid" placeholder="" value="" name="delivery_date" onchange="showSelectedDate(this)">
+                                <input type="date"  class="form-control form-control-solid" placeholder="" id="inputdate" value="" name="delivery_date" onchange="showSelectedDate(this)">
                             </div>
+                            <script>
+                                $(function(){
+                                    var dtToday = new Date();
+
+                                    var month = dtToday.getMonth() + 1;
+                                    var day = dtToday.getDate();
+                                    var year = dtToday.getFullYear();
+                                    if(month < 10)
+                                        month = '0' + month.toString();
+                                    if(day < 10)
+                                        day = '0' + day.toString();
+                                    
+                                    var maxDate = year + '-' + month + '-' + day;
+                                    // alert(maxDate);
+                                    $('#inputdate').attr('min', maxDate);
+                                });
+                            </script>
                             <div class="col-md-6 fv-row text-start">
                                 <label class="fs-6 fw-bold mb-2">Delivery Time</label>
                                 <input type="time"  class="form-control form-control-solid" placeholder="" value="" name="delivery_time" onchange="showSelectedDate(this)">

@@ -81,7 +81,15 @@ class LeadsController extends Controller
     {
         $leads = Leads::find($id);
         $id = $leads->emp_id;
-
+        
+        $deliveryDate = $req->input('delivery_date');
+        $today = \Carbon\Carbon::today()->format('Y-m-d'); // Get today's date
+        // Check if the delivery date is before today
+        if ($deliveryDate < $today) {
+            // Redirect back with an error message if the date is invalid
+            return redirect()->back()->with('error', 'Delivery date cannot be before the order date.');
+        }
+        
 
         $user = User::find($id);
 
@@ -211,6 +219,14 @@ class LeadsController extends Controller
 
     public function insert_leads(Request $request)
     {
+        $deliveryDate = $request->input('delivery_date');
+        $today = Carbon::today();
+
+        // Check if the delivery date is before today
+        if (Carbon::parse($deliveryDate)->lt($today)) {
+            // Redirect back with an error message if the date is invalid
+            return redirect()->back()->with('error', 'Delivery date cannot be before today.');
+        }
         // Get the latest order to generate a new order ID
         $latestOrder = Order::orderByDesc('id')->first();
         $newOrderNumber = $latestOrder ? (intval(substr($latestOrder->order_id, 3)) + 1) : 1;
@@ -978,6 +994,17 @@ class LeadsController extends Controller
         if (!$recaptchaVerification->json('success')) {
             return redirect()->back()->withErrors(['captcha' => 'ReCAPTCHA verification failed.']);
         }
+
+        //date validation
+        $deliveryDate = $request->input('delivery_date');
+        $today = date('Y-m-d'); // Get today's date
+        // echo  $deliveryDate, "",$today; exit;
+        // Check if the delivery date is before today        
+        if ($deliveryDate < $today) {
+            // Redirect back with an error message if the date is invalid
+            return redirect()->back()->withErrors(['delivery_date' => 'Assignment Deadline cannot be before today.']);
+        }
+        
 
         // Validate the incoming request
         $request->validate([
