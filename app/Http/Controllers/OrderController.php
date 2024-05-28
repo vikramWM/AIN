@@ -661,7 +661,7 @@ public function payment(Request $request, $id)
             $order->writer_deadline_time = $req->input('writer_deadline_time');
 
             if( $req->input('status') == 'Completed')
-            {
+            {      
                 $order->projectstatus = $req->input('status');
 
                 $orderData = [
@@ -672,8 +672,14 @@ public function payment(Request $request, $id)
                     'date'     => $order->delivery_date,
                     'due'     => $req->input('amount') - $req->input('r_amount'),
                 ];
-                Mail::to( $orderData['email']) ->send(new OrderComplete($orderData));
+                Mail::to('vikramsuthar.wm@gmail.com') ->send(new OrderComplete($orderData));
                
+            }elseif( $req->input('status') == 'Delivered')
+            {
+                if ((int)$order->amount - (int)$order->received_amount !== 0) {
+                    return redirect()->back()->with('warning' , 'Order cannot be marked as Delivered if there is any due payment remaining.');
+                }                
+                $order->projectstatus = $req->input('status');
             }
             else
             {
@@ -772,7 +778,7 @@ public function payment(Request $request, $id)
                     'date'     => $order->delivery_date,
                     'due'     => $req->input('amount') - $req->input('r_amount'),
                 ];
-                Mail::to($orderData['email'])->cc('order@assignnmentinneed.com')->send(new OrderComplete($orderData));
+                Mail::to('vikramsuthar.wm@gmail.com')->cc('vikramsuthar.wm@gmail.com')->send(new OrderComplete($orderData));
                
             }
             else
