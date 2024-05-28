@@ -81,6 +81,14 @@
                                 <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->writer_deadline)->format('Y-m-d') }}" name="writer_deadline" onchange="showSelectedDate(this)">
                             </div>
                             <div class="col-md-4 fv-row text-start">
+                                <label class=" fs-6 fw-bold mb-2">Writer Deadline Time</label>
+                                @if($order->writer_deadline_time != '')
+                                <input type="time"  class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->writer_deadline_time)->format('H:i') }}" name="writer_deadline_time" onchange="showSelectedTime(this)">
+                                @else
+                                <input type="time" class="form-control form-control-solid" placeholder="" value="" name="writer_deadline_time" onchange="showSelectedTime(this)">
+                                @endif
+                            </div>
+                            <div class="col-md-4 fv-row text-start">
                                 <label class="fs-6 fw-bold mb-2">Delivery Date</label>
                                 <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}" name="delivery_date" onchange="showSelectedDate(this)">
                             </div>
