@@ -468,7 +468,22 @@
 					url: 'update_status',
 					data: updateData,
 					success: function(response) {
-						location.reload(); // Reload the page
+						if (response.warning) {
+							Swal.fire({
+								icon: 'warning',
+								title: 'Warning',
+								text: response.warning
+							});
+						} else {
+							Swal.fire({
+								icon: 'success',
+								title: 'Success',
+								text: 'Status updated successfully'
+							}).then(() => {
+								// Reload the page after showing the success message
+								location.reload();
+							});
+						}
 					},
 					error: function(xhr, status, error) {
 						console.log(updateData);

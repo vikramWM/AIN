@@ -657,6 +657,11 @@ public function payment(Request $request, $id)
             $order->amount = $req->input('amount');
             $order->received_amount = $req->input('r_amount');
             $order->delivery_time = $req->input('delivery_time');
+            // Check if the input is a numeric value
+            if ($req->filled('word') && !is_numeric($req->input('word'))) {
+                // Redirect back with a warning message if not numeric
+                return redirect()->back()->with('warning', 'Word must be a numeric value');
+            }
             $order->pages = $req->input('word');
             $order->writer_deadline_time = $req->input('writer_deadline_time');
 
@@ -765,6 +770,11 @@ public function payment(Request $request, $id)
             $order->amount = $req->input('amount');
             $order->received_amount = $req->input('r_amount');
             $order->delivery_time = $req->input('delivery_time');
+            // Check if the input is a numeric value
+            if ($req->filled('word') && !is_numeric($req->input('word'))) {
+                // Redirect back with a warning message if not numeric
+                return redirect()->back()->with('warning', 'Word must be a numeric value');
+            }
             $order->pages = $req->input('word');
              if( $req->input('status') == 'Completed')
             {
@@ -838,6 +848,11 @@ public function payment(Request $request, $id)
             // }
             
             $order->delivery_time = $req->input('delivery_time');
+            // Check if the input is a numeric value
+            if ($req->filled('word') && !is_numeric($req->input('word'))) {
+                // Redirect back with a warning message if not numeric
+                return redirect()->back()->with('warning', 'Word must be a numeric value');
+            }
             $order->pages = $req->input('word');
             $order->projectstatus = $req->input('status');
             
@@ -2938,9 +2953,36 @@ public function orderWD2(Request $request)
             // dd($id);
 
             $statusName = Status::find( $id);
-
-
-            $order = Order::findOrFail($orderId);
+            try {
+                $order = Order::findOrFail($orderId);
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'Order not found']);
+            }
+    
+            try {
+                $userDetails = User::findOrFail($order->uid);
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'User details not found']);
+            }
+            
+            if( $statusName->status == 'Completed')
+            {      
+                $order->projectstatus = $statusName->status;
+                $orderData = [
+                    'name' => $userDetails->name,
+                    'email' => $userDetails->email,
+                    'title' => $order->title,
+                    'order_code' => $order->order_id,
+                    'date'     => $order->delivery_date,
+                    'due'     => (int)$order->amount - (int)$order->received_amount,
+                ];
+                // dd($orderData);
+                Mail::to('vikramsuthar.wm@gmail.com') ->send(new OrderComplete($orderData));
+               
+            }elseif( $statusName->status == 'Delivered' && (int)$order->amount - (int)$order->received_amount !== 0)
+            {                
+                return response()->json(['warning' => 'Order cannot be marked as Delivered if there is any due payment remaining.']);                                                
+            }
             $order->projectstatus = $statusName->status;
             $order->status_date = Carbon::now('Asia/Kolkata');
             $order->status_by   = auth()->user()->name;

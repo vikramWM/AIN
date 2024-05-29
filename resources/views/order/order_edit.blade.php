@@ -312,34 +312,34 @@
                                 @endforeach
                             </select>                           
                         </div>   
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                
 
-            // SweetAlert for status change
-            var statusSelect = document.getElementById('status-select');
-            var initialStatus = statusSelect.value;
-            var orderAmount = {{ (int)$order->amount }};
-            var receivedAmount = {{ (int)$order->received_amount }};
-            
-            statusSelect.addEventListener('change', function() {
-                var selectedStatus = this.value;
-                if (selectedStatus === 'Delivered' && orderAmount - receivedAmount !== 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Attention!',
-                        text: 'Order cannot be marked as completed if there is any due payment remaining.'
-                    }).then((result) => {
-                        // Revert to the initial status if the user closes the alert
-                        if (result.isDismissed) {
-                            statusSelect.value = initialStatus;
-                        }else {
-                            statusSelect.value = initialStatus;                        }
-                    });
-                }
-            });
-        });
-    </script>                                                                   
+                                // SweetAlert for status change
+                                var statusSelect = document.getElementById('status-select');
+                                var initialStatus = statusSelect.value;
+                                var orderAmount = {{ (int)$order->amount }};
+                                var receivedAmount = {{ (int)$order->received_amount }};
+                                
+                                statusSelect.addEventListener('change', function() {
+                                    var selectedStatus = this.value;
+                                    if (selectedStatus === 'Delivered' && orderAmount - receivedAmount !== 0) {
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Attention!',
+                                            text: 'Order cannot be marked as completed if there is any due payment remaining.'
+                                        }).then((result) => {
+                                            // Revert to the initial status if the user closes the alert
+                                            if (result.isDismissed) {
+                                                statusSelect.value = initialStatus;
+                                            }else {
+                                                statusSelect.value = initialStatus;                        }
+                                        });
+                                    }
+                                });
+                            });
+                        </script>                                                                   
                         <div class="col-md-4 fv-row">
                             <label class=" fs-6 fw-bold mb-2">Writer Name</label>
                             <select name="writer_name" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
