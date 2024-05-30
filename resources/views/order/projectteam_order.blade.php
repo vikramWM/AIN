@@ -145,12 +145,12 @@
 
                                       
 										<td class="text-center">
-											<a href="#"  data-bs-toggle="modal" data-bs-target="#kt_modal_create_appaa{{$order->id}}" id="kt_toolbar_primary_button" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+											<a target="_blank" href="edit.{{ $order->id }}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
 												<span class="svg-icon svg-icon-3">
 													<li class="fa fa-eye "></li>
 												</span>
 											</a>
-											@include('order.edit.project')
+											<!-- @include('order.edit.project') -->
 
 											
 

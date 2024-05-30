@@ -679,7 +679,8 @@ public function payment(Request $request, $id)
                 ];
                 Mail::to('vikramsuthar.wm@gmail.com') ->send(new OrderComplete($orderData));
                
-            }elseif( $req->input('status') == 'Delivered')
+            }
+            elseif( $req->input('status') == 'Delivered')
             {
                 if ((int)$order->amount - (int)$order->received_amount !== 0) {
                     return redirect()->back()->with('warning' , 'Order cannot be marked as Delivered if there is any due payment remaining.');
@@ -776,7 +777,7 @@ public function payment(Request $request, $id)
                 return redirect()->back()->with('warning', 'Word must be a numeric value');
             }
             $order->pages = $req->input('word');
-             if( $req->input('status') == 'Completed')
+            if( $req->input('status') == 'Completed')
             {
                 $order->projectstatus = $req->input('status');
 
@@ -790,6 +791,13 @@ public function payment(Request $request, $id)
                 ];
                 Mail::to('vikramsuthar.wm@gmail.com')->cc('vikramsuthar.wm@gmail.com')->send(new OrderComplete($orderData));
                
+            }
+            elseif( $req->input('status') == 'Delivered')
+            {
+                if ((int)$order->amount - (int)$order->received_amount !== 0) {
+                    return redirect()->back()->with('warning' , 'Order cannot be marked as Delivered if there is any due payment remaining.');
+                }                
+                $order->projectstatus = $req->input('status');
             }
             else
             {
@@ -854,6 +862,13 @@ public function payment(Request $request, $id)
                 return redirect()->back()->with('warning', 'Word must be a numeric value');
             }
             $order->pages = $req->input('word');
+            if( $req->input('status') == 'Delivered')
+            {
+                if ((int)$order->amount - (int)$order->received_amount !== 0) {
+                    return redirect()->back()->with('warning' , 'Order cannot be marked as Delivered if there is any due payment remaining.');
+                }                
+                $order->projectstatus = $req->input('status');
+            }
             $order->projectstatus = $req->input('status');
             
             $order->college_name = $req->input('college_name');

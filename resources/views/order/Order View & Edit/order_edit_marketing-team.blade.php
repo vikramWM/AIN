@@ -220,14 +220,41 @@
                         <div class="row g-9 mb-8 text-start">
                             <div class="col-md-4 fv-row text-start">
                                 <label class=" fs-6 fw-bold mb-2">Project Status</label>
-                                <select name="status" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
+                                <select name="status" id="status-select" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
                                     <option value="" data-select2-id="select2-data-18-e9lh12"></option>
                                     @foreach($data['Status'] as $status)
                                     <option <?php if ( $order['projectstatus'] == $status['status']) {echo "selected";} ?> value="{{$status->status}}">{{$status->status}}</option>
                                     @endforeach
                                 </select>                           
                             </div>
-                       
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    
+
+                                    // SweetAlert for status change
+                                    var statusSelect = document.getElementById('status-select');
+                                    var initialStatus = statusSelect.value;
+                                    var orderAmount = {{ (int)$order->amount }};
+                                    var receivedAmount = {{ (int)$order->received_amount }};
+                                    
+                                    statusSelect.addEventListener('change', function() {
+                                        var selectedStatus = this.value;
+                                        if (selectedStatus === 'Delivered' && orderAmount - receivedAmount !== 0) {
+                                            Swal.fire({
+                                                icon: 'warning',
+                                                title: 'Attention!',
+                                                text: 'Order cannot be marked as completed if there is any due payment remaining.'
+                                            }).then((result) => {
+                                                // Revert to the initial status if the user closes the alert
+                                                if (result.isDismissed) {
+                                                    statusSelect.value = initialStatus;
+                                                }else {
+                                                    statusSelect.value = initialStatus;                        }
+                                            });
+                                        }
+                                    });
+                                });
+                            </script> 
                             <div class="col-md-4 fv-row">
                                 <label class=" fs-6 fw-bold mb-2">Chapter</label>
                                 <select name="chapter"aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
