@@ -42,8 +42,7 @@
                                             <td>{{ $payment->paid_amount }}</td> <!-- Replace with the actual attribute you want to display -->
                                             <td>{{ $payment->reference }}</td> <!-- Replace with the actual attribute you want to display -->
                                             <!-- Include SweetAlert library -->
-                                            <script src="sweetalert2.min.js"></script>
-                                            <link rel="stylesheet" href="sweetalert2.min.css">
+                                           
 
                                             <!-- Your table cell with SweetAlert -->
                                             @if(Auth::user()->role_id == 1)
