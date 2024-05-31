@@ -90,7 +90,7 @@
                             </div>
                             <div class="col-md-4 fv-row text-start">
                                 <label class="fs-6 fw-bold mb-2">Delivery Date</label>
-                                <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}" name="delivery_date" onchange="showSelectedDate(this)">
+                                <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}" readonly onchange="showSelectedDate(this)">
                             </div>
                         </div>
 
@@ -99,9 +99,9 @@
                             <div class="col-md-4 fv-row text-start">
                                 <label class=" fs-6 fw-bold mb-2">Delivery Time</label>
                                 @if($order->delivery_time != '')
-                                <input type="time"  class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_time)->format('H:i') }}" name="delivery_time" onchange="showSelectedTime(this)">
+                                <input type="time"  class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_time)->format('H:i') }}" readonly onchange="showSelectedTime(this)">
                                 @else
-                                <input type="time" class="form-control form-control-solid" placeholder="" value="" name="delivery_time" onchange="showSelectedTime(this)">
+                                <input type="time" class="form-control form-control-solid" placeholder="" value="" readonly onchange="showSelectedTime(this)">
                                 @endif
                             </div>
                            
