@@ -2,13 +2,13 @@
     function showConfirmation(orderId) {
         // Show SweetAlert confirmation
         Swal.fire({
-            title: 'Are you sure?',
-            text: 'You won\'t be able to revert this!',
+            title: 'Are you sure this assignment code is failed?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
         }).then((result) => {
             if (result.isConfirmed) {
                 // User confirmed, send AJAX request

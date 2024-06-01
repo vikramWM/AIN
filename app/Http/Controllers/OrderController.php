@@ -1199,13 +1199,13 @@ public function payment(Request $request, $id)
                                 onclick="showConfirmation('.$order->id.')"
                                 class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                     <span class="svg-icon svg-icon-3">
-                                        <li class="fa fa-close"></li>
+                                        <i>F</i>
                                     </span>
                             </a>
 
                             <a href="/comment.'.$order->order_id.'"   target="_blank" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                 <span class="svg-icon svg-icon-3">
-                                    <i class="fa fa-comment"></i>
+                                    <i>T</i>
                                 </span>
                             </a> 
                             
@@ -1475,6 +1475,10 @@ public function payment(Request $request, $id)
 
         $uks = substr($order->order_id, 0, 3);
         
+        if ($order->feedbackissue == 1 && $order->status_issue == 'Case Resolved') {
+            $order->status_issue = 'Issues Raised Again';
+            // dd($order->feedbackissue,$order->status_issue);
+        }
           if($order->feedbackissue != 1)
         {
             $order->status_issue = 'Issue Raised';
@@ -1525,7 +1529,10 @@ public function payment(Request $request, $id)
         $feedback->created_by = auth()->user()->id; // Assuming you are using authentication
 
         $order = Order::find($request->input('order_id'));
-
+        if ($order->feedbackissue == 1 && $order->status_issue == 'Case Resolved') {
+            $order->status_issue = 'Issues Raised Again';
+            $order->save();
+        }
         $feedback->status = $order->status_issue;
 
         $feedback->save();

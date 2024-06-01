@@ -228,7 +228,7 @@
 
 											<a href="#" onclick="showConfirmation({{ $order->id }})"class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
 													<span class="svg-icon svg-icon-3">
-														<li class="fa fa-close"></li>
+														<i>F</i>
 													</span>
 											</a>
 											@include('order.section.fail-order')
@@ -236,7 +236,7 @@
 											
 											<a href="#" data-kt-drawer-toggle="#kt_drawer_chat" id="kt_drawer_chat_toggle{{ $order->order_id }}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
 												<span class="svg-icon svg-icon-3">
-													<i class="fa fa-comment"></i>
+													<i>T</i>
 												</span>
 											</a>
 											@include('order.section.comment-order')
