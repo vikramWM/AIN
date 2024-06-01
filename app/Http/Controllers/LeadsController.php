@@ -367,6 +367,8 @@ class LeadsController extends Controller
             $order->draft_date = $request->input('draft_date');
             $order->draft_time = $request->input('draft_time');
 
+            // New fields
+            $order->l_converted_by = Auth::user()->name;
             // Save the order
             $order->save();
 
@@ -972,6 +974,9 @@ class LeadsController extends Controller
         $order->draft_date = $leadData->draft_date;
         $order->draft_time = $leadData->draft_time;
 
+
+        // New fields
+        $order->l_converted_by = Auth::user()->name;
 
         $user = User::where('id', $leadData->emp_id)->first();
 

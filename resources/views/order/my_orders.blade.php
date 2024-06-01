@@ -61,6 +61,7 @@
 										<th class="min-w-40px" >Due</th>
 										<th class="min-w-40px">Team</th>
 										<th class="min-w-40px">Writer_name</th>
+										<th class="min-w-40px">Other</th>
 										<th class="min-w-150px text-center" >Actions</th>
 									</tr>
 								</thead>
@@ -201,7 +202,19 @@
 											Not Assign
 											@endif
 										</td>
-
+										<td>
+											@if($order->l_converted_by != null)
+												Convert By ({{ $order->l_converted_by }})												
+											@else
+												Convert By (N/A)
+											@endif
+											@if($order->is_fail == 1 && $order->failed_by != null)
+												<br>
+												Failed By: {{ $order->failed_by }} at {{ $order->failed_at }}
+											@else
+												Failed By: (N/A)
+											@endif
+										</td>
 										<td class="text-end">
 										<a   target="_blank" href="edit.{{ $order->id }}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
 											<span class="svg-icon svg-icon-3">

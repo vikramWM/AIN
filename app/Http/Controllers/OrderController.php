@@ -555,6 +555,8 @@ public function handleRoleSeven(Request $request)
         try {
           $order = Order::find($id);
           $order->is_fail = 1;
+          $order->failed_by = auth()->user()->name;
+          $order->failed_at = now();
           $order->save();
 
             return response()->json(['message' => 'Order updated successfully']);
@@ -1164,11 +1166,26 @@ public function payment(Request $request, $id)
                                 $output .= 'Not Assign';
                             }
             
-                            $output .= '</td>
+                            $output .= '</td>';
+                            
+                            if (auth()->user()->role_id == '1') {
+                                $output .= '<td>';
+                                if ($order->l_converted_by != null) {
+                                    $output .= 'Convert By (' . $order->l_converted_by . ')';
+                                } else {
+                                    $output .= 'Convert By (N/A)';
+                                }
+                                if ($order->is_fail == 1 && $order->failed_by != null) {
+                                    $output .= '<br>Failed By: ' . $order->failed_by . ' at ' . $order->failed_at;
+                                } else {
+                                    $output .= '<br>Failed By: (N/A)';
+                                }
+                                $output .= '</td>';
+                            }
                             
 
                             
-                            <td class="text-end">
+                            $output .= '<td class="text-end">
                             <a   target="_blank" href="edit.'.$order->id.'" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                 <span class="svg-icon svg-icon-3">
                                     <i class="fa fa-eye"></i>
