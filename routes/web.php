@@ -557,6 +557,7 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
     Route::get('/get-data', [OrderController::class, 'get-data'])->name('get');
     Route::put('/order/{id}', [OrderController::class, 'OrderEdit'])->name('order.update');
     Route::put('/fail/{orderId}', [OrderController::class, 'fail'])->name('update.order');
+    Route::put('/update-status/{id}', [OrderController::class, 'updateOrderStatus'])->name('order.update-status');
     route::put('/payment/{id}', [OrderController::class, 'payment'])->name('payment.update');
     route::get('/search', [OrderController::class, 'search']);
     route::get('/suggestions', [UserController::class, 'search'])->name('suggestions');

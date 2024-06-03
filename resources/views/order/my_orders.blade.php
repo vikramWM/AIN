@@ -208,7 +208,7 @@
 											@else
 												Convert By (N/A)
 											@endif
-											@if($order->is_fail == 1 && $order->failed_by != null)
+											@if($order->failed_by != null)
 												<br>
 												Failed By: {{ $order->failed_by }} at {{ $order->failed_at }}
 											@else
@@ -229,13 +229,14 @@
 											</a>
 											@include('order.section.payment-edit')
 
-											<a href="#" onclick="showConfirmation({{ $order->id }})"class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
-													<span class="svg-icon svg-icon-3">
-														<i>F</i>
-														<!-- <li class="fa fa-close"></li> -->
-													</span>
+											<a href="#" onclick="showConfirmation({{ $order->id }}, {{ $order->is_fail }})" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+												<span class="svg-icon svg-icon-3">
+													<i>F</i>
+													<!-- <li class="fa fa-close"></li> -->
+												</span>
 											</a>
-											@include('order.section.fail-order')
+											@include('order.section.fail-order-admin') 
+
 
 											
 											<a href="#" data-kt-drawer-toggle="#kt_drawer_chat" id="kt_drawer_chat_toggle{{ $order->order_id }}" class="btn btn-icon btn-bg-light btn-active-color-lightprimary btn-sm me-1">

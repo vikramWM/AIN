@@ -565,6 +565,32 @@ public function handleRoleSeven(Request $request)
             return response()->json(['error' => 'Failed to update order'], 500);
         }
     }
+    public function updateOrderStatus(Request $request, $id)
+{
+    try {
+        $order = Order::find($id);
+
+        if ($order->is_fail == 1) {
+            // If the order is failed, cancel the failed status
+            $order->is_fail = 0;            
+            $action = 'cancelled';
+        } else {
+            // If the order is not failed, mark it as failed
+            $order->is_fail = 1;
+            $order->failed_by = auth()->user()->name;
+            $order->failed_at = now();
+            $action = 'failed';
+        }
+
+        $order->save();
+
+        return response()->json(['message' => 'Order ' . $action . ' successfully']);
+    } catch (\Exception $e) {
+        // Log the error or handle it as needed
+        return response()->json(['error' => 'Failed to update order'], 500);
+    }
+}
+
 
 //     public function payment(Request $req , $id)
 //     {
@@ -1175,7 +1201,7 @@ public function payment(Request $request, $id)
                                 } else {
                                     $output .= 'Convert By (N/A)';
                                 }
-                                if ($order->is_fail == 1 && $order->failed_by != null) {
+                                if ($order->failed_by != null) {
                                     $output .= '<br>Failed By: ' . $order->failed_by . ' at ' . $order->failed_at;
                                 } else {
                                     $output .= '<br>Failed By: (N/A)';
@@ -1213,7 +1239,7 @@ public function payment(Request $request, $id)
                            
 
                             <a href="#" 
-                                onclick="showConfirmation('.$order->id.')"
+                                onclick="showConfirmation('.$order->id.','.$order->is_fail.')"
                                 class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                     <span class="svg-icon svg-icon-3">
                                         <i>F</i>
