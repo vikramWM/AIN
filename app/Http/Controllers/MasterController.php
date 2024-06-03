@@ -236,9 +236,7 @@ class MasterController extends Controller
 
         // Retrieve the payment by its ID
         $payment = Payment::find($request->payment_id);
-        //receive ammount
-        $payments = Payment::where('order_id', $request->order_id)->get();
-        $totalPaidAmount = $payments->sum('paid_amount');
+        
         $order = Order::find($request->order_id);
         if (!$payment) {
             return back()->with('error', 'Payment not found.');
@@ -256,8 +254,13 @@ class MasterController extends Controller
         
         // Save the updated payment
         $payment->save();
+        //receive ammount
+        $payments = Payment::where('order_id', $request->order_id)->get();
+        $totalPaidAmount = $payments->sum('paid_amount');
+
         $order->received_amount = $totalPaidAmount;
         $order->save();
+        
         // Redirect back with success message
         return back()->with('success', 'Payment updated successfully.');
     }
