@@ -735,7 +735,7 @@ public function payment(Request $request, $id)
             $order->formatting = $req->input('formatting');
             $order->services = $req->input('services');
             $order->typeofwritting = $req->input('writting_type');
-            $order->typeofpaper = $req->input('paper_type');
+            $order->typeofpaper = $req->input('paper');
             $order->chapter = $req->input('chapter');
             $order->college_name = $req->input('college_name');
             $order->draftrequired = $req->input('daraft_status');
@@ -846,6 +846,7 @@ public function payment(Request $request, $id)
             $order->resit = $req->input('resit');
             $order->tech = $req->input('tech');
             $order->module_code = $req->input('module_code');
+            $order->typeofpaper = $req->input('paper');
 
             $user = User::find($order->uid);
             if ($req->filled('user_name')) {
@@ -934,7 +935,7 @@ public function payment(Request $request, $id)
 
         // Update user details only if the corresponding input fields have a value
        
-
+// dd($order->draftrequired);
         return redirect('/order')->with(['Success' => "Order Updated", 'search' => $search]);
     
 }

@@ -422,7 +422,7 @@
                             <select name="daraft_status" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
 						        <option value="" data-select2-id="select2-data-18-e9lh12"></option>
                                     <option <?php if ( $order['draftrequired'] == 'Yes') {echo "selected";} ?>  value="Yes">Yes</option>
-                                    <option <?php if ( $order['draftrequired'] == 'No') {echo "selected";} ?>value="No">No</option>
+                                    <option <?php if ( $order['draftrequired'] == 'No') {echo "selected";} ?>   value="No">No</option>
                             </select>                         
                           </div>
                         <div class="col-md-4 fv-row">
@@ -461,7 +461,15 @@
                             </select>
                         </div>
 
-                        
+                        <div class="col-md-4 fv-row">
+                            <label class=" fs-6 fw-bold mb-2">Type Of Paper</label>
+                            <select name="paper" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
+						        <option value="" data-select2-id="select2-data-18-e9lh12">Not Selected</option>
+                                @foreach($data['paper'] as $paper)
+                                    <option <?php if ( $order['typeofpaper'] == $paper['paper_type']) {echo "selected";} ?> value="{{$paper->paper_type}}">{{$paper->paper_type}}</option>
+                                @endforeach   
+                            </select>                         
+                        </div>
                        
                        
                     </div>
