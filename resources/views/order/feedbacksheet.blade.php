@@ -146,7 +146,7 @@
 									</div>
 
                                     <td class="icon-container my-auto d-flex">
-                                        <a href="#"  style="background-color:black" data-kt-drawer-toggle="#kt_drawer_chat" id="kt_drawer_chat_toggle{{ $order->order_id }}" class="btn btn-icon btn-bg-secondary btn-active-color-primary btn-sm me-1">
+                                        <a href="#"  style="background-color:black" data-kt-drawer-toggle="#kt_drawer_chat{{ $order->order_id }}" id="kt_drawer_chat_toggle{{ $order->order_id }}" class="btn btn-icon btn-bg-secondary btn-active-color-primary btn-sm me-1">
                                             <span class="svg-icon svg-icon-3">
                                             <li style="color:white" class="fa fa-edit"></li>
                                             </span>

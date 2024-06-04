@@ -381,17 +381,17 @@ function FollowUpUser(checkbox, UserId) {
         var $toDate = $('#toDate').val();
 
         // Store filter values in localStorage
-        var filters = {
+        var followfilter = {
             search: $search,
             status: $status,
             uid: $uid,
             fromDate: $fromDate,
             toDate: $toDate
         };
-        localStorage.setItem('filters', JSON.stringify(filters));
+        localStorage.setItem('followfilter ', JSON.stringify(followfilter));
 
         // Check if any filter is set
-        var filtersExist = Object.values(filters).some(value => value);
+        var filtersExist = Object.values(followfilter).some(value => value);
 
         if (filtersExist) {
             $('.allData').hide();
@@ -412,7 +412,7 @@ function FollowUpUser(checkbox, UserId) {
             url: '{{ url('search-fw') }}',
             data: {
                 '_token': CSRF_TOKEN,
-                ...filters
+                ...followfilter
             },
             success: function (data) {
                 console.log(data);
@@ -443,14 +443,14 @@ function FollowUpUser(checkbox, UserId) {
 
     // On document ready, check if there are stored filters and apply them
     $(document).ready(function() {
-        var storedFilters = localStorage.getItem('filters');
+        var storedFilters = localStorage.getItem('followfilter');
         if (storedFilters) {
             var filters = JSON.parse(storedFilters);
-            $('#search').val(filters.search);
-            $('#status').val(filters.status);
-            $('#selectedValue').val(filters.uid);
-            $('#fromDate').val(filters.fromDate);
-            $('#toDate').val(filters.toDate);
+            $('#search').val(followfilter.search);
+            $('#status').val(followfilter.status);
+            $('#selectedValue').val(followfilter.uid);
+            $('#fromDate').val(followfilter.fromDate);
+            $('#toDate').val(followfilter.toDate);
             applyFilters();
         }
     });
