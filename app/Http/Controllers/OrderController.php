@@ -935,7 +935,6 @@ public function payment(Request $request, $id)
 
         // Update user details only if the corresponding input fields have a value
        
-// dd($order->draftrequired);
         return redirect('/order')->with(['Success' => "Order Updated", 'search' => $search]);
     
 }
