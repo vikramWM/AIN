@@ -152,6 +152,16 @@
 											@elseif($order->projectstatus == 'Advance Assignment')
 											<span class="badge badge-light-danger fs-7 fw-bold" style="background:#44f2e4; color:black">{{$order->projectstatus}}</span>
                                             @endif
+											@php
+												$statusCounts = $data['projectStatusCounts']->where('order_Id', $order->id)
+													->where('status', $order->projectstatus);
+											@endphp
+											@if ($statusCounts->isNotEmpty())
+												@foreach ($statusCounts as $statusCount)													
+													<!-- <span class="badge badge-light-danger fs-7 fw-bold" style="background:#44f2e4; color:black">{{ $statusCount->count }}</span> -->
+													<span class="badge badge-sm badge-circle badge-light-success">{{ $statusCount->count }}</span>
+												@endforeach											
+											@endif
 										</td>
 										<td style="width:50px">
 										@if($order->pages != '')

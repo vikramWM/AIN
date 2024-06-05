@@ -19,6 +19,7 @@ use App\Models\College;
 use App\Models\multipleswiter;
 use App\Models\Leads;
 use App\Models\Ordercall;
+use App\Models\ProjectStatusCount;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -166,7 +167,9 @@ class OrderController extends Controller
             'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
             'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
             'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
+            'projectStatusCounts' => ProjectStatusCount::all()
         ];
+        // dd($data['projectStatusCounts']);
         $totalOrders = $ordersQuery->count();
         $totalWordCount = 0;
 
@@ -932,6 +935,22 @@ public function payment(Request $request, $id)
 
         // Save order changes
         $order->save();
+        // Update or create a record in the ProjectStatusCount table
+            $statusCount = ProjectStatusCount::where('order_Id', $order->id)
+                            ->where('status', $req->input('status'))
+                            ->first();
+
+            if ($statusCount) {
+                $statusCount->increment('count');
+                $statusCount->save(); // Save the updated record
+            } else {
+                $statusCount = ProjectStatusCount::create([
+                    'order_Id' => $order->id,
+                    'status' => $req->input('status'),
+                    'count' => 1
+                ]);
+            }
+        // Now $statusCount contains the saved record
 
         // Update user details only if the corresponding input fields have a value
        
@@ -956,6 +975,9 @@ public function payment(Request $request, $id)
         $secondaryMobile = $request->input('secondary_mobile'); // Add this line to get the secondary mobile number
         $selectedDataTextBox = $request->input('selectedDataTextBox'); // Add this line to get the secondary mobile number
 
+        $data = [
+            'projectStatusCounts' => ProjectStatusCount::all()
+        ];
         $orders = Order::query();
     
         if ($searchTerm != '') {
@@ -1153,8 +1175,19 @@ public function payment(Request $request, $id)
                             '.($order->projectstatus ==  'Initiated' ? '<span class="badge badge-light-danger fs-7 fw-bold"  style="background:pink; color:white">'.$order->projectstatus .'</span>' : '') .'
                             
                             ' . ($order->feedback_ticket != '' ? '<span class="badge badge-light-danger fs-7 fw-bold mt-1">' . $order->feedback_ticket . '</span>' : '') . '
-                            
-                       </td>
+                            ';
+                            if (auth()->user()->role_id == '1') {
+                                $statusCounts = $data["projectStatusCounts"]->where("order_Id", $order->id)
+                                                    ->where("status", $order->projectstatus);
+                                if ($statusCounts->isNotEmpty()) {
+                                    foreach ($statusCounts as $statusCount) {
+                                        $output .= '<span class="badge badge-sm badge-circle badge-light-success">' . $statusCount->count . '</span>';
+                                    }
+                                }
+                            }
+                            $output .= '</td>';
+
+                            $output .= '
 
                         
 
@@ -3053,6 +3086,22 @@ public function orderWD2(Request $request)
             $order->status_by   = auth()->user()->name;
             
             $order->save();
+            // Update or create a record in the ProjectStatusCount table
+            $statusCount = ProjectStatusCount::where('order_Id', $request->input('orderId'))
+                ->where('status', $statusName->status)
+                ->first();
+
+            if ($statusCount) {
+                $statusCount->increment('count');
+                $statusCount->save(); // Save the updated record
+            } else {
+                $statusCount = ProjectStatusCount::create([
+                    'order_Id' => $order->id,
+                    'status' => $statusName->status,
+                    'count' => 1
+                ]);
+            }
+            // Now $statusCount contains the saved record
             return response()->json(['message' => 'Status updated successfully', 'order' => $order]);
 
         }
