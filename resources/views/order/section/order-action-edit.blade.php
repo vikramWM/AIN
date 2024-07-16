@@ -1,4 +1,4 @@
-<div id="kt_drawer_chat" class="bg-body" data-kt-drawer="true" data-kt-drawer-name="chat" data-kt-drawer-activate="true" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'300px', 'md': '500px'}" data-kt-drawer-direction="end" data-kt-drawer-toggle="#kt_drawer_chat_toggle{{ $order->order_id }}" data-kt-drawer-close="#kt_drawer_chat_close">
+<div id="kt_drawer_chat{{ $order->order_id }}" class="bg-body" data-kt-drawer="true" data-kt-drawer-name="chat" data-kt-drawer-activate="true" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'300px', 'md': '500px'}" data-kt-drawer-direction="end" data-kt-drawer-toggle="#kt_drawer_chat_toggle{{ $order->order_id }}" data-kt-drawer-close="#kt_drawer_chat_close">
     <!--begin::Messenger-->
     <div class="card w-100 rounded-0 border-0" id="kt_drawer_chat_messenger">
         <!--begin::Card header-->
@@ -38,7 +38,7 @@
         <!--end::Card header-->
         <!--begin::Card body-->
         <div class="card-body" id="kt_drawer_chat_messenger_body">
-            <div class="scroll-y me-n5 pe-5" data-kt-element="messages" data-kt-scroll="true" data-kt-scroll-activate="true" data-kt-scroll-height="auto" data-kt-scroll-dependencies="#kt_drawer_chat_messenger_header, #kt_drawer_chat_messenger_footer" data-kt-scroll-wrappers="#kt_drawer_chat_messenger_body" data-kt-scroll-offset="0px">
+            <div class="scroll-y me-n5 pe-5" data-kt-element="messages{{ $order->order_id }}" data-kt-scroll="true" data-kt-scroll-activate="true" data-kt-scroll-height="auto" data-kt-scroll-dependencies="#kt_drawer_chat_messenger_header, #kt_drawer_chat_messenger_footer" data-kt-scroll-wrappers="#kt_drawer_chat_messenger_body" data-kt-scroll-offset="0px">
             @foreach($order->feedback->sortByDesc('created_at') as $feedback)
                 @if($feedback->action_comment != '')
                 @if($feedback->created_by != Auth::user()->id)
@@ -143,7 +143,7 @@
                     'order_id': order_id,
                 },
                 success: function(response) {
-                    var messageContainer = $('[data-kt-element="messages"]');
+                    var messageContainer = $('[data-kt-element="messages{{ $order->order_id }}"]');
                     var statusBadge = getStatusBadge(response);
 
                     var newMessage = `

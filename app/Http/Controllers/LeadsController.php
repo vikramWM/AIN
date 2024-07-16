@@ -81,7 +81,15 @@ class LeadsController extends Controller
     {
         $leads = Leads::find($id);
         $id = $leads->emp_id;
-
+        
+        $deliveryDate = $req->input('delivery_date');
+        $today = \Carbon\Carbon::today()->format('Y-m-d'); // Get today's date
+        // Check if the delivery date is before today
+        if ($deliveryDate < $today) {
+            // Redirect back with an error message if the date is invalid
+            return redirect()->back()->with('error', 'Delivery date cannot be before the order date.');
+        }
+        
 
         $user = User::find($id);
 
@@ -122,6 +130,11 @@ class LeadsController extends Controller
 
 
         $leads->project_title = $req->input('project_title');
+        // Check if the input is a numeric value
+        if ( $req->filled('pages') && !is_numeric($req->input('pages'))) {
+            // Redirect back with a warning message if not numeric
+            return back()->with('warning', 'Pages must be a numeric value');
+        }
         $leads->pages = $req->input('pages');
         $leads->l_status = $req->input('l_status');
         $leads->created_at = $req->input('order_date'); // Assuming you meant 'created_at' instead of 'create_at'
@@ -211,6 +224,14 @@ class LeadsController extends Controller
 
     public function insert_leads(Request $request)
     {
+        $deliveryDate = $request->input('delivery_date');
+        $today = Carbon::today();
+
+        // Check if the delivery date is before today
+        if (Carbon::parse($deliveryDate)->lt($today)) {
+            // Redirect back with an error message if the date is invalid
+            return redirect()->back()->with('error', 'Delivery date cannot be before today.');
+        }
         // Get the latest order to generate a new order ID
         $latestOrder = Order::orderByDesc('id')->first();
         $newOrderNumber = $latestOrder ? (intval(substr($latestOrder->order_id, 3)) + 1) : 1;
@@ -254,6 +275,11 @@ class LeadsController extends Controller
         $leads->emp_id = $userId;
         $leads->project_title = $request->input('project_title');
         $leads->module_code = $request->input('module_code');
+        // Check if the input is a numeric value
+        if ( $request->filled('pages') && !is_numeric($request->input('pages'))) {
+            // Redirect back with a warning message if not numeric
+            return redirect()->back()->with('warning', 'Pages must be a numeric value');
+        }
         $leads->pages = $request->input('pages');
 
         $leads->deadline = $request->input('delivery_date');
@@ -282,6 +308,11 @@ class LeadsController extends Controller
         $order->order_id = $newOrderId;
         $order->lead_id = $leadsId;
         $order->title = $request->input('project_title');
+        // Check if the input is a numeric value
+        if ( $request->filled('pages') && !is_numeric($request->input('pages'))) {
+            // Redirect back with a warning message if not numeric
+            return redirect()->back()->with('warning', 'Pages must be a numeric value');
+        }
         $order->pages = $request->input('pages');
         $order->amount = $request->input('amount');
         $order->message = $request->input('message');
@@ -316,6 +347,11 @@ class LeadsController extends Controller
 
             // Update order fields with the provided values
             $order->title = $request->input('project_title');
+            // Check if the input is a numeric value
+            if ( $request->filled('pages') && !is_numeric($request->input('pages'))) {
+                // Redirect back with a warning message if not numeric
+                return redirect()->back()->with('warning', 'Pages must be a numeric value');
+            }
             $order->pages = $request->input('pages');
             $order->services = $request->input('service_type');
             $order->tech = $request->has('tech') ? 1 : 0;
@@ -331,6 +367,8 @@ class LeadsController extends Controller
             $order->draft_date = $request->input('draft_date');
             $order->draft_time = $request->input('draft_time');
 
+            // New fields
+            $order->l_converted_by = Auth::user()->name;
             // Save the order
             $order->save();
 
@@ -908,7 +946,11 @@ class LeadsController extends Controller
 
         $order->uid = $leadData->emp_id;
         $order->title = $leadData->project_title;
-
+        // Check if the input is a numeric value
+        if (!is_numeric($leadData->pages) && !empty($leadData->pages)) {
+            // Redirect back with a warning message if not numeric
+            return response()->json(['success' => false, 'message' => 'Word must be a numeric value.'], 404);
+        }
         $order->pages = $leadData->pages;
         $order->services = $leadData->service_type;
         if ($leadData->tech == 'on') {
@@ -932,6 +974,9 @@ class LeadsController extends Controller
         $order->draft_date = $leadData->draft_date;
         $order->draft_time = $leadData->draft_time;
 
+
+        // New fields
+        $order->l_converted_by = Auth::user()->name;
 
         $user = User::where('id', $leadData->emp_id)->first();
 
@@ -978,6 +1023,17 @@ class LeadsController extends Controller
         if (!$recaptchaVerification->json('success')) {
             return redirect()->back()->withErrors(['captcha' => 'ReCAPTCHA verification failed.']);
         }
+
+        //date validation
+        $deliveryDate = $request->input('delivery_date');
+        $today = date('Y-m-d'); // Get today's date
+        // echo  $deliveryDate, "",$today; exit;
+        // Check if the delivery date is before today        
+        if ($deliveryDate < $today) {
+            // Redirect back with an error message if the date is invalid
+            return redirect()->back()->withErrors(['delivery_date' => 'Assignment Deadline cannot be before today.']);
+        }
+        
 
         // Validate the incoming request
         $request->validate([

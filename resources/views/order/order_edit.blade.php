@@ -232,10 +232,45 @@
                             @endif
                         </div>
                        
-                        <div class="col-md-4 fv-row text-start">
+                        <!-- <div class="col-md-4 fv-row text-start">
                             <label class="fs-6 fw-bold mb-2">Delivery Date</label>
                             <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}" name="delivery_date" onchange="showSelectedDate(this)">
+                        </div> -->
+                        <div class="col-md-4 fv-row text-start">
+                            <label class="fs-6 fw-bold mb-2">Delivery Date</label>
+                            <input type="date" class="form-control form-control-solid" placeholder="" value="{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}" name="delivery_date">
                         </div>
+
+                        <script>
+                            // Function to handle delivery date change event
+                            function validateDeliveryDate() {
+                                // Get the value of the order date from PHP variable
+                                const orderDate = new Date('{{ $order->order_date }}');
+                                
+                                // Get the delivery date input element
+                                const deliveryDateInput = document.getElementsByName('delivery_date')[0];
+                                
+                                // Parse the selected delivery date
+                                const selectedDeliveryDate = new Date(deliveryDateInput.value);
+
+                                // Compare selected delivery date with order date
+                                if (selectedDeliveryDate < orderDate) {
+                                    // Display SweetAlert if selected delivery date is before order date
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Invalid Delivery Date',
+                                        text: 'Delivery date cannot be before the order date.',
+                                    });
+
+                                    // Clear the value of the delivery date input
+                                    deliveryDateInput.value = '{{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}';
+                                }
+                            }
+
+                            // Add event listener to delivery date input
+                            document.getElementsByName('delivery_date')[0].addEventListener('change', validateDeliveryDate);
+                        </script>
+
                         <div class="col-md-4 fv-row text-start">
                             <label class=" fs-6 fw-bold mb-2">Delivery Time</label>
                             @if($order->delivery_time != '')
@@ -270,13 +305,41 @@
                         </div>
                         <div class="col-md-4 fv-row text-start">
                             <label class=" fs-6 fw-bold mb-2">Project Status</label>
-                            <select name="status" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
+                            <select name="status" id="status-select" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
 						        <option value="" data-select2-id="select2-data-18-e9lh12"></option>
                                 @foreach($data['Status'] as $status)
                                 <option <?php if ( $order['projectstatus'] == $status['status']) {echo "selected";} ?> value="{{$status->status}}">{{$status->status}}</option>
                                 @endforeach
                             </select>                           
-                        </div>
+                        </div>   
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                
+
+                                // SweetAlert for status change
+                                var statusSelect = document.getElementById('status-select');
+                                var initialStatus = statusSelect.value;
+                                var orderAmount = {{ (int)$order->amount }};
+                                var receivedAmount = {{ (int)$order->received_amount }};
+                                
+                                statusSelect.addEventListener('change', function() {
+                                    var selectedStatus = this.value;
+                                    if (selectedStatus === 'Delivered' && orderAmount - receivedAmount !== 0) {
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Attention!',
+                                            text: 'Order cannot be marked as completed if there is any due payment remaining.'
+                                        }).then((result) => {
+                                            // Revert to the initial status if the user closes the alert
+                                            if (result.isDismissed) {
+                                                statusSelect.value = initialStatus;
+                                            }else {
+                                                statusSelect.value = initialStatus;                        }
+                                        });
+                                    }
+                                });
+                            });
+                        </script>                                                                   
                         <div class="col-md-4 fv-row">
                             <label class=" fs-6 fw-bold mb-2">Writer Name</label>
                             <select name="writer_name" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
@@ -359,7 +422,7 @@
                             <select name="daraft_status" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
 						        <option value="" data-select2-id="select2-data-18-e9lh12"></option>
                                     <option <?php if ( $order['draftrequired'] == 'Yes') {echo "selected";} ?>  value="Yes">Yes</option>
-                                    <option <?php if ( $order['draftrequired'] == 'No') {echo "selected";} ?>value="No">No</option>
+                                    <option <?php if ( $order['draftrequired'] == 'No') {echo "selected";} ?>   value="No">No</option>
                             </select>                         
                           </div>
                         <div class="col-md-4 fv-row">
@@ -398,7 +461,15 @@
                             </select>
                         </div>
 
-                        
+                        <div class="col-md-4 fv-row">
+                            <label class=" fs-6 fw-bold mb-2">Type Of Paper</label>
+                            <select name="paper" aria-label="Select a Timezone" data-control="select2"  class="form-select form-select-solid form-select-lg select2-hidden-accessible" data-select2-id="select2-data-16-796922" tabindex="-1" aria-hidden="true">
+						        <option value="" data-select2-id="select2-data-18-e9lh12">Not Selected</option>
+                                @foreach($data['paper'] as $paper)
+                                    <option <?php if ( $order['typeofpaper'] == $paper['paper_type']) {echo "selected";} ?> value="{{$paper->paper_type}}">{{$paper->paper_type}}</option>
+                                @endforeach   
+                            </select>                         
+                        </div>
                        
                        
                     </div>
@@ -467,6 +538,37 @@
     });
 </script> 
                 
+<!-- <script>
+    // Function to handle delivery date change event
+    function validateDeliveryDate() {
+        // Get the value of the order date from PHP variable
+        const orderDate = new Date('{{ $order->order_date }}');
+        
+        // Get the delivery date input element
+        const deliveryDateInput = document.getElementsByName('delivery_date')[0];
+        
+        // Parse the selected delivery date
+        const selectedDeliveryDate = new Date(deliveryDateInput.value);
+
+        // Compare selected delivery date with order date
+        if (selectedDeliveryDate >= orderDate) {
+            // Display SweetAlert if selected delivery date is before order date
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Delivery Date',
+                text: 'Delivery date cannot be before the order date.',
+            });
+
+            // Clear the value of the delivery date input
+            deliveryDateInput.value = '';
+        }
+    }
+
+    // Add event listener to delivery date input
+    document.getElementsByName('delivery_date')[0].addEventListener('change', validateDeliveryDate);
+</script> -->
+
+
 
 
 

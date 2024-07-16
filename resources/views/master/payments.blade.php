@@ -33,16 +33,21 @@
                 </h3>
             </div>
             <div class="card-body py-3">
-              
+                    <div class="d-flex justify-content-end mb-3">
+                        <input type="checkbox" id="select-all">
+                        <button id="bulk-update-btn" class="btn btn-primary btn-sm ms-2">Update Selected Status</button>
+                    </div>
                     <div class="table-responsive">
                         <table  class="table table-hover table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
                                 <thead class="p-2">
-                                    <tr class="fw-bolder text-muted bg-light">
+                                    <tr class="fw-bolder text-muted bg-light">                                    
                                         <th class='px-2'>Sr.No.</th>
                                         <th>Date</th>
                                         <th>Order Code</th>
                                         <th>Client</th>
                                         <th>Amount</th>
+                                        <th>Update By</th>
+                                        <th>Payee Name</th>
                                         <th class='text-center'>Action</th>
                                     </tr>
                                 </thead>
@@ -54,7 +59,7 @@
                             
                                 @foreach($data['payments'] as $payment)
                                     <tr>
-                                    <td class='text-center'>{{$loop->index + 1 + ($data['payments']->perPage() * ($data['payments']->currentPage() - 1))}}</td>
+                                        <td class='text-center'>{{$loop->index + 1 + ($data['payments']->perPage() * ($data['payments']->currentPage() - 1))}}</td>
                                         <td>{{$payment->payment_date  }}</td>
                                         <td> {{$payment->order->order_id  }}</td>
                                         <td>{{$payment->order->user->name  }} <br>
@@ -63,6 +68,8 @@
                                         <td>
                                         {{$payment->paid_amount  }}
                                         </td>
+                                        <td>{{ $payment->payment_update_by }}</td>
+                                        <td>{{ $payment->payee_name }}</td>
                                         <td  style="justify-content:center" class=" text-center icon-container my-auto d-flex">
                                             
                                             <a href="#" style="color:white" class="btn btn-icon btn-bg-danger btn-active-color-light btn-sm me-1 delete-link" id="delete-payment-{{$payment->id}}" onclick="deletePayment({{$payment->id}})">
@@ -90,8 +97,8 @@
                                     </tr>
                                 @endforeach
                                 </tbody>
-                            </table>
-                        {{ $data['payments']->links() }}
+                            </table>                        
+							{{ $data['payments']->appends(request()->except('page'))->links() }}
                     </div>
                 </div>
 
@@ -101,8 +108,63 @@
 
         </div>
     </div>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Select all checkboxes
+            $('#select-all').on('click', function () {
+                var isChecked = this.checked;
+                $('.payment-checkbox').each(function () {
+                    this.checked = isChecked;
+                });
+            });
+
+            // Bulk update button
+            $('#bulk-update-btn').on('click', function () {
+                var selectedPayments = [];
+                $('.payment-checkbox:checked').each(function () {
+                    var paymentId = $(this).data('payment-id');
+                    var status = $(this).data('status') ? 0 : 1; // Toggle status
+                    selectedPayments.push({ payment_id: paymentId, status: status });
+                });
+
+                if (selectedPayments.length > 0) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '{{ route('payments.bulkUpdateStatus') }}',
+                        data: {
+                            payments: selectedPayments,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function (data) {
+                            handleResponse(data);
+                        },
+                        error: function (error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Please select at least one payment to update.',
+                    });
+                }
+            });
+
+            function handleResponse(data) {
+                console.log(data.message);
+
+                // Reload the page if the update was successful
+                if (data.message === 'Payment statuses updated successfully') {
+                    window.location.reload();
+                }
+            }
+        });
+    </script>
+
+
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -138,7 +200,7 @@
             
             
         });
-    </script>
+    </script> -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Include SweetAlert library -->
 
     <script>

@@ -23,32 +23,11 @@
                         <div class="text-muted fw-bold fs-5">{{ $payment->order->order_id }}</div>
                     </div>
                    
-                    <div class="row g-9 mb-8 text-start">
-                        <div class="col-md-6 fv-row">
-                            <label class=" fs-6 fw-bold mb-2">User Name</label>
-                        <input type="text" readonly  class="form-control form-control-solid" placeholder="" value="{{ $payment->order->user->name }}">
-                           
-                        </div>
-                        <div class="col-md-6 fv-row text-start">
-                            <label class=" fs-6 fw-bold mb-2">mobile_no</label>
-                            <input type="text" readonly  class="form-control form-control-solid" placeholder="" value="{{ $payment->order->user->mobile_no }}">
-                        </div>
-                    </div>
-                    <div class="row g-9 mb-8 text-start">
-                        
-                        <div class="col-md-12 fv-row text-start">
-                            <label class=" fs-6 fw-bold mb-2">email</label>
-                            <input type="text" readonly  class=" text-center form-control form-control-solid" placeholder="" value="{{ $payment->order->user->email }}">
-                       
-                        </div>
-                    </div>
+                    
                       
                     
                     <div class="row g-9 mb-8 text-start">
-                        <div class="col-md-6 fv-row text-start">
-                            <label class="fs-6 fw-bold mb-2">Payment Date</label>
-                            <input type="date" class="form-control form-control-solid" placeholder="" value="{{$payment->payment_date  }}" name="date" onchange="showSelectedDate(this)" readonly>
-                        </div>
+                        
                         <div class="col-md-6 fv-row">
                             <label class=" fs-6 fw-bold mb-2">Amount</label>
                             <input type="text"  class="form-control form-control-solid" placeholder="" value=" {{$payment->paid_amount  }}" name="price">

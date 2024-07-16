@@ -252,9 +252,23 @@
 								</div>
 								
 								<div class="col-md-12">
+									@if ($errors->any())
+										<div id="errorAlert" class="alert alert-danger">
+											<ul>
+												@foreach ($errors->all() as $error)
+													<li>{{ $error }}</li>
+												@endforeach
+											</ul>
+										</div>
+										<script>
+											setTimeout(function() {
+												document.getElementById('errorAlert').style.display = 'none';
+											}, 10000); // Hide the error message after 10 seconds (10000 milliseconds)
+										</script>
+									@endif
 									<div class="form-group">
 										<label>Assignment Deadline</label>
-										<input type="date" name="delivery_date" class="form-control" required="">
+										<input type="date" name="delivery_date" id="DeliveryDate" class="form-control" required="">
 									</div>
 								</div>
 								

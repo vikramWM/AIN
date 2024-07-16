@@ -171,8 +171,9 @@
                     <div class="row g-9 mb-8 text-start">
                         <div class="col-md-6 fv-row text-start">
                             <label class="fs-6 fw-bold mb-2">Delivery Date</label>
-                        <input type="date" class="form-control form-control-solid" placeholder="" value="{{ $lead->deadline }}" name="delivery_date" onchange="showSelectedDate(this)">
+                            <input type="date" class="form-control form-control-solid" placeholder="" id="DeliveryDate" value="{{ $lead->deadline }}" name="delivery_date" onchange="showSelectedDate(this)" data-created-at="{{ \Carbon\Carbon::parse($lead->create_at)->format('Y-m-d') }}">
                         </div>
+                        
                         <div class="col-md-6 fv-row text-start">
                             <label class="fs-6 fw-bold mb-2">Delivery Time</label>
                             <input type="time" class="form-control form-control-solid" placeholder="" value="{{ $lead->delivery_time }}" name="delivery_time" onchange="showSelectedTime(this)">
@@ -329,6 +330,16 @@
 </script>
 
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    // Get the created_at date from the data attribute
+    var createdAt = $('#DeliveryDate').data('created-at');
+
+    // Set the minimum date attribute to the created_at date
+    $('#DeliveryDate').attr('min', createdAt);
+});
+</script>
 
 
 @endsection

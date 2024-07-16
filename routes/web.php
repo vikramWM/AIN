@@ -31,6 +31,11 @@ Route::get('/export-WD', [ExportController::class, 'exportWD'])->name('export.WD
 Route::get('/order-writer', [OrderController::class, 'orderWD'])->name('order.writer');
 Route::post('/order-writer', [OrderController::class, 'orderWD2'])->name('order.writer2');
 
+Route::POST('/update_status', [OrderController::class, 'updateStatus'])->name('update_status');
+Route::POST('/update_date', [OrderController::class, 'updateDate'])->name('update_date');
+
+route::get('/status-details', [OrderController::class, 'statusDetails'])->name('status-details');
+
 Route::get('/', function () {
     $data['title'] = 'Assignment Writing Help in London, UK @40% off';
     $data['description'] = 'Assignment Writing Help in London, UK offers The technical assignments as well Mathematics, Physics, C++, Java, LabVIEW, MATLAB Assignments order @40% off.';
@@ -573,6 +578,7 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
     Route::get('/get-data', [OrderController::class, 'get-data'])->name('get');
     Route::put('/order/{id}', [OrderController::class, 'OrderEdit'])->name('order.update');
     Route::put('/fail/{orderId}', [OrderController::class, 'fail'])->name('update.order');
+    Route::put('/update-status/{id}', [OrderController::class, 'updateOrderStatus'])->name('order.update-status');
     route::put('/payment/{id}', [OrderController::class, 'payment'])->name('payment.update');
     route::get('/search', [OrderController::class, 'search']);
     route::get('/suggestions', [UserController::class, 'search'])->name('suggestions');
@@ -637,7 +643,8 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
 
     Route::get('/status', [MasterController::class, 'status'])->name('status');
     Route::get('/Payments', [MasterController::class, 'Payments'])->name('Payments');
-    Route::post('/update-payment-status/{paymentId}/{isChecked}', [MasterController::class, 'updateStatus']);
+    // Route::post('/update-payment-status/{paymentId}/{isChecked}', [MasterController::class, 'updateStatus']);
+    Route::post('/update-payment-status/bulk', [MasterController::class, 'bulkUpdateStatus'])->name('payments.bulkUpdateStatus');
     Route::post('/Payments', [MasterController::class, 'update_payments'])->name('update_payments');
     Route::delete('/Payments/{id}', [MasterController::class, 'delete_payments'])->name('delete_payments');
 

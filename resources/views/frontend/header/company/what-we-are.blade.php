@@ -130,6 +130,7 @@
 							<div class="text">
 								<div class="partial-text"> 
 									Our vision is to be recognized as one of the most trusted service providers, prepare and deliver world-class level assignments by piling up the  ...
+								</div>
 								<div class="full-text" style="display: none;">
 									Our vision is to be recognized as one of the most trusted service providers, prepare and deliver world-class level assignments by piling up the information from different valuable sources. We are a dynamic organization serving innovative and competitive pricing services for customer-driven satisfaction. We intend to construct a path between students and the professional writers to help the students’ in their studies and secure good grades.
 								</div>

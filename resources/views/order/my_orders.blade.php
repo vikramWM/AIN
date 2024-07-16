@@ -14,9 +14,9 @@
                 <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
                     <div data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_content_container', 'lg': '#kt_toolbar_container'}" class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                         <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Order
-                        	<span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
-                        	<small class="text-muted fs-7 fw-bold my-1 ms-1">Assignement In Need</small>
-						</h1>
+                        <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
+                        <small class="text-muted fs-7 fw-bold my-1 ms-1">Assignement In Need</small>
+                        </h1>
 						<span id="orderCount" class="badge bg-primary mx-2">Orders: <?php echo $data['totalOrders']; ?></span>
 						<span id="wordCount" class="badge bg-success mx-2">Words: <?php echo $data['totalWordCount']; ?></span>
                     </div>
@@ -41,6 +41,7 @@
 							<span class="card-label fw-bolder fs-3 mb-1">Orders</span>
 						</h3>
 						<a onclick="orderExport()" style="height: fit-content;" class="btn btn-sm btn-danger">Export</a>
+
 					</div>
 					<div class="card-body py-3">
 						<div class="table-responsive">
@@ -60,6 +61,7 @@
 										<th class="min-w-40px" >Due</th>
 										<th class="min-w-40px">Team</th>
 										<th class="min-w-40px">Writer_name</th>
+										<th class="min-w-40px">Other</th>
 										<th class="min-w-150px text-center" >Actions</th>
 									</tr>
 								</thead>
@@ -70,12 +72,13 @@
 								<tbody class="allData">
 
                                     @foreach($data['orders'] as $order)
-									<tr id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')" @if($order->user->feedback_issue == 1) style="color: green;" @endif>										<td>
+									<tr @if( $order->user->is_fail == 1 || $order->user->feedback_issue == 1)  style="color:blue"  @endif id="order_{{ $order->id }}" class="{{ ($order->is_read == 1) ? 'bold-row' : '' }}" onclick="markAsRead('{{ $order->id }}')">										<td>
 										{{ $loop->index + 1 }}
 										</td>
 										<td class="text-center">
 											{{ $order->order_id }}
-											
+											<span class="badge badge-light-danger fs-7 fw-bold ">{{$order->feedback_ticket}}</span>
+
                                             @if($order->is_fail == 1)
 												<span class="badge badge-light-danger fs-7 fw-bold">Fail Order</span>
 											@endif
@@ -102,7 +105,7 @@
 											{{ \Carbon\Carbon::parse($order->order_date)->format('d M Y') }}
 											
 										</td>
-										<td>
+										<td onclick="updateDeliveryDate({{$order->id }})">
 										{{ \Carbon\Carbon::parse($order->delivery_date)->format('d M Y') }}
 										@if( $order->draftrequired == 'Y')
                                             <span class="badge badge-light-success  fs-7 fw-bold">{{ \Carbon\Carbon::parse($order->draft_date)->format('d M Y') }} ({{ \Carbon\Carbon::parse($order->draft_time)->format('H:i') }})</span>	
@@ -121,7 +124,7 @@
                                                 <span class="badge badge-light-danger fs-7 fw-bold">{{$order->module_code}}</span>
                                             @endif
                                         </td>
-										<td>
+										<td  onclick="status('{{$order->id }}')">
                                             @if($order->projectstatus == 'Other')
 											<span class="badge badge-light-primary fs-7 fw-bold " style="background:#44f2e4; color:black">{{$order->projectstatus}}</span>
                                             @elseif($order->projectstatus == 'Pending')
@@ -149,7 +152,16 @@
 											@elseif($order->projectstatus == 'Advance Assignment')
 											<span class="badge badge-light-danger fs-7 fw-bold" style="background:#44f2e4; color:black">{{$order->projectstatus}}</span>
                                             @endif
-											<span class="badge badge-light-danger fs-7 fw-bold mt-1">{{$order->feedback_ticket}}</span>
+											@php
+												$statusCounts = $data['projectStatusCounts']->where('order_Id', $order->id)
+													->where('status', $order->projectstatus);
+											@endphp
+											@if ($statusCounts->isNotEmpty())
+												@foreach ($statusCounts as $statusCount)													
+													<!-- <span class="badge badge-light-danger fs-7 fw-bold" style="background:#44f2e4; color:black">{{ $statusCount->count }}</span> -->
+													<span class="badge badge-sm badge-circle badge-light-success">{{ $statusCount->count }}</span>
+												@endforeach											
+											@endif
 										</td>
 										<td style="width:50px">
 										@if($order->pages != '')
@@ -200,10 +212,19 @@
 											Not Assign
 											@endif
 										</td>
-
-
-
-                                      
+										<td>
+											@if($order->l_converted_by != null)
+												Convert By ({{ $order->l_converted_by }})												
+											@else
+												Convert By (N/A)
+											@endif
+											@if($order->failed_by != null)
+												<br>
+												Failed By: {{ $order->failed_by }} at {{ $order->failed_at }}
+											@else
+												Failed By: (N/A)
+											@endif
+										</td>
 										<td class="text-end">
 										<a   target="_blank" href="edit.{{ $order->id }}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
 											<span class="svg-icon svg-icon-3">
@@ -218,29 +239,32 @@
 											</a>
 											@include('order.section.payment-edit')
 
-											<a href="#" onclick="showConfirmation({{ $order->id }})"class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
-													<span class="svg-icon svg-icon-3">
-														<li class="fa fa-close"></li>
-													</span>
+											<a href="#" onclick="showConfirmation({{ $order->id }}, {{ $order->is_fail }})" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+												<span class="svg-icon svg-icon-3">
+													<i>F</i>
+													<!-- <li class="fa fa-close"></li> -->
+												</span>
 											</a>
-											@include('order.section.fail-order')
+											@include('order.section.fail-order-admin') 
+
 
 											
-											<a href="#" data-kt-drawer-toggle="#kt_drawer_chat" id="kt_drawer_chat_toggle{{ $order->order_id }}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+											<a href="#" data-kt-drawer-toggle="#kt_drawer_chat" id="kt_drawer_chat_toggle{{ $order->order_id }}" class="btn btn-icon btn-bg-light btn-active-color-lightprimary btn-sm me-1">
 												<span class="svg-icon svg-icon-3">
-													<i class="fa fa-comment"></i>
+													<i>T</i>
+													<!-- <i class="fa fa-comment"></i> -->
 												</span>
 											</a>
 											@include('order.section.comment-order')
-											<a   target="_blank" href="/call.{{$order->id}}" class="btn btn-icon btn-bg-warning btn-active-color-light btn-sm me-1">Call</a>
 
 											
+                                            
+
                                             <!-- Include jQuery library -->
 											<a href="#" onclick="showConfirmationclick('{{ $order->id }}')" id="clickToCallBtn{{$order->id}}" class="btn btn-icon btn-bg-success btn-active-color-light btn-sm me-1">
 												<span class="svg-icon svg-icon-3">
 													<i class="fa fa-phone fa-lg"></i>
 												</span>
-												<input type="hidden" id="primary" value="{{ $order->user->countrycode }}{{ $order->user->mobile_no }}">
 											</a>
 
 											<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -248,12 +272,9 @@
 
 											<script>
 												function showConfirmationclick(orderId) {
+													var primarycountrycode = $("#country_primary").val(); // Assuming country_primary is an input field
 													var primarynumber = $("#primary").val(); // Assuming primary is an input field
-													@if ($order->user)
-														@if ($order->user->countrycode && $order->user->mobile_no)
-													apiUrl = "/click2call?callerNumber={{ Auth::user()->sip }}&receiverNumber=" + primarynumber + "&user=anil&key=jbti89692vc60b2o9nu%^7";
-														@endif
-													@endif
+													var apiUrl = "/click2call?callerNumber={{ Auth::user()->sip }}&receiverNumber={{ $order->user->countrycode }}{{ $order->user->mobile_no }}&user=anil&key=jbti89692vc60b2o9nu%^7";
 
 													$.get(apiUrl, function(data, status) {
 														// Use SweetAlert to display data and status
@@ -383,6 +404,194 @@
 	}
 </style>
 
+<script>
+    function orderExport() {
+        // Retrieve filter parameters
+        var search = $('#search').val();
+        var uid = $('#selectedValue').val();
+        var status = $('#status').val();
+        var writer = $('#writer').val();
+        var dateStatus = $('#date_status').val();
+        var fromDate = $('#from_date').val();
+        var toDate = $('#to_date').val();
+        var writerTL = $('#writerTL').val();
+        var subWriter = $('#SubWriter').val();
+        var college = $('#college').val();
+        var extra = $('#extra').val();
+        var secondaryMobile = $('#secondary_mobile').val();
+
+        // Store filter values in localStorage
+        localStorage.setItem('filters', JSON.stringify({
+            search: search,
+            uid: uid,
+            status: status,
+            writer: writer,
+            dateStatus: dateStatus,
+            fromDate: fromDate,
+            toDate: toDate,
+            writerTL: writerTL,
+            subWriter: subWriter,
+            college: college,
+            extra: extra,
+            secondaryMobile: secondaryMobile
+        }));
+
+        // Use CSRF token for security
+        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+        // Send AJAX request to export endpoint
+        $.ajax({
+            type: 'get',
+            url: '{{ url('export') }}',
+            data: {
+                _token: CSRF_TOKEN,
+                search: search,
+                uid: uid,
+                status: status,
+                writer: writer,
+                date_status: dateStatus,
+                from_date: fromDate,
+                to_date: toDate,
+                WriterTL: writerTL,
+                SubWriter: subWriter,
+                college: college,
+                extra: extra,
+                secondary_mobile: secondaryMobile
+            },
+            success: function (data) {
+                // On success, trigger file download
+                var blob = new Blob([data], { type: 'text/csv' });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                
+                // Generate file name with current timestamp
+                var filename = 'orders_' + new Date().toISOString().slice(0, 19).replace(/[-T:/]/g, '') + '.csv';
+                link.download = filename;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (data) {
+                console.log('Error:', data);
+            }
+
+        });
+    }
+</script>
+<script>
+	function status(orderId) {
+		let data = <?php echo json_encode($data['Status']); ?>;
+		let statusValues = Object.values(data).map(item => item.status);
+		Swal.fire({
+			title: 'Change Status',
+			text: 'Select Status',
+			icon: 'info',
+			input: 'select',
+			inputOptions: statusValues,
+			inputPlaceholder: 'Select status',
+			showCancelButton: true,
+			confirmButtonText: 'OK',
+			cancelButtonText: 'Cancel',
+			preConfirm: (selectedStatus) => {
+				if (!selectedStatus) {
+					Swal.fire({
+						title: 'Error!',
+						text: 'Status cannot be empty!',
+						icon: 'error'
+					});
+					return false; // Prevent further execution
+				}
+				
+				let updateData = {
+					orderId: orderId,
+					status: selectedStatus,
+					_token: '{{ csrf_token() }}'
+				};
+				$.ajax({
+					type: 'POST',
+					url: 'update_status',
+					data: updateData,
+					success: function(response) {
+						if (response.warning) {
+							Swal.fire({
+								icon: 'warning',
+								title: 'Warning',
+								text: response.warning
+							});
+						} else {
+							Swal.fire({
+								icon: 'success',
+								title: 'Success',
+								text: 'Status updated successfully'
+							}).then(() => {
+								// Reload the page after showing the success message
+								location.reload();
+							});
+						}
+					},
+					error: function(xhr, status, error) {
+						console.log(updateData);
+					}
+				});
+			}
+		});
+	}
+</script>
+<script>
+    function updateDeliveryDate(orderId) {
+        // Show date picker
+        Swal.fire({
+            title: 'Select Delivery Date',
+            html: '<input type="date" id="deliveryDate" class="swal2-input">',
+            confirmButtonText: 'Confirm',
+            preConfirm: () => {
+                const selectedDate = document.getElementById('deliveryDate').value;
+                if (!selectedDate) {
+                    Swal.showValidationMessage('Please select a delivery date');
+                }
+                return selectedDate;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Retrieve selected date
+                const selectedDate = result.value;
+                // Perform actions with the selected date (e.g., update status)
+                console.log('Order ID:', orderId);
+                console.log('Selected Delivery Date:', selectedDate);
+
+                // Assuming you have the CSRF token available in a variable named csrfToken
+                const csrfToken = '{{ csrf_token() }}';
+
+                // Send AJAX request to update delivery date
+                $.ajax({
+                    url: 'update_date',
+                    type: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        orderId: orderId,
+                        selectedDate: selectedDate
+                    },
+                    success: function(response) {
+						if (response.Error) {
+							// Show SweetAlert error message if there is an error in the response
+							Swal.fire('Invalid Delivery Date', response.Error, 'error');
+						} else {
+							// Reload the page if date updated successfully
+							location.reload();
+						}
+					},
+					error: function(xhr, status, error) {
+						console.error(xhr.responseText);
+						Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+					}
+                });
+            }
+        });
+    }
+</script>
 
   @endsection
   

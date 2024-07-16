@@ -96,6 +96,21 @@
 
 			<div class="image-column col-lg-6 cl-md-12 col-sm-12">
 				<div class="inner-column" style="background-color: #aed6ee; border-radius: 32px;box-shadow: 10px;box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;">
+					@if ($errors->any())
+						<div id="errorAlert" class="alert alert-danger">
+							<ul>
+								@foreach ($errors->all() as $error)
+									<li>{{ $error }}</li>
+								@endforeach
+							</ul>
+						</div>
+						<script>
+							setTimeout(function() {
+								document.getElementById('errorAlert').style.display = 'none';
+							}, 10000); // Hide the error message after 10 seconds (10000 milliseconds)
+						</script>
+					@endif
+
 					<form id="orderForm" action="/neworder-fromhome" method="POST" enctype="multipart/form-data">
 						@csrf
 						<div class="contact-form p-4">
@@ -135,7 +150,7 @@
 								<div class="col-md-6">
 									<div class="form-group">
 										<label>Assignment Deadline</label>
-										<input type="date" name="delivery_date" class="form-control" required="">
+										<input type="date" name="delivery_date" id="DeliveryDate" class="form-control" required="">
 									</div>
 								</div>
 								<div class="col-md-12">

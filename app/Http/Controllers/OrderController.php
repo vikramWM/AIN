@@ -19,6 +19,7 @@ use App\Models\College;
 use App\Models\multipleswiter;
 use App\Models\Leads;
 use App\Models\Ordercall;
+use App\Models\ProjectStatusCount;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -166,7 +167,9 @@ class OrderController extends Controller
             'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
             'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
             'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
+            'projectStatusCounts' => ProjectStatusCount::all()
         ];
+        // dd($data['projectStatusCounts']);
         $totalOrders = $ordersQuery->count();
         $totalWordCount = 0;
 
@@ -555,6 +558,8 @@ public function handleRoleSeven(Request $request)
         try {
           $order = Order::find($id);
           $order->is_fail = 1;
+          $order->failed_by = auth()->user()->name;
+          $order->failed_at = now();
           $order->save();
 
             return response()->json(['message' => 'Order updated successfully']);
@@ -563,6 +568,32 @@ public function handleRoleSeven(Request $request)
             return response()->json(['error' => 'Failed to update order'], 500);
         }
     }
+    public function updateOrderStatus(Request $request, $id)
+{
+    try {
+        $order = Order::find($id);
+
+        if ($order->is_fail == 1) {
+            // If the order is failed, cancel the failed status
+            $order->is_fail = 0;            
+            $action = 'cancelled';
+        } else {
+            // If the order is not failed, mark it as failed
+            $order->is_fail = 1;
+            $order->failed_by = auth()->user()->name;
+            $order->failed_at = now();
+            $action = 'failed';
+        }
+
+        $order->save();
+
+        return response()->json(['message' => 'Order ' . $action . ' successfully']);
+    } catch (\Exception $e) {
+        // Log the error or handle it as needed
+        return response()->json(['error' => 'Failed to update order'], 500);
+    }
+}
+
 
 //     public function payment(Request $req , $id)
 //     {
@@ -593,6 +624,7 @@ public function payment(Request $request, $id)
     // Validation rules
     $validator = Validator::make($request->all(), [
         'amount' => 'required|numeric|min:0.01', // Minimum amount should be 0.01
+        'payee_name' => 'required|string',        
     ]);
 
     // If validation fails
@@ -622,6 +654,8 @@ public function payment(Request $request, $id)
     $payment->payment_date = $request->input('payment_date');
     $payment->paid_amount = $paidAmount;
     $payment->reference = $request->input('message');
+    $payment->payee_name = $request->input('payee_name');
+    $payment->payment_update_by = auth()->user()->name;
     $payment->account_status = 1; // Assuming this is the default value
     $payment->save();
 
@@ -647,15 +681,23 @@ public function payment(Request $request, $id)
             $order->title = $req->input('title');
             $order->order_date = $req->input('order_date');
             $order->writer_deadline = $req->input('writer_deadline');
-            $order->delivery_date = $req->input('delivery_date');
+            if ($order->order_date <= $req->input('delivery_date')) {
+                // Delivery Date must be on or after the Order Date               
+                $order->delivery_date = $req->input('delivery_date');
+            }
             $order->amount = $req->input('amount');
             $order->received_amount = $req->input('r_amount');
             $order->delivery_time = $req->input('delivery_time');
+            // Check if the input is a numeric value
+            if ($req->filled('word') && !is_numeric($req->input('word'))) {
+                // Redirect back with a warning message if not numeric
+                return redirect()->back()->with('warning', 'Word must be a numeric value');
+            }
             $order->pages = $req->input('word');
             $order->writer_deadline_time = $req->input('writer_deadline_time');
 
             if( $req->input('status') == 'Completed')
-            {
+            {      
                 $order->projectstatus = $req->input('status');
 
                 $orderData = [
@@ -663,11 +705,18 @@ public function payment(Request $request, $id)
                     'email' => $req->input('email'),
                     'title' => $req->input('title'),
                     'order_code' => $order->order_id,
-                    'date'     => $req->input('delivery_date'),
+                    'date'     => $order->delivery_date,
                     'due'     => $req->input('amount') - $req->input('r_amount'),
                 ];
-                Mail::to( $orderData['email']) ->send(new OrderComplete($orderData));
+                Mail::to('vikramsuthar.wm@gmail.com') ->send(new OrderComplete($orderData));
                
+            }
+            elseif( $req->input('status') == 'Delivered')
+            {
+                if ((int)$order->amount - (int)$order->received_amount !== 0) {
+                    return redirect()->back()->with('warning' , 'Order cannot be marked as Delivered if there is any due payment remaining.');
+                }                
+                $order->projectstatus = $req->input('status');
             }
             else
             {
@@ -689,7 +738,7 @@ public function payment(Request $request, $id)
             $order->formatting = $req->input('formatting');
             $order->services = $req->input('services');
             $order->typeofwritting = $req->input('writting_type');
-            $order->typeofpaper = $req->input('paper_type');
+            $order->typeofpaper = $req->input('paper');
             $order->chapter = $req->input('chapter');
             $order->college_name = $req->input('college_name');
             $order->draftrequired = $req->input('daraft_status');
@@ -745,12 +794,21 @@ public function payment(Request $request, $id)
             $order->order_date = $req->input('order_date');
             
             
-            $order->delivery_date = $req->input('delivery_date');
+            // $order->delivery_date = $req->input('delivery_date');
+            if ($order->order_date <= $req->input('delivery_date')) {
+                // Delivery Date must be on or after the Order Date               
+                $order->delivery_date = $req->input('delivery_date');
+            }
             $order->amount = $req->input('amount');
             $order->received_amount = $req->input('r_amount');
             $order->delivery_time = $req->input('delivery_time');
+            // Check if the input is a numeric value
+            if ($req->filled('word') && !is_numeric($req->input('word'))) {
+                // Redirect back with a warning message if not numeric
+                return redirect()->back()->with('warning', 'Word must be a numeric value');
+            }
             $order->pages = $req->input('word');
-             if( $req->input('status') == 'Completed')
+            if( $req->input('status') == 'Completed')
             {
                 $order->projectstatus = $req->input('status');
 
@@ -759,11 +817,18 @@ public function payment(Request $request, $id)
                     'email' => $req->input('email'),
                     'title' => $req->input('title'),
                     'order_code' => $order->order_id,
-                    'date'     => $req->input('delivery_date'),
+                    'date'     => $order->delivery_date,
                     'due'     => $req->input('amount') - $req->input('r_amount'),
                 ];
-                Mail::to($orderData['email'])->cc('order@assignnmentinneed.com')->send(new OrderComplete($orderData));
+                Mail::to('vikramsuthar.wm@gmail.com')->cc('vikramsuthar.wm@gmail.com')->send(new OrderComplete($orderData));
                
+            }
+            elseif( $req->input('status') == 'Delivered')
+            {
+                if ((int)$order->amount - (int)$order->received_amount !== 0) {
+                    return redirect()->back()->with('warning' , 'Order cannot be marked as Delivered if there is any due payment remaining.');
+                }                
+                $order->projectstatus = $req->input('status');
             }
             else
             {
@@ -784,6 +849,7 @@ public function payment(Request $request, $id)
             $order->resit = $req->input('resit');
             $order->tech = $req->input('tech');
             $order->module_code = $req->input('module_code');
+            $order->typeofpaper = $req->input('paper');
 
             $user = User::find($order->uid);
             if ($req->filled('user_name')) {
@@ -815,10 +881,26 @@ public function payment(Request $request, $id)
             $order->order_date = $req->input('order_date');
             $order->writer_deadline = $req->input('writer_deadline');
             $order->writer_deadline_time = $req->input('writer_deadline_time');
-            $order->delivery_date = $req->input('delivery_date');
+            // $order->delivery_date = $req->input('delivery_date');
+            // if ($order->order_date <= $req->input('delivery_date')) {
+            //     // Delivery Date must be on or after the Order Date               
+            //     $order->delivery_date = $req->input('delivery_date');
+            // }
             
             $order->delivery_time = $req->input('delivery_time');
+            // Check if the input is a numeric value
+            if ($req->filled('word') && !is_numeric($req->input('word'))) {
+                // Redirect back with a warning message if not numeric
+                return redirect()->back()->with('warning', 'Word must be a numeric value');
+            }
             $order->pages = $req->input('word');
+            if( $req->input('status') == 'Delivered')
+            {
+                if ((int)$order->amount - (int)$order->received_amount !== 0) {
+                    return redirect()->back()->with('warning' , 'Order cannot be marked as Delivered if there is any due payment remaining.');
+                }                
+                $order->projectstatus = $req->input('status');
+            }
             $order->projectstatus = $req->input('status');
             
             $order->college_name = $req->input('college_name');
@@ -853,10 +935,25 @@ public function payment(Request $request, $id)
 
         // Save order changes
         $order->save();
+        // Update or create a record in the ProjectStatusCount table
+            $statusCount = ProjectStatusCount::where('order_Id', $order->id)
+                            ->where('status', $req->input('status'))
+                            ->first();
+
+            if ($statusCount) {
+                $statusCount->increment('count');
+                $statusCount->save(); // Save the updated record
+            } else {
+                $statusCount = ProjectStatusCount::create([
+                    'order_Id' => $order->id,
+                    'status' => $req->input('status'),
+                    'count' => 1
+                ]);
+            }
+        // Now $statusCount contains the saved record
 
         // Update user details only if the corresponding input fields have a value
        
-
         return redirect('/order')->with(['Success' => "Order Updated", 'search' => $search]);
     
 }
@@ -878,6 +975,9 @@ public function payment(Request $request, $id)
         $secondaryMobile = $request->input('secondary_mobile'); // Add this line to get the secondary mobile number
         $selectedDataTextBox = $request->input('selectedDataTextBox'); // Add this line to get the secondary mobile number
 
+        $data = [
+            'projectStatusCounts' => ProjectStatusCount::all()
+        ];
         $orders = Order::query();
     
         if ($searchTerm != '') {
@@ -1075,8 +1175,19 @@ public function payment(Request $request, $id)
                             '.($order->projectstatus ==  'Initiated' ? '<span class="badge badge-light-danger fs-7 fw-bold"  style="background:pink; color:white">'.$order->projectstatus .'</span>' : '') .'
                             
                             ' . ($order->feedback_ticket != '' ? '<span class="badge badge-light-danger fs-7 fw-bold mt-1">' . $order->feedback_ticket . '</span>' : '') . '
-                            
-                       </td>
+                            ';
+                            if (auth()->user()->role_id == '1') {
+                                $statusCounts = $data["projectStatusCounts"]->where("order_Id", $order->id)
+                                                    ->where("status", $order->projectstatus);
+                                if ($statusCounts->isNotEmpty()) {
+                                    foreach ($statusCounts as $statusCount) {
+                                        $output .= '<span class="badge badge-sm badge-circle badge-light-success">' . $statusCount->count . '</span>';
+                                    }
+                                }
+                            }
+                            $output .= '</td>';
+
+                            $output .= '
 
                         
 
@@ -1114,11 +1225,26 @@ public function payment(Request $request, $id)
                                 $output .= 'Not Assign';
                             }
             
-                            $output .= '</td>
+                            $output .= '</td>';
+                            
+                            if (auth()->user()->role_id == '1') {
+                                $output .= '<td>';
+                                if ($order->l_converted_by != null) {
+                                    $output .= 'Convert By (' . $order->l_converted_by . ')';
+                                } else {
+                                    $output .= 'Convert By (N/A)';
+                                }
+                                if ($order->failed_by != null) {
+                                    $output .= '<br>Failed By: ' . $order->failed_by . ' at ' . $order->failed_at;
+                                } else {
+                                    $output .= '<br>Failed By: (N/A)';
+                                }
+                                $output .= '</td>';
+                            }
                             
 
                             
-                            <td class="text-end">
+                            $output .= '<td class="text-end">
                             <a   target="_blank" href="edit.'.$order->id.'" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                 <span class="svg-icon svg-icon-3">
                                     <i class="fa fa-eye"></i>
@@ -1146,16 +1272,16 @@ public function payment(Request $request, $id)
                            
 
                             <a href="#" 
-                                onclick="showConfirmation('.$order->id.')"
+                                onclick="showConfirmation('.$order->id.','.$order->is_fail.')"
                                 class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                     <span class="svg-icon svg-icon-3">
-                                        <li class="fa fa-close"></li>
+                                        <i>F</i>
                                     </span>
                             </a>
 
                             <a href="/comment.'.$order->order_id.'"   target="_blank" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                 <span class="svg-icon svg-icon-3">
-                                    <i class="fa fa-comment"></i>
+                                    <i>T</i>
                                 </span>
                             </a> 
                             
@@ -1425,6 +1551,10 @@ public function payment(Request $request, $id)
 
         $uks = substr($order->order_id, 0, 3);
         
+        if ($order->feedbackissue == 1 && $order->status_issue == 'Case Resolved') {
+            $order->status_issue = 'Issues Raised Again';
+            // dd($order->feedbackissue,$order->status_issue);
+        }
           if($order->feedbackissue != 1)
         {
             $order->status_issue = 'Issue Raised';
@@ -1475,7 +1605,10 @@ public function payment(Request $request, $id)
         $feedback->created_by = auth()->user()->id; // Assuming you are using authentication
 
         $order = Order::find($request->input('order_id'));
-
+        if ($order->feedbackissue == 1 && $order->status_issue == 'Case Resolved') {
+            $order->status_issue = 'Issues Raised Again';
+            $order->save();
+        }
         $feedback->status = $order->status_issue;
 
         $feedback->save();
@@ -2906,6 +3039,156 @@ public function orderWD2(Request $request)
         
     }
 
+    //27-may-update
+    public function updateDate(Request $request)
+    {
+        // Check if a date has been selected
+        if ($request->input('selectedDate') != '') {
+            $orderId = $request->input('orderId');
+            $date = $request->input('selectedDate');
+
+            // Find the order by its ID, or fail if not found
+            $order = Order::findOrFail($orderId);
+
+            // Check if the selected date is on or after the order date
+            if ($order->order_date <= $date) {
+                // Update the delivery date and save the order
+                $order->delivery_date = $date;
+                $order->save();
+
+                // Return a success response
+                return response()->json(['message' => 'Date updated successfully', 'order' => $order]);
+            } else {
+                // Return an error response if the delivery date is before the order date
+                return response()->json(['Error' => 'Delivery date cannot be before the order date.']);           
+            }
+        } else {
+            // Return an error response if no date is selected
+            return response()->json(['Error' => 'Date not selected']);
+        }
+    }
+
+    // public function updateDate (Request $request)
+    // {
+    //     if(  $request->input('selectedDate') != '')
+    //     {
+    //         $orderId = $request->input('orderId');
+    //         $date = $request->input('selectedDate');
+
+        
+
+    //         $order = Order::findOrFail($orderId);
+    //         $order->delivery_date = $date;
+        
+            
+    //         $order->save();
+    //         return response()->json(['message' => 'date updated successfully', 'order' => $order]);
+
+    //     }
+    //     else
+    //     {
+    //         return response()->json(['message' => 'date Not Selected']);
+
+    //     }
+    // }
+    public function updateStatus(Request $request)
+    {
+        if(  $request->input('status') != '')
+        {
+            $orderId = $request->input('orderId');
+            $index = $request->input('status');
+
+            $id = $index + 1 ;
+            // dd($id);
+
+            $statusName = Status::find( $id);
+            try {
+                $order = Order::findOrFail($orderId);
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'Order not found']);
+            }
+    
+            try {
+                $userDetails = User::findOrFail($order->uid);
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'User details not found']);
+            }
+            
+            if( $statusName->status == 'Completed')
+            {      
+                $order->projectstatus = $statusName->status;
+                $orderData = [
+                    'name' => $userDetails->name,
+                    'email' => $userDetails->email,
+                    'title' => $order->title,
+                    'order_code' => $order->order_id,
+                    'date'     => $order->delivery_date,
+                    'due'     => (int)$order->amount - (int)$order->received_amount,
+                ];
+                // dd($orderData);
+                Mail::to('vikramsuthar.wm@gmail.com') ->send(new OrderComplete($orderData));
+               
+            }elseif( $statusName->status == 'Delivered' && (int)$order->amount - (int)$order->received_amount !== 0)
+            {                
+                return response()->json(['warning' => 'Order cannot be marked as Delivered if there is any due payment remaining.']);                                                
+            }
+            $order->projectstatus = $statusName->status;
+            $order->status_date = Carbon::now('Asia/Kolkata');
+            $order->status_by   = auth()->user()->name;
+            
+            $order->save();
+            // Update or create a record in the ProjectStatusCount table
+            $statusCount = ProjectStatusCount::where('order_Id', $request->input('orderId'))
+                ->where('status', $statusName->status)
+                ->first();
+
+            if ($statusCount) {
+                $statusCount->increment('count');
+                $statusCount->save(); // Save the updated record
+            } else {
+                $statusCount = ProjectStatusCount::create([
+                    'order_Id' => $order->id,
+                    'status' => $statusName->status,
+                    'count' => 1
+                ]);
+            }
+            // Now $statusCount contains the saved record
+            return response()->json(['message' => 'Status updated successfully', 'order' => $order]);
+
+        }
+        else
+        {
+            return response()->json(['message' => 'Status Not Selected']);
+
+        }
+        
+
+        // Return response
+    }
+
+    public function statusDetails(Request $request)
+    {
+        $from_date = $request->input('from_date');
+        $to_date = $request->input('to_date');
+        
+        $query = Order::with('user')->where('uid', '!=', 0)
+        ->where('status_date', '!=', '0000-00-00 00:00:00');
+
+        if ($from_date && $to_date) {
+            $query->whereDate('status_date', '>=', $from_date)->whereDate('status_date', '<=', $to_date);
+        }
+
+        if ($from_date && $to_date) {
+        $data['order'] = $query->get();
+        }
+        else
+        {
+            $data['order'] = $query->paginate(10);
+
+        }
+
+        return view('order.order-status-details', compact('data'));
+    }
 
 }
 
