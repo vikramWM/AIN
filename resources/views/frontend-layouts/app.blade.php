@@ -180,6 +180,7 @@
     <div class="whatsapp_float">
         <a href="https://wa.me/+447826233106" target="_blank"><img src="images/WhatsApp.png" alt="WhatsApp" class="whatsapp_float_btn"/></a>
     </div>
+    
     <!-- Include JavaScript -->
     @include('frontend-layouts.js')
     <script>

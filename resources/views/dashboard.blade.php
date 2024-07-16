@@ -3,8 +3,8 @@
 @section('content')
 <style>
     #teamMembersContainer {
-        max-height: 500px; /* Set a maximum height for the container */
-        overflow-y: auto; /* Enable vertical scrolling if content exceeds the container height */
+        max-height: 500px; 
+        overflow-y: auto; 
     }
 
     .member-container {

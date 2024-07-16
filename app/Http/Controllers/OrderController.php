@@ -1236,7 +1236,7 @@ public function payment(Request $request, $id)
         $data['college']      = College::all();
         $data['admin']        = User::where('role_id', '=', '8')->where('flag', '=', 0)->get();
         $data['writerTL']     = User::where('role_id', '=', '6')->where('flag', '=', 0)->get();
-        $data['SubWriter']    = User::where('role_id', '=', '7')->where('flag', '=', 0)->get();
+        $data['SubWriter']    = User::where('role_id', '=', '7')->where('flag', 0)->get();
         $data['ordersub']     = multipleswiter::where('order_id', $id)->get();
 
 
@@ -2622,73 +2622,124 @@ public function orderWD2(Request $request)
     ]);
 }
 
-//-----------------------------------------------------------------
-// public function writerAvailable()
-// {
-//     $today = Carbon::today()->toDateString();
+    //-----------------------------------------------------------------
+    // public function writerAvailable()
+    // {
+    //     $today = Carbon::today()->toDateString();
+        
+    //     $admins = User::where('role_id', 8)->where('flag', 0)->get();
+    //     $writerTLs = User::where('role_id', 6)->where('flag', 0)->get();
+    //     $subWriters = User::where('role_id', 7)->where('flag', 0)->get();
+
     
-//     $admins = User::where('role_id', 8)->where('flag', 0)->get();
-//     $writerTLs = User::where('role_id', 6)->where('flag', 0)->get();
-//     $subWriters = User::where('role_id', 7)->where('flag', 0)->get();
 
-   
+    //     foreach ($writerTLs as $writerTL) {
+    //         $writerTL->isAvailableToday = $this->isUserAvailableToday($writerTL->id, $today);
+    //     }
 
-//     foreach ($writerTLs as $writerTL) {
-//         $writerTL->isAvailableToday = $this->isUserAvailableToday($writerTL->id, $today);
-//     }
+    //     foreach ($subWriters as $subWriter) {
+    //         $subWriter->isAvailableToday = $this->isUserAvailableToday($subWriter->id, $today);
+    //     }
 
-//     foreach ($subWriters as $subWriter) {
-//         $subWriter->isAvailableToday = $this->isUserAvailableToday($subWriter->id, $today);
-//     }
+    //     $data = [
+    //         'admin2' => $admins,
+    //         'writerTL2' => $writerTLs,
+    //         'subWriter2' => $subWriters,
+    //         'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
+    //         'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
+    //         'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
+    //     ];
 
-//     $data = [
-//         'admin2' => $admins,
-//         'writerTL2' => $writerTLs,
-//         'subWriter2' => $subWriters,
-//         'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
-//         'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
-//         'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
-//     ];
+    //     return view('order.writerAvailable', compact('data'));
+    // }
 
-//     return view('order.writerAvailable', compact('data'));
-// }
+    // private function isUserAvailableToday($userId, $today)
+    // {
+    //     // Check if user is assigned to any order today
+    //     $orderCount = Order::where('admin_id', '!=', 0)
+    //         ->where(function($query) use ($userId, $today) {
+    //             $query->where('wid', $userId)
+    //                   ->where(function($query) use ($today) {
+    //                       $query->where('writer_fd', '<=', $today)
+    //                             ->where('writer_ud', '>=', $today);
+    //                   });
+    //         })
+    //         ->orWhere(function($query) use ($userId, $today) {
+    //             $query->whereHas('mulsubwriter', function($subQuery) use ($userId, $today) {
+    //                 $subQuery->where('user_id', $userId);
+    //             })
+    //             ->where(function($query) use ($today) {
+    //                 $query->where('writer_fd', '<=', $today)
+    //                       ->where('writer_ud', '>=', $today);
+    //             });
+    //         })
+    //         ->count();
 
-// private function isUserAvailableToday($userId, $today)
-// {
-//     // Check if user is assigned to any order today
-//     $orderCount = Order::where('admin_id', '!=', 0)
-//         ->where(function($query) use ($userId, $today) {
-//             $query->where('wid', $userId)
-//                   ->where(function($query) use ($today) {
-//                       $query->where('writer_fd', '<=', $today)
-//                             ->where('writer_ud', '>=', $today);
-//                   });
-//         })
-//         ->orWhere(function($query) use ($userId, $today) {
-//             $query->whereHas('mulsubwriter', function($subQuery) use ($userId, $today) {
-//                 $subQuery->where('user_id', $userId);
-//             })
-//             ->where(function($query) use ($today) {
-//                 $query->where('writer_fd', '<=', $today)
-//                       ->where('writer_ud', '>=', $today);
-//             });
-//         })
-//         ->count();
+    //     return $orderCount === 0; // If no orders are found, the user is available today
+    // }
 
-//     return $orderCount === 0; // If no orders are found, the user is available today
-// }
-
-    public function writerAvailable()
+    public function writerAvailable(Request $req)
     {
-        $data = [
-            'admin' => User::where('role_id', 8)->where('flag', 0)->get(),
-            'writerTL' => User::where('role_id', 6)->where('flag', 0)->get(),
-            'SubWriter' => User::where('role_id', 7)->where('flag', 0)->get(),
+        if ($req->has('available_date')) {
+            $today = $req->input('available_date');
+        } else {
+            $today = Carbon::today()->format('Y-m-d');
+        }
+    
+        $currentTime = Carbon::now()->format('H:i:s');
+    
+        $users = User::with([
+            'writerWork' => function ($query) {
+                $query->select(['id', 'user_id', 'order_id']);
+            },
+            'writerWork.order' => function ($query) {
+                $query->select(['id', 'order_id', 'writer_fd', 'writer_fd_h', 'writer_ud', 'writer_ud_h']);
+            }
+        ])
+        ->where('role_id', 7)
+        ->whereDoesntHave('writerWork.order', function ($query) use ($today, $currentTime) {
             
-        ];
-
-        return view('order.writerAvailable', compact('data'));
+            $query->where(function ($subQuery) use ($today, $currentTime) {
+                $subQuery->whereDate('writer_fd', '<=', $today)
+                         
+                ->where(function ($innerQuery) use ($today, $currentTime) {
+                             
+                    $innerQuery->whereDate('writer_ud', '>=', $today)
+                                        
+                    ->orWhere(function ($timeQuery) use ($today, $currentTime) {
+                                            
+                        $timeQuery->whereDate('writer_ud', '=', $today)
+                                                      
+                        ->whereNotNull('writer_ud_h')
+                                                      
+                        ->whereTime('writer_ud_h', '>', $currentTime);
+                                        });
+                         });
+            });
+        })
+        ->where('flag', '0')
+        ->get(['id', 'name', 'email', 'mobile_no'])
+        ->map(function ($user) use ($today, $currentTime) {
+            $user->available_today_after = null;
+    
+            foreach ($user->writerWork as $work) {
+                if ($work->order && $work->order->writer_ud == $today && $work->order->writer_ud_h && $work->order->writer_ud_h > $currentTime) {
+                    $user->available_today_after = $work->order->writer_ud_h;
+                    break;
+                }
+            }
+    
+            return $user;
+        });
+    
+        return view('order.writerAvailable', compact('users', 'today'));
     }
+    
+    
+    
+
+
+
     public function writerAvailable2(Request $request)
     {
         $tlId = $request->tlId;

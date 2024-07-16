@@ -46,5 +46,22 @@ class User extends Authenticatable
     protected $attributes = [
         'role_id' => 2,
     ];
+
+
+    public function writerAvailable()
+    {
+        return $this->hasMany(Order::class, 'wid', 'id');
+    }
+
+    
+    
+    public function writerWork()
+    {
+        return $this->hasMany(MultiplesWiter::class, 'user_id', 'id')->with('order');
+    }
+
+
+   
+    
     
 }

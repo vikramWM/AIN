@@ -23,99 +23,19 @@
                         <span class="card-label fw-bolder fs-3 mb-1">Filter</span>
                     </h3>
                 </div>
-                <div class="card-body py-3">
-                    <form id="filterForm">
-                        <div class="row mb-3">
-                            <div class="col-md-3 fv-row">
-                                <input type="date" name="from_date" id="from_date"
-                                    class="form-control form-control-solid" placeholder="From">
+                <form action="">
+                    <div class="card-body py-3">
+                        <div class="d-flex">
+                            <div class="col-lg-3 fv-row fv-plugins-icon-container me-2">
+                                <input type="date" name="available_date"  class="form-control form-control-solid" placeholder="Search By OrderCode">
                             </div>
-                            <div class="col-md-3 fv-row">
-                                <input type="date" name="to_date" id="to_date"
-                                    class="form-control form-control-solid" placeholder="To">
-                            </div>
-                            <div class="col-lg-3 fv-row">
-                                <select name="writerTL" id="writerTL" aria-label="Select a Timezone"
-                                    data-control="select2" data-placeholder="Search By writer Name"
-                                    class="form-select form-select-solid form-select-lg">
-                                    <option value="">Select Writer</option>
-                                    @foreach($data['writerTL'] as $tl)
-                                    <option value="{{ $tl->id }}">{{ $tl->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-3 fv-row">
-                                <select name="SubWriter" id="SubWriter" aria-label="Select a Timezone"
-                                    data-control="select2" data-placeholder="Search By Sub Writer"
-                                    class="form-select form-select-solid form-select-lg">
-                                    <option value="">Select SubWriter</option>
-                                    @foreach($data['SubWriter'] as $Sub)
-                                    <option value="{{ $Sub->id }}">{{ $Sub->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-                            <script>
-                                $(document).ready(function () {
-                                // Function to handle both search and filter
-
-                                // Function to populate SubWriter dropdown based on the selected Writer TL
-                                function populateSubwriters() {
-                                    var tlId = $('#writerTL').val();
-                                    var subwriterSelect = $('#SubWriter');
-
-                                    // Store the currently selected SubWriter value
-                                    var selectedSubWriter = subwriterSelect.val();
-
-                                    // Clear previous options
-                                    subwriterSelect.empty();
-
-                                    // Check if a TL is selected
-                                    if (tlId !== '') {
-                                        // Fetch subwriters based on the selected TL
-                                        $.ajax({
-                                            type: 'get',
-                                            url: '/fetch-subwriters', // Use the correct URL here
-                                            data: {
-                                                'tlId': tlId
-                                            },
-                                            success: function (data) {
-                                                // Populate SubWriter dropdown with fetched data
-                                                $.each(data, function (key, value) {
-                                                    subwriterSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
-                                                });
-
-                                                // Set the selected option back to its original value
-                                                subwriterSelect.val(selectedSubWriter);
-                                            },
-                                            error: function (data) {
-                                                console.log('Error fetching SubWriters:', data);
-                                            }
-                                        });
-                                    } else {
-                                        // If no TL is selected, show all sub-writers
-                                        subwriterSelect.append('<option value=""></option>');
-                                        @foreach($data['SubWriter'] as $Sub)
-                                            subwriterSelect.append('<option value="{{ $Sub->id }}">{{ $Sub->name }}</option>');
-                                        @endforeach
-                                    }
-                                }
-
-                                // Use event delegation for dynamically populated elements
-                                $(document).on('change', '#writerTL', populateSubwriters);
-
-                                // Populate SubWriter dropdown on page load
-                                populateSubwriters();
-                            });
-
-                            </script>
-                            <div class="col-lg-12 fv-row fv-plugins-icon-container mt-2">
-                                <a id="resetFiltersBtn" class="btn btn-sm btn-danger">Reset</a>
-                                <a id="applySearch" class="btn btn-sm btn-primary">Search</a>
+                            <div class="col-lg-3 fv-row fv-plugins-icon-container">
+                                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
+
             </div>
         </div>
 
@@ -127,21 +47,39 @@
                     </h3>
                 </div>
                 <div class="card-body py-3">
-                    <div class="table-responsive">
-                        <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
-                            <thead class="p-2">
-                                <tr class="fw-bolder text-muted bg-light">
-                                    <th class="min-w-55px text-center">SR</th>
-                                    
-                                    <th class="min-w-150px">Date</th>
-                                    <th class="min-w-150px">Available</th>
-                                    
-                                    <!-- <th class="min-w-150px text-start">Writer Name</th>
-                                    <th class="min-w-150px text-start">Subwriter Name</th> -->
-                                </tr>
-                            </thead>
-                            <tbody id="ordersTableBody"></tbody>
-                        </table>
+                <div class="container">
+                        <h1>Writers Available on {{ $today }}</h1>
+                        
+                        @if($users->isEmpty())
+                            <p>No writers available.</p>
+                        @else
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Available After</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($users as $user)
+                                        <tr>
+                                            <td>{{$loop->index + 1 }}</td>
+                                            <td>{{ $user->name }}</td>
+                                            <td>{{ $user->email }}</td>
+                                            <td>
+                                                @if($user->available_today_after)
+                                                    {{ $user->available_today_after }}
+                                                @else
+                                                    All day
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -149,95 +87,6 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-    $(document).ready(function () {
-        function fetchOrders() {
-            var from_date = $('#from_date').val();
-            var to_date = $('#to_date').val();
-            var tlId = $('#writerTL').val();
-            var swId = $('#SubWriter').val();
-
-            $.ajax({
-                url: '{{ route('writer.available2') }}', // Use the fetchWriterAvailable route
-                type: 'POST',
-                data: {
-                    from_date: from_date,
-                    to_date: to_date,
-                    tlId: tlId,
-                    swId: swId,
-                    _token: '{{ csrf_token() }}' // Remove swId if it's not necessary
-                },
-                success: function (response) {
-                    var availableDates = response.data.availableDates;
-                    var tbody = $('#ordersTableBody');
-                    tbody.empty();
-
-                    // Iterate over the available dates and populate the table
-                    $.each(availableDates, function (index, date) {
-                        // Convert date to a format suitable for display
-                        var formattedDate = moment(date).format('DD-MM-YYYY (dddd)');
-                        var color = moment(date).day() === 0 ? 'red' : 'black';
-
-                        // Create a new row with data from the availableDates array
-                        var row = '<tr>' +
-                            '<td class="min-w-55px text-center">' + (index + 1) + '</td>' +
-                            '<td style="color: ' + color + '">' + formattedDate + '</td>' +
-                            '<td style="color: ' + color + '">Available</td>' + // Assuming all dates are available by default
-                            // '<td></td>' + // Leave writer name column empty
-                            // '<td></td>' + // Leave subwriter name column empty
-                            '</tr>';
-                        tbody.append(row);
-                    });
-                },
-                // success: function (response) {
-                //     var availableDates = response.data.availableDates;
-                //     var tbody = $('#ordersTableBody');
-                //     tbody.empty();
-
-                //     // Iterate over the available dates and populate the table
-                //     $.each(availableDates, function (index, dateObj) {
-                //         // Convert date to a format suitable for display
-                //         var formattedDate = moment(dateObj.date).format('DD-MM-YYYY (dddd)');
-                //         var color = moment(dateObj.date).day() === 0 ? 'red' : 'black';
-                        
-                //         // Get writer and subwriter names if they exist
-                //         var writerName = dateObj.writer_name ? dateObj.writer_name : '';
-                //         var subwriterName = dateObj.subwriter_name ? dateObj.subwriter_name : '';
-
-                //         // Create a new row with data from the availableDates array
-                //         var row = '<tr>' +
-                //             '<td class="min-w-55px text-center">' + (index + 1) + '</td>' +
-                //             '<td style="color: ' + color + '">' + formattedDate + '</td>' +
-                //             '<td style="color: ' + color + '">Available</td>' + 
-                //             '<td>' + writerName + '</td>' + // Writer name column
-                //             '<td>' + subwriterName + '</td>' + // Subwriter name column
-                //             '</tr>';
-                //         tbody.append(row);
-                //     });
-                // },
-                error: function (xhr, status, error) {
-                    // Handle error if needed
-                }
-            });
-        }
-
-        $('#applySearch').on('click', function () {
-            fetchOrders();
-        });
-        
-        $('#resetFiltersBtn').click(function(e) {
-            e.preventDefault();
-            $('#from_date').val('');
-            $('#to_date').val('');
-            $('#writerTL').val('');
-            // Clear the table when resetting filters
-            $('#ordersTableBody').empty();
-            location.reload(); // Refresh the page
-        });
-    });
-</script>
 
 
 

@@ -41,6 +41,16 @@ Route::get('/', function () {
     return view('welcome',compact('data','advertisements'));
 });
 
+Route::get('/math-assignment-help', function () {
+    $data['title'] = 'Math Assignment Writing Help Services @ 40% Off- Assignment In Need';
+    $data['description'] = 'Math assignment help services, expert assignment writing service, Algebra, Calculus, Geometry, with 120% refund: If we fail to deliver, get 120% of your money back';
+    $data['keyword'] = '';
+    $data['canonical']= 'https://www.assignmentinneed.com/math-assignment-help';
+
+    return view('frontend.header.services.sub.math',compact('data'));
+});
+
+
 
 Route::get('/click2call', function () {
     return view('api.clic2call');
@@ -189,6 +199,10 @@ Route::get('/assignment-writing-uk', function ()
     return view('frontend/header/services/assignment-writing' , compact('data'));
 });
 Route::get('/dissertation-writing-services-uk', 
+
+
+
+
 function () {
     $data['title'] = 'Dissertation Writing Services in London, UK';
     $data['description'] = 'Get Dissertation writing services in London, UK by expert dissertation writers to secure good grades. We offer the best dissertation writing services with great discounts.';
@@ -307,6 +321,13 @@ function () {
 
 Route::redirect('best-assignment-help-spain', 'es', 301);
 
+Route::get('/canada', 
+function () {
+    $data['title'] = 'Best Assignment Help Spain - Assignment In Need';
+    $data['description'] = '';
+    $data['keyword'] = '';
+    return view('frontend/header/country/canada', compact('data'));
+});
 
 // Route::get('/samples', function () {return view('frontend/header/samples');});
 Route::get('/upload-your-assignment',
@@ -316,7 +337,7 @@ Route::get('/upload-your-assignment',
     $data['keyword'] = '';
     return view('frontend/header/order-now', compact('data'));
 });
-// Route::get('myProfile', function () {return view('frontend/myProfile');});
+
 Route::get('myProfile',
  function () {
      // Get the authenticated user

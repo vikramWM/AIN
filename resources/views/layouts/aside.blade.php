@@ -54,8 +54,6 @@
 								@foreach ($menus as $menu)
 								@if ($menu->show_menu == 'Y'  && in_array($menu->id, $menuIds))
 									@if (count($menu->submenus) > 0)
-
-										<!-- Display as accordion menu with submenus -->
 										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
 											<span class="menu-link">
 												<span class="menu-icon">
@@ -67,7 +65,6 @@
 											</span>
 											<div class="menu-sub menu-sub-accordion menu-active-bg">
 												@foreach ($menu->submenus as $submenu)
-													
 													@if(in_array($submenu->id, $submenuIds))
 														<div class="menu-item">
 															<a class="menu-link" href="{{$submenu->routes}}">

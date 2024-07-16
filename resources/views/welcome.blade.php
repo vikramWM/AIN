@@ -1044,4 +1044,62 @@
       margin-right: 5px;
     }
   </style> -->
+  
+<!-- Modal -->
+<div class="modal fade show" id="exitIntent" role="dialog" style="display: block;" aria-modal="true">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" onclick="return closeExitIntentPopup();">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional: Font Awesome for close icon -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+<style>
+    /* Custom CSS for centering the modal */
+    .modal-dialog {
+      position: absolute;
+	  top: 15%;
+	  left: 35%;
+      transform: translate(-50%, -50%);
+    }
+	.modal-content {
+      background-image: url('assets/media/thumbnail/offer.jpeg');
+      background-size: cover;
+      background-position: center;
+	  height: 490px;
+    width: 577px;
+      color: #fff; /* Set text color to white for better contrast */
+    }
+
+	.modal
+	{
+		width: 80%;
+	}
+	
+  </style>
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Script to open the modal on page load -->
+<script>
+  $(document).ready(function(){
+    $('#exitIntent').modal('show');
+  });
+
+  function closeExitIntentPopup() {
+    $('#exitIntent').modal('hide');
+    return false; // Prevent default action
+  }
+</script>
 @endsection
